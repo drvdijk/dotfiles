@@ -99,6 +99,19 @@ defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool
 defaults -currentHost write -g com.apple.mouse.tapBehavior -int 1
 defaults write -g com.apple.mouse.tapBehavior -int 1
 
+# Tap with two fingers to emulate right click
+defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadRightClick -bool true
+
+# Enable three finger tap (look up)
+defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerTapGesture -int 2
+
+# Enable three finger drag
+defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool true
+
+# Enable mouse right-click
+defaults write com.apple.driver.AppleBluetoothMultitouch.mouse MouseButtonMode "TwoButton"
+defaults write com.apple.driver.AppleBluetoothMultitouch.mouse MouseOneFingerDoubleTapGesture -bool true
+
 # Set trackpad & mouse speed to a reasonable number
 defaults write -g com.apple.trackpad.scaling 1.5
 defaults write -g com.apple.mouse.scaling 1.5
