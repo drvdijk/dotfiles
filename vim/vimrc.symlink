@@ -1,5 +1,6 @@
 colorscheme desert
 syntax on
+:set hlsearch
 
 " Wrap gitcommit file types at the appropriate length
 filetype indent plugin on
