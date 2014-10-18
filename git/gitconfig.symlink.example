@@ -1,27 +1,20 @@
 # Sample gitconfig
 #
 
-[hub]
-        protocol = https
 [user]
         name = AUTHORNAME
         email = AUTHOREMAIL
-[credential]
-        helper = GIT_CREDENTIAL_HELPER
 [alias]
         co = checkout
-        promote = !$ZSH/bin/git-promote
-        wtf     = !$ZSH/bin/git-wtf
-        rank-contributors = !$ZSH/bin/git-rank-contributors
-        count   = !git shortlog -sn
+        hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
 [color]
         diff = auto
         status = auto
         branch = auto
         ui = true
 [core]
-        excludesfile = ~/.gitignore
-        editor = vim
+        excludesfile = ~/.gitignore_global
+        autocrlf = input
 [apply]
         whitespace = nowarn
 [mergetool]
@@ -30,6 +23,8 @@
         prompt = false
 [help]
         autocorrect = 1
+[merge]
+        tool = kdiff3
 [push]
         # See `git help config` (search for push.default)
         # for more information on different options of the below setting.
