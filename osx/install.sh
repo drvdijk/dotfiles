@@ -11,6 +11,11 @@
 #
 # Run ./set-defaults.sh and you'll be good to go.
 
+if [ "$(uname -s)" != "Darwin" ]; then
+	echo "  Please only run this on OS X machines ..."
+	exit
+fi
+
 # Ask for the administrator password upfront
 sudo -v
 
