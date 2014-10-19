@@ -12,7 +12,7 @@
 # Run ./set-defaults.sh and you'll be good to go.
 
 if [ "$(uname -s)" != "Darwin" ]; then
-	echo "  Please only run this on OS X machines ..."
+	echo "  Not setting OS X defaults on non-OS X machine"
 	exit
 fi
 
@@ -27,12 +27,15 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 # General UI/UX                                                               #
 ###############################################################################
 
-## TODO ask if variable is not available, skip when empty
-## Set computer name (as done via System Preferences → Sharing)
-#sudo scutil --set ComputerName "0x6D746873"
-#sudo scutil --set HostName "0x6D746873"
-#sudo scutil --set LocalHostName "0x6D746873"
-#sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "0x6D746873"
+echo "  Enter the computer name you want to use for this Mac (empty to skip):"
+read computer_name
+if [ ! -z $computer_name ]; then
+	# Set computer name (as done via System Preferences → Sharing)
+	sudo scutil --set ComputerName "$computer_name"
+	sudo scutil --set HostName "$computer_name"
+	sudo scutil --set LocalHostName "$computer_name"
+	sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "$computer_name"
+fi
 
 # Disable OS X Gate Keeper, (you'll be able to install any app you want from here on, not just Mac App Store apps)
 sudo spctl --master-disable
