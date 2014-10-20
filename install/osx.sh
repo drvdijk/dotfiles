@@ -15,3 +15,6 @@ $CURDIR/homebrew.sh
 # cask
 $CURDIR/cask.sh
 
+# mackup
+$CURDIR/mackup.sh
+
