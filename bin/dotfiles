@@ -130,7 +130,7 @@ install_dotfiles () {
   done
 }
 
-setup_gitconfig
-install_dotfiles
+#setup_gitconfig
+#install_dotfiles
 
 success 'Done!'
