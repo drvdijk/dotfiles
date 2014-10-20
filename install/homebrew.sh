@@ -38,7 +38,6 @@ require_brew coreutils
 require_brew findutils
 
 # Install other common packages
-require_brew mackup
 require_brew trash
 require_brew wget  --with-iri
 

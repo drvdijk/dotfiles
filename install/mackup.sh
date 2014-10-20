@@ -33,3 +33,9 @@ running "Restoring configuration"
 mackup restore
 ok
 
+if [ -e ~/.ssh ]; then
+    running "Restricting .ssh file permissions after syncing"
+    chmod -R go-rwx ~/.ssh
+    ok
+fi
+
