@@ -20,6 +20,7 @@ sub_help () {
     echo "   install <x>          Install package x"
     echo "   install homebrew     Install homebrew"
     echo "   install cask         Install homebrew cask (includes homebrew)"
+    echo "   install mackup       Install mackup & restore config (requires/installs homebrew & cask)"
     echo "   install osx-defaults Install reasonable OS X defaults"
     echo "   install osx          Install all osx stuff (defaults, homebrew, cask, ...)"
 }
