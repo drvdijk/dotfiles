@@ -12,15 +12,15 @@ require_osx
 bot "Let's get Mackup up & running!"
 
 running "Installing Mackup"
-#require_brew mackup
+require_brew mackup
 ok
 
 running "Installing Dropbox"
-#require_cask dropbox
+require_cask dropbox
 ok
 
 running "Opening dropbox"
-#open -a Dropbox.app
+open -a Dropbox.app
 ok
 
 action "Please make sure you're signed in to to dropbox & the Mackup folder is synchronized fully"
