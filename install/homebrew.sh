@@ -46,6 +46,6 @@ require_brew findutils
 # Install other common packages
 require_brew mackup
 require_brew trash
-require_brew wget  --enable-iri
+require_brew wget  --with-iri
 
 exit 0
