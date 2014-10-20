@@ -26,6 +26,8 @@ bot "installing tools via homebrew..."
 action "update brew..."
 brew update
 ok "brew updated..."
+brew upgrade
+ok "brew upgrade..."
 
 action "installing packages..."
 
