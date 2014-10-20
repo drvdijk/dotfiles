@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Sets reasonable OS X defaults.
 #
@@ -9,32 +9,38 @@
 #   https://gist.github.com/MatthewMueller/e22d9840f9ea2fee4716
 #   https://gist.github.com/saetia/1623487
 #
-# Run ./set-defaults.sh and you'll be good to go.
 
+# Exit immediately if anything exits with a non-zero status.
+set -e
+
+# Load libs
+source "$( cd "$( dirname "${BASH_SOURCE[0]}" )/../bin" && pwd )"/lib.sh
+
+# Check OS X
 if [ "$(uname -s)" != "Darwin" ]; then
-	echo "  Not setting OS X defaults on non-OS X machine"
+	echo "Not setting OS X defaults on non-OS X machine"
 	exit
 fi
 
-# Ask for the administrator password upfront
-sudo -v
+require_sudo
 
-# Keep-alive: update existing `sudo` time stamp until `.osx` has finished
-while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
-
+bot "Let's set some reasonable OS X defaults!"
 
 ###############################################################################
 # General UI/UX                                                               #
 ###############################################################################
 
-echo "  Enter the computer name you want to use for this Mac (empty to skip):"
+action "Computer name for this mac"
+echo -e "Enter the computer name you want to use for this Mac (empty to skip):"
 read computer_name
 if [ ! -z $computer_name ]; then
 	# Set computer name (as done via System Preferences → Sharing)
+    running "Setting computer name"
 	sudo scutil --set ComputerName "$computer_name"
 	sudo scutil --set HostName "$computer_name"
 	sudo scutil --set LocalHostName "$computer_name"
 	sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "$computer_name"
+    ok
 fi
 
 # Disable OS X Gate Keeper, (you'll be able to install any app you want from here on, not just Mac App Store apps)
@@ -45,7 +51,7 @@ defaults write com.apple.LaunchServices LSQuarantine -bool false
 # Disable the sound effects on boot
 sudo nvram SystemAudioVolume=" "
 
-# Disable sound effect when changing volume 
+# Disable sound effect when changing volume
 defaults write -g com.apple.sound.beep.feedback -integer 0
 
 # Disable menu bar transparency
@@ -54,6 +60,7 @@ defaults write -g AppleEnableMenuBarTransparency -bool false
 ## TODO check for Yosemite
 ## Disable transparency in the menu bar and elsewhere on Yosemite
 #defaults write com.apple.universalaccess reduceTransparency -bool true
+## TODO set black menu bar by default in Yosemite
 
 # Set appearance to Graphite
 defaults write -g AppleAquaColorVariant -int 6
@@ -344,7 +351,12 @@ defaults write com.apple.messageshelper.MessageController SOInputLineSettings -d
 # Kill affected applications                                                  #
 ###############################################################################
 
+action "restarting (killing) affected apps"
+set +e
+
 for app in "cfprefsd" "Dock" "Finder" "Messages" "Safari" "SystemUIServer"; do
 	killall "${app}" > /dev/null 2>&1
 done
-echo "Done. Note that some of these changes require a logout/restart to take effect."
+
+bot "woot!"
+warn "Note that some of these changes require a logout/restart to take effect."

@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 #
 
-# Get current dir (so run this script from anywhere)
-if [ -z $DOTFILES_DIR ]; then
-	export DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
-fi
+# Load libs
+source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/lib.sh
 
+# Exit immediately if anything exits with a non-zero status.
 set -e
 
 COMMAND_NAME=$1
@@ -13,42 +12,21 @@ SUB_COMMAND_NAME=$2
 
 
 sub_help () {
-    echo "Usage: $(basename $0) <command>\n"
+    echo "Usage: $(basename $0) <command>"
     echo "Commands:"
-    echo "   help               This help message"
-    echo "   bootstrap          Bootstrap the dotfiles"
-#    echo "   edit               Open dotfiles in default editor ($EDITOR) and Git GUI ($GIT_GUI)"
-#    echo "   reload             Reload dotfiles"
-#    echo "   update             Update OS X Applications, Homebrew (cask)"
-#    echo "   osx                Apply OS X system defaults"
-#    echo "   dock               Apply OS X Dock settings"
-#    echo "   install bash       Install Bash (Homebrew)"
-#    echo "   install beets      Install Beets (PIP)"
-#    echo "   install mjolnir    Install Mjolnir (Homebrew/Luarocks)"
-#    echo "   install vundle     Install Vundle"
+    echo "   help                 This help message"
+    echo "   bootstrap            Bootstrap the dotfiles"
+    echo "   gitconfig            Setup git configuration"
+    echo "   install <x>          Install package x"
+    echo "   install homebrew     Install homebrew"
+    echo "   install cask         Install homebrew cask (includes homebrew)"
+    echo "   install osx-defaults Install reasonable OS X defaults"
+    echo "   install osx          Install all osx stuff (defaults, homebrew, cask, ...)"
 }
 
 
 
 # Helper functions
-
-info () {
-  printf "  [ \033[00;34m..\033[0m ] $1"
-}
-
-user () {
-  printf "\r  [ \033[0;33m?\033[0m ] $1 "
-}
-
-success () {
-  printf "\r\033[2K  [ \033[00;32mOK\033[0m ] $1\n"
-}
-
-fail () {
-  printf "\r\033[2K  [\033[0;31mFAIL\033[0m] $1\n"
-  echo ''
-  exit
-}
 
 link_file () {
   local src=$1 dst=$2
@@ -71,7 +49,7 @@ link_file () {
 
       else
 
-        user "File already exists: $(basename "$src"), what do you want to do? [s]kip, [S]kip all, [o]verwrite, [O]verwrite all, [b]ackup, [B]ackup all?"
+        warn "File already exists: $(basename "$src"), what do you want to do? [s]kip, [S]kip all, [o]verwrite, [O]verwrite all, [b]ackup, [B]ackup all?"
         read -n 1 action
 
         case "$action" in
@@ -102,32 +80,32 @@ link_file () {
     if [ "$overwrite" == "true" ]
     then
       rm -rf "$dst"
-      success "removed $dst"
+      ok "removed $dst"
     fi
 
     if [ "$backup" == "true" ]
     then
       mv "$dst" "${dst}.backup"
-      success "moved $dst to ${dst}.backup"
+      ok "moved $dst to ${dst}.backup"
     fi
 
     if [ "$skip" == "true" ]
     then
-      success "skipped $src"
+      ok "skipped $src"
     fi
   fi
 
   if [ "$skip" != "true" ]  # "false" or empty
   then
     ln -s "$1" "$2"
-    success "linked $1 to $2"
+    ok "linked $1 to $2"
   fi
 }
 
 # Sub commands
 
 sub_bootstrap () {
-  info 'installing dotfiles'
+  bot 'Installing dotfiles'
 
   local overwrite_all=false backup_all=false skip_all=false
 
@@ -136,24 +114,30 @@ sub_bootstrap () {
     dst="$HOME/.$(basename "${src%.*}")"
     link_file "$src" "$dst"
   done
+
+  ok 'dotfiles installed'
 }
 
 sub_gitconfig () {
   if ! [ -f $DOTFILES_DIR/git/gitconfig.symlink ]
   then
-    info 'setup gitconfig'
+    bot 'Setup gitconfig'
 
-    user ' - What is your global git author name?'
+    echo -e ' - What is your global git author name?'
     read -e git_authorname
-    user ' - What is your global git author email?'
+    echo -e ' - What is your global git author email?'
     read -e git_authoremail
 
     sed -e "s/AUTHORNAME/$git_authorname/g" -e "s/AUTHOREMAIL/$git_authoremail/g" $DOTFILES_DIR/git/gitconfig.symlink.example > $DOTFILES_DIR/git/gitconfig.symlink
 
-    success 'gitconfig'
+    ok 'gitconfig set up'
   fi
 }
 
+sub_install () {
+    local SCRIPT="${DOTFILES_DIR}/install/${SUB_COMMAND_NAME}.sh"
+    [ -f "$SCRIPT" ] && source "$SCRIPT" || error "Unable to find script to install ${SUB_COMMAND_NAME}"
+}
 
 
 case $COMMAND_NAME in
@@ -162,11 +146,14 @@ case $COMMAND_NAME in
         ;;
     *)
         shift
-        sub_${COMMAND_NAME} $@
-        if [ $? = 127 ]; then
-            echo "'$COMMAND_NAME' is not a known command or has errors." >&2
+        if test $(type -t sub_${COMMAND_NAME}); then
+            sub_${COMMAND_NAME} $@
+            if [ $? = 127 ]; then
+                error "'$COMMAND_NAME' is not a known command or has errors." >&2
+            fi
+        else
+            error "'$COMMAND_NAME' is not a known command." >&2
             sub_help
-            exit 1
         fi
         ;;
 esac
