@@ -1,13 +1,36 @@
 #!/usr/bin/env bash
 #
-# bootstrap installs things.
 
-cd "$(dirname "$0")/.."
-DOTFILES_ROOT=$(pwd)
+# Get current dir (so run this script from anywhere)
+if [ -z $DOTFILES_DIR ]; then
+	export DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+fi
 
 set -e
 
-echo ''
+COMMAND_NAME=$1
+SUB_COMMAND_NAME=$2
+
+
+sub_help () {
+    echo "Usage: $(basename $0) <command>\n"
+    echo "Commands:"
+    echo "   help               This help message"
+    echo "   bootstrap          Bootstrap the dotfiles"
+#    echo "   edit               Open dotfiles in default editor ($EDITOR) and Git GUI ($GIT_GUI)"
+#    echo "   reload             Reload dotfiles"
+#    echo "   update             Update OS X Applications, Homebrew (cask)"
+#    echo "   osx                Apply OS X system defaults"
+#    echo "   dock               Apply OS X Dock settings"
+#    echo "   install bash       Install Bash (Homebrew)"
+#    echo "   install beets      Install Beets (PIP)"
+#    echo "   install mjolnir    Install Mjolnir (Homebrew/Luarocks)"
+#    echo "   install vundle     Install Vundle"
+}
+
+
+
+# Helper functions
 
 info () {
   printf "  [ \033[00;34m..\033[0m ] $1"
@@ -26,23 +49,6 @@ fail () {
   echo ''
   exit
 }
-
-setup_gitconfig () {
-  if ! [ -f git/gitconfig.symlink ]
-  then
-    info 'setup gitconfig'
-
-    user ' - What is your global git author name?'
-    read -e git_authorname
-    user ' - What is your global git author email?'
-    read -e git_authoremail
-
-    sed -e "s/AUTHORNAME/$git_authorname/g" -e "s/AUTHOREMAIL/$git_authoremail/g" git/gitconfig.symlink.example > git/gitconfig.symlink
-
-    success 'gitconfig'
-  fi
-}
-
 
 link_file () {
   local src=$1 dst=$2
@@ -118,19 +124,50 @@ link_file () {
   fi
 }
 
-install_dotfiles () {
+# Sub commands
+
+sub_bootstrap () {
   info 'installing dotfiles'
 
   local overwrite_all=false backup_all=false skip_all=false
 
-  for src in $(find "$DOTFILES_ROOT" -maxdepth 2 -name '*.symlink')
+  for src in $(find "$DOTFILES_DIR" -maxdepth 2 -name '*.symlink')
   do
     dst="$HOME/.$(basename "${src%.*}")"
     link_file "$src" "$dst"
   done
 }
 
-#setup_gitconfig
-#install_dotfiles
+sub_gitconfig () {
+  if ! [ -f $DOTFILES_DIR/git/gitconfig.symlink ]
+  then
+    info 'setup gitconfig'
 
-success 'Done!'
+    user ' - What is your global git author name?'
+    read -e git_authorname
+    user ' - What is your global git author email?'
+    read -e git_authoremail
+
+    sed -e "s/AUTHORNAME/$git_authorname/g" -e "s/AUTHOREMAIL/$git_authoremail/g" $DOTFILES_DIR/git/gitconfig.symlink.example > $DOTFILES_DIR/git/gitconfig.symlink
+
+    success 'gitconfig'
+  fi
+}
+
+
+
+case $COMMAND_NAME in
+    "" | "-h" | "--help")
+        sub_help
+        ;;
+    *)
+        shift
+        sub_${COMMAND_NAME} $@
+        if [ $? = 127 ]; then
+            echo "'$COMMAND_NAME' is not a known command or has errors." >&2
+            sub_help
+            exit 1
+        fi
+        ;;
+esac
+

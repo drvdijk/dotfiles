@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Source: https://github.com/webpro/dotfiles/blob/master/install.sh
 
@@ -8,6 +8,7 @@ export DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Update dotfiles itself first
 [ -d "$DOTFILES_DIR/.git" ] && git --work-tree="$DOTFILES_DIR" --git-dir="$DOTFILES_DIR/.git" pull origin master
 
-# Call dotfiles install
-$DITFILES_DIR/bin/dotfiles install
+# Call dotfiles gitconfig & bootstrap
+$DOTFILES_DIR/bin/dotfiles gitconfig
+$DOTFILES_DIR/bin/dotfiles bootstrap
 
