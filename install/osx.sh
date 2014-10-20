@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Exit immediately if anything exits with a non-zero status.
-set -e
+# Load libs
+source "$( cd "$( dirname "${BASH_SOURCE[0]}" )/../bin" && pwd )"/lib.sh
 
 # Get current directory
 CURDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -17,4 +17,5 @@ $CURDIR/cask.sh
 
 # mackup
 $CURDIR/mackup.sh
+
 

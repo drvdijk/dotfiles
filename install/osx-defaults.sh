@@ -10,18 +10,10 @@
 #   https://gist.github.com/saetia/1623487
 #
 
-# Exit immediately if anything exits with a non-zero status.
-set -e
-
 # Load libs
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )/../bin" && pwd )"/lib.sh
 
-# Check OS X
-if [ "$(uname -s)" != "Darwin" ]; then
-	echo "Not setting OS X defaults on non-OS X machine"
-	exit
-fi
-
+require_osx
 require_sudo
 
 bot "Let's set some reasonable OS X defaults!"

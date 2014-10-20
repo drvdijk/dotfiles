@@ -26,19 +26,18 @@ bot "installing tools via homebrew..."
 action "update brew..."
 brew update
 ok "brew updated..."
+# Need to run brew upgrade at this point to make sure `brew list` works correctly...
 brew upgrade
 ok "brew upgrade..."
 
-action "installing packages..."
-
-# Install GNU core utilities (those that come with OS X are outdated)
-# Don’t forget to add `$(brew --prefix coreutils)/libexec/gnubin` to `$PATH`.
-require_brew coreutils
-# Install GNU `find`, `locate`, `updatedb`, and `xargs`, `g`-prefixed
-require_brew findutils
-
 # Install other common packages
+action "installing packages..."
+require_brew coreutils
+require_brew findutils
+require_brew kdiff3
 require_brew trash
 require_brew wget  --with-iri
+
+bot "formulas brewed"
 
 exit 0
