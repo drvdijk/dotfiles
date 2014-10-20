@@ -20,7 +20,7 @@ require_cask dropbox
 ok
 
 running "Opening dropbox"
-open -a Dropbox.app
+open -a /Applications/Dropbox.app
 ok
 
 action "Please make sure you're signed in to to dropbox & the Mackup folder is synchronized fully"

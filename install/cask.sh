@@ -13,8 +13,8 @@ require_sudo
 
 
 if [ -z "$HOMEBREW_CASK_OPTS" ]; then
-    # Install to /Applications instead of ~/Applications
-    export HOMEBREW_CASK_OPTS="--appdir=/Applications"
+    # Install to /Applications instead of ~/Applications (also for QuickLook)
+    export HOMEBREW_CASK_OPTS="--appdir=/Applications --qlplugindir=/Library/QuickLook"
 fi
 
 # Install cask
@@ -23,6 +23,37 @@ require_brew caskroom/cask/brew-cask
 
 # Apps!
 action "installing apps..."
+require_cask adobe-photoshop-lightroom
+require_cask bartender
+require_cask caffeine
 require_cask caskroom/versions/google-chrome-beta
+require_cask daisydisk
 require_cask dropbox
+require_cask evernote
+require_cask flash-player
+require_cask firefox
+require_cask forklift
+require_cask google_hangouts
+require_cask ifunbox
+require_cask macvim
+require_cask menumeters
+require_cask mou
+require_cask onepassword
+require_cask pycharm-ce
+require_cask sequel-pro
+require_cask skitch
+require_cask sizeup
+require_cask silverlight
+require_cask skype
+require_cask sourcetree
+require_cask spotify
+require_cask the-unarchiver
+require_cask virtualmox
+require_cask vlc
+
+# Quicklook plugins
+action "installing quicklook plugins..."
+require_cask betterzipql
+
+bot "All done with these lovely apps!"
 
