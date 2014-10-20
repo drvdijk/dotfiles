@@ -34,7 +34,7 @@ ok "brew upgrade..."
 action "installing packages..."
 require_brew coreutils
 require_brew findutils
-require_brew kdiff3
+#require_brew kdiff3
 require_brew trash
 require_brew wget  --with-iri
 
