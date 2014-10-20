@@ -19,6 +19,9 @@ COL_CYAN=$ESC_SEQ"36;01m"
 # Get dotfiles dir (so run this script from anywhere)
 export DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
 
+# Exit immediately if anything exits with a non-zero status.
+set -e
+
 function ok() {
     echo -e "$COL_GREEN[ok]$COL_RESET "$1
 }
@@ -51,12 +54,22 @@ function require_sudo() {
     while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 }
 
-function require_cask() {
-    running "brew cask $1"
-    brew cask list $1 > /dev/null 2>&1 | true
+function require_osx() {
+    if [ "$(uname -s)" != "Darwin" ]; then
+        error "Only supported on OS X"
+        exit 0
+    fi
+}
+
+function require_brew() {
+    if test ! $(which brew); then
+        $DOTFILES_DIR/install/homebrew.sh
+    fi
+    running "brew $1 $2"
+    brew list $1 > /dev/null 2>&1 | true
     if [[ ${PIPESTATUS[0]} != 0 ]]; then
-        action "brew cask install $1 $2"
-        brew cask install $1
+        action "brew install $1 $2"
+        brew install $1 $2
         if [[ $? != 0 ]]; then
             error "failed to install $1! aborting..."
             exit -1
@@ -65,12 +78,13 @@ function require_cask() {
     ok
 }
 
-function require_brew() {
-    running "brew $1 $2"
-    brew list $1 > /dev/null 2>&1 | true
+function require_cask() {
+    require_brew caskroom/cask/brew-cask
+    running "brew cask $1"
+    brew cask list $1 > /dev/null 2>&1 | true
     if [[ ${PIPESTATUS[0]} != 0 ]]; then
-        action "brew install $1 $2"
-        brew install $1 $2
+        action "brew cask install $1 $2"
+        brew cask install $1
         if [[ $? != 0 ]]; then
             error "failed to install $1! aborting..."
             exit -1

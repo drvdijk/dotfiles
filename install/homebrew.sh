@@ -5,20 +5,12 @@
 # This installs some of the common dependencies needed (or at least desired)
 # using Homebrew.
 
-# Exit immediately if anything exits with a non-zero status.
-set -e
-
 # Load libs
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )/../bin" && pwd )"/lib.sh
 
-# Check OS X
-if [ "$(uname -s)" != "Darwin" ]; then
-    error "  Homebrew only supported on OS X"
-    exit 0
-fi
-
+# Check OS X & sudo
+require_osx
 require_sudo
-
 
 # Check for Homebrew
 running "checking homebrew"
