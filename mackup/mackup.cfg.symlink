@@ -1,6 +1,7 @@
 [applications_to_sync]
 adobe-camera-raw
 adobe-lightroom
+apache-directory-studio
 bartender
 bash
 caffeine
@@ -8,6 +9,7 @@ bash
 forklift-2
 iterm2
 macvim
+maven_tomtom_config
 menumeters
 sequel-pro
 sizeup
