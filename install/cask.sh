@@ -35,6 +35,7 @@ require_cask firefox
 require_cask forklift
 require_cask google_hangouts
 require_cask ifunbox
+require_cask iterm2
 require_cask macvim
 require_cask menumeters
 require_cask mou
