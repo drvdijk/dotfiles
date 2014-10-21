@@ -52,7 +52,9 @@ defaults write -g AppleEnableMenuBarTransparency -bool false
 ## TODO check for Yosemite
 ## Disable transparency in the menu bar and elsewhere on Yosemite
 #defaults write com.apple.universalaccess reduceTransparency -bool true
-## TODO set black menu bar by default in Yosemite
+
+# Set black menu bar by default in Yosemite
+sudo defaults write -g /Library/Preferences/.GlobalPreferences AppleInterfaceTheme Dark
 
 # Set appearance to Graphite
 defaults write -g AppleAquaColorVariant -int 6
