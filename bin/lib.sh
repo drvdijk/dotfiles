@@ -84,6 +84,10 @@ function require_cask() {
     brew cask list $1 > /dev/null 2>&1 | true
     if [[ ${PIPESTATUS[0]} != 0 ]]; then
         action "brew cask install $1 $2"
+        if [ -z "$HOMEBREW_CASK_OPTS" ]; then
+            # Install to /Applications instead of ~/Applications
+            export HOMEBREW_CASK_OPTS="--appdir=/Applications"
+        fi
         brew cask install $1
         if [[ $? != 0 ]]; then
             error "failed to install $1! aborting..."
