@@ -49,12 +49,8 @@ defaults write -g com.apple.sound.beep.feedback -integer 0
 # Disable menu bar transparency
 defaults write -g AppleEnableMenuBarTransparency -bool false
 
-## TODO check for Yosemite
-## Disable transparency in the menu bar and elsewhere on Yosemite
-#defaults write com.apple.universalaccess reduceTransparency -bool true
-
 # Set black menu bar by default in Yosemite
-sudo defaults write -g /Library/Preferences/.GlobalPreferences AppleInterfaceTheme Dark
+sudo defaults write -g AppleInterfaceStyle Dark
 
 # Set appearance to Graphite
 defaults write -g AppleAquaColorVariant -int 6
@@ -128,7 +124,7 @@ defaults write -g com.apple.trackpad.scaling 1.5
 defaults write -g com.apple.mouse.scaling 1.5
 
 # Use all F1, F2, etc. keys as standard function keys
-defaults write com.apple.keyboard.fnState -bool true
+defaults write -g com.apple.keyboard.fnState -bool true
 
 # Enable full keyboard access for all controls
 # (e.g. enable Tab in modal dialogs)
@@ -322,6 +318,8 @@ defaults write com.apple.dock wvous-tl-modifier -int 0
 defaults write com.apple.dock wvous-bl-corner -int 10
 defaults write com.apple.dock wvous-bl-modifier -int 0
 
+# Add spacer to the Dock
+defaults write com.apple.dock persistent-apps -array-add '{ "tile-type" = "spacer-tile"; }'
 
 ###############################################################################
 # TextEdit, Disk Utility, and Messages                                        #
