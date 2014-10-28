@@ -25,6 +25,7 @@ In the `bin` directory lives the `dotfiles` script. It basically handles everyth
 * https://github.com/holman/dotfiles
 * https://github.com/webpro/dotfiles/blob/master/bin/dotfiles
 * https://github.com/atomantic/dotfiles
+* https://github.com/ndhoule/dotfiles
 
 ## To do
 
