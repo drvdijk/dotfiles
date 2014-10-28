@@ -1,0 +1,53 @@
+# -*- mode: sh -*-
+
+#
+# Executes commands at the start of an interactive session.
+#
+# Author:
+#   Nathan Houle <nathan@nathanhoule.com>
+#
+# Credit to:
+#   Sorin Ionescu <sorin.ionescu@gmail.com>
+#   Zach Holman <zach@zachholman.com>
+#
+
+export DOTFILES=$HOME/.dotfiles
+
+#
+# Zprezto
+#
+
+# Load zprezto if it's installed
+if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
+  source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
+fi
+
+#
+# Zsh submodules
+#
+
+# All zsh config files (all *.zsh files contained in $DOTFILES children
+# directories). Note that this glob is limited to one directory level deep.
+typeset -U config_files
+config_files=($DOTFILES/*/*.zsh)
+
+# Load path files
+for file in ${(M)config_files:#*/path.zsh}; do
+  source $file
+done
+
+# Load all files except for path and completions
+for file in ${${config_files:#*/path.zsh}:#*/completion.zsh}; do
+  source $file
+done
+
+# Load completions
+for file in ${(M)config_files:#*/completion.zsh}; do
+  source $file
+done
+
+#
+# Cleanup
+#
+
+unset config_files
