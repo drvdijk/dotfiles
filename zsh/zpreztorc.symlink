@@ -25,15 +25,17 @@ zstyle ':prezto:*:*' color 'yes'
 # The order matters.
 zstyle ':prezto:load' pmodule \
   'environment' \
-  'git' \
+  'terminal' \
+  'editor' \
   'history' \
   'directory' \
+  'spectrum' \
+  'utility' \
+  'git' \
   'completion' \
+  'syntax-highlighting' \
+  'history-substring-search' \
   'prompt'
-#  'terminal' \
-#  'editor' \
-#  'utility' \
-#  'spectrum' \
 
 #
 # Editor
