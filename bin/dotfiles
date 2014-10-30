@@ -106,6 +106,16 @@ link_file () {
 # Sub commands
 
 sub_bootstrap () {
+  bot 'Updating repo & submodules...'
+  if [ -d "$DOTFILES_DIR/.git" ]; then
+    pushd $DOTFILES_DIR >/dev/null
+    git pull origin master
+    ok "repository updated"
+    git submodule update --init --recursive
+    ok "submodules initialized & updated"
+    popd >/dev/null
+  fi
+
   bot 'Installing dotfiles'
 
   local overwrite_all=false backup_all=false skip_all=false
