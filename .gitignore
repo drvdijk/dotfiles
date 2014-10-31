@@ -1,3 +1,2 @@
 git/gitconfig.symlink
-mackup/mackup.symlink/private-files.cfg
-install/private.sh
+**/*private*
