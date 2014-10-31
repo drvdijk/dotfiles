@@ -4,9 +4,6 @@
 [user]
         name = AUTHORNAME
         email = AUTHOREMAIL
-[alias]
-        co = checkout
-        hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
 [color]
         diff = auto
         status = auto
