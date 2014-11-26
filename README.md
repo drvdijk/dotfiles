@@ -6,7 +6,7 @@ My dotfiles, currently heavily under development (eg bash profile isn't even in 
 
 On a clean machine (either Mac or Linux), clone this git repo and run setup.sh:
 
-    git clone https://github.com/drvdijk/dotfiles.git ~/.dotfiles
+    git clone --recursive https://github.com/drvdijk/dotfiles.git ~/.dotfiles
     ~/.dotfiles/setup.sh
 
 This step should not install any software, but just link dotfiles. Afterwards you'd run (eg):
