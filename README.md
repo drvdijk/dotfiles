@@ -13,12 +13,29 @@ This step should not install any software, but just link dotfiles. Afterwards yo
 
     ~/.dotfiles/bin/dotfiles install osx
 
+Or just install parts, eg:
+
+    ~/.dotfiles/bin/dotfiles install osx-defaults
+    ~/.dotfiles/bin/dotfiles install brew
+    ~/.dotfiles/bin/dotfiles install cask
+    ~/.dotfiles/bin/dotfiles install mackup
+    ~/.dotfiles/bin/dotfiles install private
+
 (todo here: add the ~/.dotfiles/bin to the path through the bash or zsh profiles)
 
 ### dotfiles
 
 In the `bin` directory lives the `dotfiles` script. It basically handles everything, from `bootstrap`-ing the dotfiles to `install ...` the various parts. The `setup.sh` script in the root also simply calls this `dotfiles` script.
 
+## ZSH
+
+Adding zsh to the list of shells:
+
+    echo $(which zsh) | sudo tee - /etc/shells
+
+Setting the shell to zsh for the current user:
+
+    chsh -s `which zsh`
 
 ## See
 
