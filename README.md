@@ -31,7 +31,7 @@ In the `bin` directory lives the `dotfiles` script. It basically handles everyth
 
 Adding zsh to the list of shells:
 
-    echo $(which zsh) | sudo tee - /etc/shells
+    echo $(which zsh) | sudo tee -a /etc/shells
 
 Setting the shell to zsh for the current user:
 
