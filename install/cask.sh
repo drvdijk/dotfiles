@@ -23,24 +23,24 @@ require_brew caskroom/cask/brew-cask
 
 # Apps!
 action "installing apps..."
+require_cask 1password
 require_cask adobe-photoshop-lightroom
 require_cask bartender
 require_cask caffeine
-require_cask caskroom/versions/google-chrome-beta
 require_cask daisydisk
 require_cask dropbox
 require_cask evernote
 require_cask flash-player
 require_cask firefox
 require_cask forklift
+require_cask google-chrome
 require_cask ifunbox
 require_cask iterm2
 require_cask kdiff3
 require_cask macvim
 require_cask menumeters
 require_cask mou
-require_cask onepassword
-require_cask pycharm-ce
+#require_cask pycharm-ce
 require_cask sequel-pro
 require_cask skitch
 require_cask sizeup
