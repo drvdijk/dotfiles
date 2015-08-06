@@ -37,6 +37,7 @@ require_brew findutils
 #require_brew kdiff3
 require_brew trash
 require_brew wget  --with-iri
+require_brew zsh
 
 bot "formulas brewed"
 
