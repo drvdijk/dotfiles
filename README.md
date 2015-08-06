@@ -4,9 +4,12 @@ My dotfiles, currently heavily under development (eg bash profile isn't even in 
 
 ## Idea (wip)
 
-On a clean machine (either Mac or Linux), clone this git repo and run setup.sh:
+On a clean machine (either Mac or Linux), clone this git repo:
 
     git clone --recursive https://github.com/drvdijk/dotfiles.git ~/.dotfiles
+    
+ And run setup.sh
+ 
     ~/.dotfiles/setup.sh
 
 This step should not install any software, but just link dotfiles. Afterwards you'd run (eg):
