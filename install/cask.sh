@@ -24,7 +24,7 @@ require_brew caskroom/cask/brew-cask
 # Apps!
 action "installing apps..."
 require_cask 1password
-require_cask adobe-photoshop-lightroom
+#require_cask adobe-photoshop-lightroom # this is lightroom 5, 6 is not available through caskroom
 require_cask bartender
 require_cask caffeine
 require_cask daisydisk
@@ -34,12 +34,12 @@ require_cask flash-player
 require_cask firefox
 require_cask forklift
 require_cask google-chrome
-require_cask ifunbox
+#require_cask ifunbox
 require_cask iterm2
 require_cask kdiff3
 require_cask macvim
 require_cask menumeters
-require_cask mou
+#require_cask mou
 #require_cask pycharm-ce
 require_cask sequel-pro
 require_cask skitch
@@ -47,7 +47,7 @@ require_cask sizeup
 require_cask silverlight
 require_cask skype
 require_cask sourcetree
-require_cask spotify
+#require_cask spotify
 require_cask the-unarchiver
 require_cask virtualbox
 require_cask vlc
