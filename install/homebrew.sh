@@ -37,7 +37,10 @@ require_brew findutils
 #require_brew kdiff3
 require_brew trash
 require_brew wget  --with-iri
+
+# ZSH, and add it to the shells list
 require_brew zsh
+echo $(which zsh) | sudo tee -a /etc/shells
 
 bot "formulas brewed"
 

@@ -32,7 +32,7 @@ In the `bin` directory lives the `dotfiles` script. It basically handles everyth
 
 ## ZSH
 
-Adding zsh to the list of shells:
+Adding zsh to the list of shells (note this is done in the homebrew install script already):
 
     echo $(which zsh) | sudo tee -a /etc/shells
 
