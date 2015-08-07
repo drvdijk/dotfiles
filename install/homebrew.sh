@@ -16,7 +16,7 @@ require_sudo
 running "checking homebrew"
 if test ! $(which brew); then
     action "installing homebrew"
-    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" - --full
 fi
 ok
 
