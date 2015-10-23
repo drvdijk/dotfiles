@@ -30,6 +30,7 @@ running "Sure the Mackup folder is synced? Press CTRL-C to cancel"
 read -p ""
 
 running "Restoring configuration"
+action "Please DO NOT overwrite any mackup configuration files, just answer No to questions below."
 mackup restore
 ok
 
