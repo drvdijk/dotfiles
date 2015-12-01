@@ -33,6 +33,7 @@ ok "brew upgrade..."
 # Install other common packages
 action "installing packages..."
 require_brew coreutils
+ln -s /usr/local/bin/gtac /usr/local/bin/tac
 require_brew findutils
 #require_brew kdiff3
 require_brew trash
