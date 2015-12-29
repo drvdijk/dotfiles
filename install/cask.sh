@@ -38,7 +38,7 @@ require_cask google-chrome
 require_cask iterm2
 require_cask kdiff3
 require_cask macvim
-require_cask menumeters
+#require_cask menumeters # disabled because it doesn't work with el capitan, see http://member.ipmu.jp/yuji.tachikawa/MenuMetersElCapitan/
 #require_cask mou
 #require_cask pycharm-ce
 require_cask sequel-pro
