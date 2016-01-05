@@ -28,8 +28,9 @@ require_cask 1password
 require_cask bartender
 require_cask caffeine
 require_cask daisydisk
+require_cask dash
 require_cask dropbox
-require_cask evernote
+#require_cask evernote
 require_cask flash-player
 require_cask firefox
 require_cask forklift
@@ -42,7 +43,7 @@ require_cask macvim
 #require_cask mou
 #require_cask pycharm-ce
 require_cask sequel-pro
-require_cask skitch
+#require_cask skitch
 require_cask sizeup
 require_cask silverlight
 require_cask skype
