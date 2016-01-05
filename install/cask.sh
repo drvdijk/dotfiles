@@ -19,7 +19,7 @@ fi
 
 # Install cask
 bot "Installing homebrew cask"
-brew tap caskroom/cask
+brew tap caskroom/cask --full
 
 # Apps!
 action "installing apps..."
