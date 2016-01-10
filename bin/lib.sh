@@ -79,11 +79,12 @@ function require_brew() {
 }
 
 function require_cask() {
-    require_brew caskroom/cask/brew-cask
+    require_brew
+    brew tap caskroom/cask --full 2>/dev/null
     running "brew cask $1"
     brew cask list $1 > /dev/null 2>&1 | true
     if [[ ${PIPESTATUS[0]} != 0 ]]; then
-        action "brew cask install $1 $2"
+        action "brew cask install $1"
         if [ -z "$HOMEBREW_CASK_OPTS" ]; then
             # Install to /Applications instead of ~/Applications
             export HOMEBREW_CASK_OPTS="--appdir=/Applications"
