@@ -36,6 +36,7 @@ require_cask firefox
 require_cask forklift
 require_cask google-chrome
 #require_cask ifunbox
+require_cask istat-menus
 require_cask iterm2
 require_cask kdiff3
 require_cask macvim
