@@ -266,6 +266,12 @@ defaults write com.apple.finder FXInfoPanesExpanded -dict \
 # Dock, Dashboard, and hot corners                                            #
 ###############################################################################
 
+# Short delay when revealing dock when hidden
+defaults write com.apple.dock autohide-time-modifier -float 0.15;
+
+# Position the dock on the left side
+defaults write com.apple.Dock orientation -string left
+
 # Set the icon size of Dock items to 16 pixels
 defaults write com.apple.dock tilesize -int 16
 
