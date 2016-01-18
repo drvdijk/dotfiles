@@ -267,7 +267,7 @@ defaults write com.apple.finder FXInfoPanesExpanded -dict \
 ###############################################################################
 
 # Short delay when revealing dock when hidden
-defaults write com.apple.dock autohide-time-modifier -float 0.15;
+defaults write com.apple.dock autohide-time-modifier -float 0.5
 
 # Position the dock on the left side
 defaults write com.apple.Dock orientation -string left
