@@ -1,0 +1,3 @@
+sorendition Wk
+hardstatus alwayslastline '%{= kg}[ %{G}%H %{B}%l %{g}][ %{= kw}%?%-w%?%{r}(%{W}%n %t%?(%u)%?%{r})%{w}%?%+w%?%?%= %{g}][%{B} %y/%m/%d %{W}%c:%s %{g}]'
+defscrollback 5000
