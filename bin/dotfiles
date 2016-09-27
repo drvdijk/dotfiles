@@ -14,15 +14,15 @@ SUB_COMMAND_NAME=$2
 sub_help () {
     echo "Usage: $(basename $0) <command>"
     echo "Commands:"
-    echo "   help                 This help message"
-    echo "   bootstrap            Bootstrap the dotfiles"
-    echo "   gitconfig            Setup git configuration"
-    echo "   install <x>          Install package x"
-    echo "   install homebrew     Install homebrew"
-    echo "   install cask         Install homebrew cask (includes homebrew)"
-    echo "   install mackup       Install mackup & restore config (requires/installs homebrew & cask)"
-    echo "   install osx-defaults Install reasonable OS X defaults"
-    echo "   install osx          Install all osx stuff (defaults, homebrew, cask, ...)"
+    echo "   help                   This help message"
+    echo "   bootstrap              Bootstrap the dotfiles"
+    echo "   gitconfig              Setup git configuration"
+    echo "   install <x>            Install package x"
+    echo "   install homebrew       Install homebrew"
+    echo "   install cask           Install homebrew cask (includes homebrew)"
+    echo "   install mackup         Install mackup & restore config (requires/installs homebrew & cask)"
+    echo "   install macos-defaults Install reasonable macOS defaults"
+    echo "   install macos          Install all macOS stuff (defaults, homebrew, cask, ...)"
 }
 
 
