@@ -54,7 +54,7 @@ defaults write -g com.apple.sound.beep.feedback -integer 0
 defaults write -g AppleEnableMenuBarTransparency -bool false
 
 # Enable shortcut to switch between dark and light mode (control+option+command+T)
-sudo defaults write -g _HIEnableThemeSwitchHotKey -bool true
+sudo defaults write /Library/Preferences/.GlobalPreferences.plist _HIEnableThemeSwitchHotKey -bool true
 
 # Set appearance to Graphite
 defaults write -g AppleAquaColorVariant -int 6
