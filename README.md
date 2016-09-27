@@ -14,11 +14,11 @@ On a clean machine (either Mac or Linux), clone this git repo:
 
 This step should not install any software, but just link dotfiles. Afterwards you'd run (eg):
 
-    ~/.dotfiles/bin/dotfiles install osx
+    ~/.dotfiles/bin/dotfiles install macos
 
 Or just install parts, eg:
 
-    ~/.dotfiles/bin/dotfiles install osx-defaults
+    ~/.dotfiles/bin/dotfiles install macos-defaults
     ~/.dotfiles/bin/dotfiles install brew
     ~/.dotfiles/bin/dotfiles install cask
     ~/.dotfiles/bin/dotfiles install mackup
