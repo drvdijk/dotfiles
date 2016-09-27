@@ -53,8 +53,8 @@ defaults write -g com.apple.sound.beep.feedback -integer 0
 # Disable menu bar transparency
 defaults write -g AppleEnableMenuBarTransparency -bool false
 
-# Set black menu bar by default in Yosemite
-sudo defaults write -g AppleInterfaceStyle Dark
+# Enable shortcut to switch between dark and light mode (control+option+command+T)
+sudo defaults write -g _HIEnableThemeSwitchHotKey -bool true
 
 # Set appearance to Graphite
 defaults write -g AppleAquaColorVariant -int 6
