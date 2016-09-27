@@ -6,8 +6,8 @@ source "$( cd "$( dirname "${BASH_SOURCE[0]}" )/../bin" && pwd )"/lib.sh
 # Get current directory
 CURDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# osx-defaults
-$CURDIR/osx-defaults.sh
+# macos-defaults
+$CURDIR/macos-defaults.sh
 
 # homebrew
 $CURDIR/homebrew.sh
