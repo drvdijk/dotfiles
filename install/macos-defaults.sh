@@ -18,6 +18,10 @@ require_sudo
 
 bot "Let's set some reasonable OS X defaults!"
 
+# Close any open System Preferences panes, to prevent them from overriding
+# settings we’re about to change
+osascript -e 'tell application "System Preferences" to quit'
+
 ###############################################################################
 # General UI/UX                                                               #
 ###############################################################################
@@ -81,9 +85,6 @@ defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
 # Restart automatically if the computer freezes
 sudo systemsetup -setrestartfreeze on
 
-# Check for software updates daily, not just once per week
-defaults write com.apple.SoftwareUpdate ScheduleFrequency -int 1
-
 # Disable smart quotes as they’re annoying when typing code
 defaults write -g NSAutomaticQuoteSubstitutionEnabled -bool false
 
@@ -133,11 +134,11 @@ defaults write -g AppleKeyboardUIMode -int 2
 # Disable press-and-hold for keys in favor of key repeat.
 defaults write -g ApplePressAndHoldEnabled -bool false
 
+# Note OS X Sierra issues: https://github.com/mathiasbynens/dotfiles/commit/5e2360b8df0dfa50bc42c566b22fccbc846d5cf3
 # Set a blazingly fast keyboard repeat rate
-defaults write -g KeyRepeat -int 0
-
+defaults write -g KeyRepeat -int 1
 # Set a shorter Delay until key repeat
-defaults write NSGlobalDomain InitialKeyRepeat -int 12
+defaults write NSGlobalDomain InitialKeyRepeat -int 10
 
 # Set language and text formats
 # Note: if you’re in the US, replace `EUR` with `USD`, `Centimeters` with
@@ -328,6 +329,13 @@ defaults write com.apple.dock wvous-bl-modifier -int 0
 defaults write com.apple.dock persistent-apps -array-add '{ "tile-type" = "spacer-tile"; }'
 
 ###############################################################################
+# Time Machine                                                                #
+###############################################################################
+
+# Prevent Time Machine from prompting to use new hard drives as backup volume
+defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
+
+###############################################################################
 # TextEdit, Disk Utility, and Messages                                        #
 ###############################################################################
 
@@ -344,6 +352,34 @@ defaults write com.apple.DiskUtility advanced-image-options -bool true
 # Disable smart quotes as it’s annoying for messages that contain code
 defaults write com.apple.messageshelper.MessageController SOInputLineSettings -dict-add "automaticQuoteSubstitutionEnabled" -bool false
 
+###############################################################################
+# Mac App Store                                                               #
+###############################################################################
+
+# Enable the automatic update check
+defaults write com.apple.SoftwareUpdate AutomaticCheckEnabled -bool true
+
+# Check for software updates daily, not just once per week
+defaults write com.apple.SoftwareUpdate ScheduleFrequency -int 1
+
+# Download newly available updates in background
+defaults write com.apple.SoftwareUpdate AutomaticDownload -int 1
+
+# Install System data files & security updates
+defaults write com.apple.SoftwareUpdate CriticalUpdateInstall -int 1
+
+# Turn off app auto-update
+defaults write com.apple.commerce AutoUpdate -bool false
+
+# Do not allow the App Store to reboot machine on macOS updates
+defaults write com.apple.commerce AutoUpdateRestartRequired -bool false
+
+###############################################################################
+# Photos                                                                      #
+###############################################################################
+
+# Prevent Photos from opening automatically when devices are plugged in
+defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true
 
 ###############################################################################
 # Kill affected applications                                                  #
