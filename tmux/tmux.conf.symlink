@@ -1,0 +1,5 @@
+set-option -g prefix C-a
+bind-key C-a last-window
+bind-key a send-prefix
+set -g base-index 1
+
