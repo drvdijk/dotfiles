@@ -7,8 +7,12 @@
 # Load libs
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../bin/lib.sh
 
-# Check OS X
+# Check OS X & sudo
 require_osx
+require_sudo
+
+bot "Running software updates"
+sudo softwareupdate -i -a
 
 # Install mas
 bot "Installing mas (Mac App Store command line utility)"
