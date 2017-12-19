@@ -39,12 +39,6 @@ if [ ! -z $computer_name ]; then
     ok
 fi
 
-# not disabling Gate Keeper anymore, let's find out where that gives problems!
-## Disable OS X Gate Keeper, (you'll be able to install any app you want from here on, not just Mac App Store apps)
-#sudo spctl --master-disable
-#sudo defaults write /var/db/SystemPolicy-prefs.plist enabled -string no
-#defaults write com.apple.LaunchServices LSQuarantine -bool false
-
 # Disable the sound effects on boot
 sudo nvram SystemAudioVolume=" "
 
@@ -103,6 +97,43 @@ defaults write com.apple.systemuiserver menuExtras -array \
     "/System/Library/CoreServices/Menu Extras/Volume.menu" \
     "/System/Library/CoreServices/Menu Extras/Displays.menu" \
     "/System/Library/CoreServices/Menu Extras/TimeMachine.menu"
+
+##############################################################################
+# Security                                                                   #
+##############################################################################
+# Based on:
+# https://github.com/atomantic/dotfiles/blob/master/install.sh
+# https://github.com/drduh/macOS-Security-and-Privacy-Guide
+# https://benchmarks.cisecurity.org/tools2/osx/CIS_Apple_OSX_10.12_Benchmark_v1.0.0.pdf
+
+# Enable firewall. Possible values:
+#   0 = off
+#   1 = on for specific sevices
+#   2 = on for essential services
+sudo defaults write /Library/Preferences/com.apple.alf globalstate -int 1
+
+# Disable remote apple events
+sudo systemsetup -setremoteappleevents off
+
+# Disable remote login
+sudo systemsetup -setremotelogin off
+
+# Disable wake-on modem
+sudo systemsetup -setwakeonmodem off
+
+# Disable wake-on LAN
+sudo systemsetup -setwakeonnetworkaccess off
+
+# Disable guest account login
+sudo defaults write /Library/Preferences/com.apple.loginwindow GuestEnabled -bool false
+
+# not disabling Gate Keeper anymore, let's find out where that gives problems!
+## Disable OS X Gate Keeper, (you'll be able to install any app you want from here on, not just Mac App Store apps)
+#sudo spctl --master-disable
+#sudo defaults write /var/db/SystemPolicy-prefs.plist enabled -string no
+
+# Disable the “Are you sure you want to open this application?” dialog
+defaults write com.apple.LaunchServices LSQuarantine -bool false
 
 ###############################################################################
 # Trackpad, mouse, keyboard, Bluetooth accessories, and input                 #
