@@ -49,4 +49,3 @@ echo $(which zsh) | sudo tee -a /etc/shells
 
 bot "formulas brewed"
 
-exit 0
