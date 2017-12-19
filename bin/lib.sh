@@ -63,7 +63,7 @@ function require_osx() {
 
 function require_brew() {
     if test ! $(which brew); then
-        $DOTFILES_DIR/install/homebrew.sh
+        $DOTFILES_DIR/homebrew/homebrew.sh
     fi
     running "brew $1 $2"
     brew list $1 > /dev/null 2>&1 | true
