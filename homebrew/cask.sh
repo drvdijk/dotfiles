@@ -27,7 +27,6 @@ require_cask 1password
 require_cask adobe-photoshop-lightroom
 require_cask bartender
 require_cask caffeine
-#require_cask daisydisk  TODO via MAS
 require_cask dash
 require_cask dropbox
 #require_cask flash-player
