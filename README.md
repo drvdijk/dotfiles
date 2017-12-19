@@ -1,30 +1,28 @@
 # drvdijk dotfiles
 
-My dotfiles, currently heavily under development (eg bash profile isn't even in here).
+My dotfiles, probably never finished and ever changing (eg bash profile isn't even in there).
 
-## Idea (wip)
+## Idea
 
 On a clean machine (either Mac or Linux), clone this git repo:
 
     git clone --recursive https://github.com/drvdijk/dotfiles.git ~/.dotfiles
     
- And run setup.sh
+And run setup.sh (this step does not install any software, but just links dotfiles from the repo into the home dir):
  
     ~/.dotfiles/setup.sh
 
-This step should not install any software, but just link dotfiles. Afterwards you'd run (eg):
-
-    ~/.dotfiles/bin/dotfiles install macos
-
-Or just install parts, eg:
+Afterwards you can run various install scripts:
 
     ~/.dotfiles/bin/dotfiles install macos-defaults
-    ~/.dotfiles/bin/dotfiles install brew
+    ~/.dotfiles/bin/dotfiles install homebrew
     ~/.dotfiles/bin/dotfiles install cask
     ~/.dotfiles/bin/dotfiles install mackup
     ~/.dotfiles/bin/dotfiles install private
 
-(todo here: add the ~/.dotfiles/bin to the path through the bash or zsh profiles)
+Todo's here:
+* add the ~/.dotfiles/bin to the path through the bash or zsh profiles
+* install all in one go (scan folders for install.sh scripts)
 
 ### dotfiles
 
