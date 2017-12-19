@@ -112,17 +112,18 @@ defaults write com.apple.systemuiserver menuExtras -array \
 #   2 = on for essential services
 sudo defaults write /Library/Preferences/com.apple.alf globalstate -int 1
 
-# Disable remote apple events
-sudo systemsetup -setremoteappleevents off
-
-# Disable remote login
-sudo systemsetup -setremotelogin off
-
-# Disable wake-on modem
-sudo systemsetup -setwakeonmodem off
-
-# Disable wake-on LAN
-sudo systemsetup -setwakeonnetworkaccess off
+# This part is disabled for now, as it doesn't seem to be supported by default
+## Disable remote apple events
+#sudo systemsetup -setremoteappleevents off
+#
+## Disable remote login
+#sudo systemsetup -setremotelogin off
+#
+## Disable wake-on modem
+#sudo systemsetup -setwakeonmodem off
+#
+## Disable wake-on LAN
+#sudo systemsetup -setwakeonnetworkaccess off
 
 # Disable guest account login
 sudo defaults write /Library/Preferences/com.apple.loginwindow GuestEnabled -bool false
