@@ -24,7 +24,7 @@ brew tap caskroom/cask --full
 # Apps!
 action "installing apps..."
 require_cask 1password
-#require_cask adobe-photoshop-lightroom # this is lightroom 5, 6 is not available through caskroom
+require_cask adobe-photoshop-lightroom
 require_cask bartender
 require_cask caffeine
 #require_cask daisydisk  TODO via MAS
@@ -48,11 +48,6 @@ require_cask spotify
 require_cask the-unarchiver
 #require_cask virtualbox # loads kernel module, TODO figure out how to do this nicely automatically
 require_cask vlc
-
-## Quicklook plugins
-# Disabled: betterzipql is integrated in betterzip nowadays, and not available standalone anymore :(
-#action "installing quicklook plugins..."
-#require_cask betterzipql
 
 bot "All done with these lovely apps!"
 
