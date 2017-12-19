@@ -17,12 +17,10 @@ sub_help () {
     echo "   help                   This help message"
     echo "   bootstrap              Bootstrap the dotfiles"
     echo "   gitconfig              Setup git configuration"
-    echo "   install <x>            Install package x"
-    echo "   install homebrew       Install homebrew"
-    echo "   install cask           Install homebrew cask (includes homebrew)"
+    echo "   install macos          Install reasonable macOS defaults"
+    echo "   install homebrew       Install homebrew & cask"
     echo "   install mackup         Install mackup & restore config (requires/installs homebrew & cask)"
-    echo "   install macos-defaults Install reasonable macOS defaults"
-    echo "   install macos          Install all macOS stuff (defaults, homebrew, cask, ...)"
+    echo "   install <x>            Install package x"
 }
 
 
@@ -146,7 +144,7 @@ sub_gitconfig () {
 }
 
 sub_install () {
-    local SCRIPT="${DOTFILES_DIR}/install/${SUB_COMMAND_NAME}.sh"
+    local SCRIPT="${DOTFILES_DIR}/${SUB_COMMAND_NAME}/install.sh"
     [ -f "$SCRIPT" ] && source "$SCRIPT" || error "Unable to find script to install ${SUB_COMMAND_NAME}"
 }
 
