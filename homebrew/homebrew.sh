@@ -33,19 +33,16 @@ ok "brew upgrade..."
 # Install other common packages
 action "installing packages..."
 require_brew coreutils
-if test ! -e /usr/local/bin/tac; then
-    action "linking gtac to tac"
-    ln -s /usr/local/bin/gtac /usr/local/bin/tac
-fi
 require_brew findutils
-#require_brew kdiff3
 require_brew trash
 require_brew wget  --with-iri
 require_brew tree
 
 # ZSH, and add it to the shells list
 require_brew zsh
-echo $(which zsh) | sudo tee -a /etc/shells
+if [[ $(cat /etc/shells | grep $(which zsh) | wc -c) -eq 0 ]]; then
+    echo $(which zsh) | sudo tee -a /etc/shells
+fi
 
 bot "formulas brewed"
 
