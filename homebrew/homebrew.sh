@@ -34,9 +34,10 @@ ok "brew upgrade..."
 action "installing packages..."
 require_brew coreutils
 require_brew findutils
+require_brew mas
 require_brew trash
-require_brew wget  --with-iri
 require_brew tree
+require_brew wget  --with-iri
 
 # ZSH, and add it to the shells list
 require_brew zsh
