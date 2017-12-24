@@ -35,6 +35,7 @@ action "installing packages..."
 require_brew coreutils
 require_brew findutils
 require_brew mas
+require_brew rclone
 require_brew trash
 require_brew tree
 require_brew wget  --with-iri
