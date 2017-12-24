@@ -25,6 +25,7 @@ brew tap caskroom/cask --full
 action "installing apps..."
 require_cask 1password
 require_cask adobe-photoshop-lightroom
+require_cask apptivate
 require_cask authy
 require_cask bartender
 require_cask caffeine
@@ -33,6 +34,7 @@ require_cask dropbox
 #require_cask flash-player
 require_cask firefox
 require_cask forklift
+require_casl franz
 require_cask google-chrome
 require_cask istat-menus
 require_cask iterm2
