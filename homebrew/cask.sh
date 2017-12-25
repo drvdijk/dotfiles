@@ -34,7 +34,7 @@ require_cask dropbox
 #require_cask flash-player
 require_cask firefox
 require_cask forklift
-require_casl franz
+require_cask franz
 require_cask google-chrome
 require_cask istat-menus
 require_cask iterm2
