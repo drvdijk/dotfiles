@@ -36,6 +36,7 @@ require_cask firefox
 require_cask forklift
 require_cask franz
 require_cask google-chrome
+require_cask gpg-suite
 require_cask istat-menus
 require_cask iterm2
 require_cask kdiff3
@@ -44,7 +45,7 @@ require_cask macvim
 #require_cask skitch
 require_cask sizeup
 #require_cask silverlight
-require_cask skype
+#require_cask skype
 require_cask sourcetree
 require_cask spotify
 require_cask the-unarchiver
