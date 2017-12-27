@@ -6,7 +6,7 @@ bash
 caffeine
 dash
 flycut
-forklift-2
+forklift-3
 gnupg
 intellijidea-2016.3
 istat-menus-6
@@ -20,4 +20,4 @@ skype
 ssh
 
 private
-private-files
+#private-files
