@@ -1,0 +1,67 @@
+# Cask directory for applications
+cask_args appdir: "/Applications"
+
+# Taps
+tap "caskroom/cask"
+# or (maybe):
+# tap "caskroom/cask", args: ["--full"]
+tap "caskroom/versions"
+tap "homebrew/bundle"
+tap "homebrew/core"
+
+# Dependencies
+brew "mas"
+
+# Shells
+brew "zsh"
+brew "bash"
+
+# CLI
+brew "coreutils"
+brew "findutils"
+brew "mackup"
+brew "rclone"
+brew "trash"
+brew "tree"
+brew "watch"
+brew "wget"
+
+# GUI applications
+cask "1password"
+cask "adobe-photoshop-lightroom"
+cask "apptivate"
+cask "atom"
+cask "authy"
+cask "bartender"
+cask "caffeine"
+cask "dash"
+cask "dropbox"
+cask "firefox"
+cask "forklift"
+cask "franz"
+cask "google-chrome"
+cask "gpg-suite"
+cask "iina"
+cask "istat-menus"
+cask "iterm2"
+cask "kdiff3"
+cask "macvim"
+cask "rocket"
+cask "sizeup"
+cask "skype"
+cask "sourcetree"
+cask "spotify"
+cask "the-unarchiver"
+# disabled
+# cask "flash-player"
+# cask "sequel-pro"
+# cask "skitch"
+# cask "silverlight"
+# cask "skype"
+#cask virtualbox # loads kernel module, TODO figure out how to do this nicely automatically
+
+# MAS applications
+mas "Airmail 3", id: 918858936
+mas "DaisyDisk", id: 411643860
+mas "Flycut", id: 442160987
+mas "Wunderlist", id: 410628904
