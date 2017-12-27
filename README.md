@@ -1,22 +1,22 @@
 # drvdijk dotfiles
 
-My dotfiles, probably never finished and ever changing (eg bash profile isn't even in there).
+My dotfiles, probably never finished and ever changing
 
 ## Idea
 
 On a clean machine (either Mac or Linux), clone this git repo:
 
     git clone --recursive https://github.com/drvdijk/dotfiles.git ~/.dotfiles
-    
+
 And run setup.sh (this step does not install any software, but just links dotfiles from the repo into the home dir):
- 
+
     ~/.dotfiles/setup.sh
 
 Afterwards you can run various install scripts:
 
-    ~/.dotfiles/bin/dotfiles install macos-defaults
+    ~/.dotfiles/bin/dotfiles install macos
     ~/.dotfiles/bin/dotfiles install homebrew
-    ~/.dotfiles/bin/dotfiles install cask
+    ~/.dotfiles/bin/dotfiles install mas
     ~/.dotfiles/bin/dotfiles install mackup
     ~/.dotfiles/bin/dotfiles install private
 
@@ -44,10 +44,12 @@ Setting the shell to zsh for the current user:
 * https://github.com/webpro/dotfiles/blob/master/bin/dotfiles
 * https://github.com/atomantic/dotfiles
 * https://github.com/ndhoule/dotfiles
+* https://github.com/joeyhoer/starter
 
 ## To do
 
+* switch over to Brewfile
+* gitconfig with pgp key
 * zsh
 * bash profile
 * heaps more
-
