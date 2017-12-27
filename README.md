@@ -16,7 +16,6 @@ Afterwards you can run various install scripts:
 
     ~/.dotfiles/bin/dotfiles install macos
     ~/.dotfiles/bin/dotfiles install homebrew
-    ~/.dotfiles/bin/dotfiles install mas
     ~/.dotfiles/bin/dotfiles install mackup
     ~/.dotfiles/bin/dotfiles install private
 
