@@ -33,16 +33,6 @@ sudo defaults write /Library/Preferences/.GlobalPreferences.plist _HIEnableTheme
 # Ask to keep changes when closing documents
 defaults write -g NSCloseAlwaysConfirmsChanges -bool true
 
-# Increase window resize speed for Cocoa applications
-# TODO goes in other.sh
-defaults write -g NSWindowResizeTime -float 0.001
-
-# Expand save panel by default
-# TODO goes in other.sh
-defaults write -g NSNavPanelExpandedStateForSaveMode -bool true
-# TODO goes in other.sh
-defaults write -g NSNavPanelExpandedStateForSaveMode2 -bool true
-
 # Save to disk (not to iCloud) by default
 # TODO goes in icloud.sh
 defaults write -g NSDocumentSaveNewDocumentsToCloud -bool false
@@ -66,18 +56,6 @@ defaults write -g NSAutomaticQuoteSubstitutionEnabled -bool false
 
 # Disable smart dashes as they’re annoying when typing code
 defaults write -g NSAutomaticDashSubstitutionEnabled -bool false
-
-# Display ASCII control characters using caret notation in standard text views
-# Try e.g. `cd /tmp; unidecode "\x{0000}" > cc.txt; open -e cc.txt`
-defaults write -g NSTextShowsControlCharacters -bool true
-
-# Select which items to show in the menu bar (unrelated to what Bartender hides)
-defaults write com.apple.systemuiserver menuExtras -array \
-    "/System/Library/CoreServices/Menu Extras/Battery.menu" \
-    "/System/Library/CoreServices/Menu Extras/AirPort.menu" \
-    "/System/Library/CoreServices/Menu Extras/Volume.menu" \
-    "/System/Library/CoreServices/Menu Extras/Displays.menu" \
-    "/System/Library/CoreServices/Menu Extras/TimeMachine.menu"
 
 ##############################################################################
 # Security                                                                   #
@@ -184,16 +162,6 @@ defaults write -g NSAutomaticSpellingCorrectionEnabled -bool false
 # Require password 5 seconds after sleep or screen saver begins
 defaults write com.apple.screensaver askForPassword -int 1
 defaults write com.apple.screensaver askForPasswordDelay -int 5
-
-# Save screenshots to the desktop
-defaults write com.apple.screencapture location -string "${HOME}/Desktop"
-
-# Save screenshots in PNG format (other options: BMP, GIF, JPG, PDF, TIFF)
-defaults write com.apple.screencapture type -string "png"
-
-# Disable shadow in screenshots
-defaults write com.apple.screencapture disable-shadow -bool true
-
 
 ###############################################################################
 # Finder                                                                      #
