@@ -34,7 +34,8 @@ function set_prefs {
 
 # Sources all the preference files
 function source_prefs {
-  for file in "${PREF_FILES[@]}"; do
+  for pref_file in "${PREF_FILES[@]}"; do
+    file=$( dirname "${BASH_SOURCE[0]}" )/$pref_file
     [ -r "$file" ] && [ -f "$file" ] && source "$file"
   done
 }
@@ -111,7 +112,7 @@ system_preferences=(
   app-store
   # network
   bluetooth
-  sharing
+  sharing #DONE
 
   users-groups
   # parental-controls
@@ -158,6 +159,10 @@ set_prefs google-chrome "Google Chrome"
 set_prefs qlcolorcode "Quick Look"
 set_prefs sublime-text "Sublime Text"
 set_prefs transmission "Transmission"
+
+# Close any open System Preferences panes, to prevent them from overriding
+# settings we’re about to change
+osascript -e 'tell application "System Preferences" to quit'
 
 # Run
 get_open_affected_apps

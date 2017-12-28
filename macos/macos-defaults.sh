@@ -16,8 +16,6 @@ source "$( cd "$( dirname "${BASH_SOURCE[0]}" )/../bin" && pwd )"/lib.sh
 require_osx
 require_sudo
 
-bot "Let's set some reasonable OS X defaults!"
-
 # Close any open System Preferences panes, to prevent them from overriding
 # settings we’re about to change
 osascript -e 'tell application "System Preferences" to quit'
@@ -26,18 +24,7 @@ osascript -e 'tell application "System Preferences" to quit'
 # General UI/UX                                                               #
 ###############################################################################
 
-action "Computer name for this mac"
-echo -e "Enter the computer name you want to use for this Mac (empty to skip):"
-read computer_name
-if [ ! -z $computer_name ]; then
-	# Set computer name (as done via System Preferences → Sharing)
-    running "Setting computer name"
-	sudo scutil --set ComputerName "$computer_name"
-	sudo scutil --set HostName "$computer_name"
-	sudo scutil --set LocalHostName "$computer_name"
-	sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "$computer_name"
-    ok
-fi
+### TODO Came to here in the macos-defaults.sh file while splitting it up
 
 # Disable the sound effects on boot
 sudo nvram SystemAudioVolume=" "
