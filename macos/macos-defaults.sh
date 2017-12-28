@@ -63,31 +63,17 @@ defaults write -g NSCloseAlwaysConfirmsChanges -bool true
 # Trackpad, mouse, keyboard, Bluetooth accessories, and input                 #
 ###############################################################################
 
-### TODO Came to here in the macos-defaults.sh file while splitting it up
-
-# Trackpad: enable tap to click for this user and for the login screen
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
-#defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
-defaults -currentHost write -g com.apple.mouse.tapBehavior -int 1
-defaults write -g com.apple.mouse.tapBehavior -int 1
-
-# Tap with two fingers to emulate right click
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadRightClick -bool true
-
 # Enable three finger tap (look up)
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerTapGesture -int 2
-
-# Enable three finger drag
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool true
-defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -bool true
 
 # Enable mouse right-click
 defaults write com.apple.driver.AppleBluetoothMultitouch.mouse MouseButtonMode "TwoButton"
 defaults write com.apple.driver.AppleBluetoothMultitouch.mouse MouseOneFingerDoubleTapGesture -bool true
 
-# Set trackpad & mouse speed to a reasonable number
-defaults write -g com.apple.trackpad.scaling 1.5
+# Set <s>trackpad &</s> mouse speed to a reasonable number
 defaults write -g com.apple.mouse.scaling 1.5
+
+### TODO Came to here in the macos-defaults.sh file while splitting it up
 
 # Set language and text formats
 # Note: if you’re in the US, replace `EUR` with `USD`, `Centimeters` with
