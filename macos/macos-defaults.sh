@@ -73,50 +73,20 @@ defaults write com.apple.driver.AppleBluetoothMultitouch.mouse MouseOneFingerDou
 # Set <s>trackpad &</s> mouse speed to a reasonable number
 defaults write -g com.apple.mouse.scaling 1.5
 
-### TODO Came to here in the macos-defaults.sh file while splitting it up
-
 ###############################################################################
 # Dock, Dashboard, and hot corners                                            #
 ###############################################################################
 
-# Short delay when revealing dock when hidden
-defaults write com.apple.dock autohide-time-modifier -float 0.5
-
-# Position the dock on the left side
-defaults write com.apple.Dock orientation -string left
-
-# Set the icon size of Dock items to 16 pixels
-defaults write com.apple.dock tilesize -int 16
-
-# Enable dock magnification
-defaults write com.apple.dock magnification -boolean true
-
-# Set dock magnification size
-defaults write com.apple.dock largesize 100.0
-
-# Change minimize/maximize window effect
-defaults write com.apple.dock mineffect -string "scale"
-
-# Minimize windows into their application’s icon
-defaults write com.apple.dock minimize-to-application -bool true
-
-# Enable spring loading for all Dock items
-defaults write com.apple.dock enable-spring-load-actions-on-all-items -bool true
-
-# Show indicator lights for open applications in the Dock
-defaults write com.apple.dock show-process-indicators -bool true
-
 # Speed up Mission Control animations
 defaults write com.apple.dock expose-animation-duration -float 0.1
+
+### TODO Came to here in the macos-defaults.sh file while splitting it up
 
 # Don’t show Dashboard as a Space
 defaults write com.apple.dock dashboard-in-overlay -bool true
 
 # Don’t automatically rearrange Spaces based on most recent use
 defaults write com.apple.dock mru-spaces -bool false
-
-# Make Dock icons of hidden applications translucent
-defaults write com.apple.dock showhidden -bool true
 
 # Hot corners
 # Possible values:
