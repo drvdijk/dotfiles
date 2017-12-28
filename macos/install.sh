@@ -40,6 +40,22 @@ function source_prefs {
   done
 }
 
+# Quit affected applications
+function quit_apps {
+  for app in "${AFFECTED_APPS[@]}"; do
+    case "$app" in
+      'Quick Look')
+        # Restart Quick Look
+        qlmanage -r
+        ;;
+      *)
+        killall "$app" &>/dev/null
+        # osascript -e "tell application \"${app}\" to quit"
+        ;;
+    esac
+  done
+}
+
 # Check for open application
 function get_open_affected_apps {
   open_apps=()
@@ -55,25 +71,11 @@ function get_open_affected_apps {
   # Print the open apps in columns
   printf -- '%s\n' "${open_apps[@]}" | column -x
 
-  echo "Would you like to quit these apps now? [Y/n] "
-  echo "TODO these apps should then be quit ... Please do so manually for now.."
-  read -p ""
-}
-
-# Quit affected applications
-function quit_apps {
-  for app in "${AFFECTED_APPS[@]}"; do
-    case "$app" in
-      'Quick Look')
-        # Restart Quick Look
-        qlmanage -r
-        ;;
-      *)
-        killall "$app" &>/dev/null
-        # osascript -e "tell application \"${app}\" to quit"
-        ;;
-    esac
-  done
+  read -p "Would you like to quit these apps now? [Y/n] " -
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+      quit_apps
+  fi
 }
 
 # Prompt if user wants to restart the machine
@@ -152,13 +154,8 @@ set_prefs terminal # Do not kill "Terminal" - it will stop script execution
 set_prefs textedit "TextEdit"
 
 # Third Party Apps
-set_prefs adobe
-set_prefs divvy "Divvy"
 set_prefs dropbox "Dropbox"
 set_prefs google-chrome "Google Chrome"
-set_prefs qlcolorcode "Quick Look"
-set_prefs sublime-text "Sublime Text"
-set_prefs transmission "Transmission"
 
 # Close any open System Preferences panes, to prevent them from overriding
 # settings we’re about to change
@@ -167,6 +164,5 @@ osascript -e 'tell application "System Preferences" to quit'
 # Run
 get_open_affected_apps
 source_prefs
-quit_apps
 
 prompt_restart
