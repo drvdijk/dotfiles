@@ -4,6 +4,31 @@
 # Security & Privacy
 ###############################################################################
 
+# Previous:
+# Based on:
+# https://github.com/atomantic/dotfiles/blob/master/install.sh
+# https://github.com/drduh/macOS-Security-and-Privacy-Guide
+# https://benchmarks.cisecurity.org/tools2/osx/CIS_Apple_OSX_10.12_Benchmark_v1.0.0.pdf
+
+# This part is disabled for now, as it doesn't seem to be supported by default
+## Disable remote apple events
+#sudo systemsetup -setremoteappleevents off
+#
+## Disable remote login
+#sudo systemsetup -setremotelogin off
+#
+## Disable wake-on modem
+#sudo systemsetup -setwakeonmodem off
+#
+## Disable wake-on LAN
+#sudo systemsetup -setwakeonnetworkaccess off
+
+# not disabling Gate Keeper anymore, let's find out where that gives problems!
+## Disable OS X Gate Keeper, (you'll be able to install any app you want from here on, not just Mac App Store apps)
+#sudo spctl --master-disable
+#sudo defaults write /var/db/SystemPolicy-prefs.plist enabled -string no
+
+
 # Require password almost immediately after sleep or screen saver begins
 defaults write com.apple.screensaver askForPassword -bool true
 defaults write com.apple.screensaver askForPasswordDelay -int 5
