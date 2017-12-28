@@ -75,18 +75,6 @@ defaults write -g com.apple.mouse.scaling 1.5
 
 ### TODO Came to here in the macos-defaults.sh file while splitting it up
 
-# Set language and text formats
-# Note: if you’re in the US, replace `EUR` with `USD`, `Centimeters` with
-# `Inches`, `en_GB` with `en_US`, and `true` with `false`.
-defaults write -g AppleLanguages -array "en" "nl"
-defaults write -g AppleLocale -string "en_NL"
-defaults write -g AppleMeasurementUnits -string "Centimeters"
-defaults write -g AppleMetricUnits -bool false
-
-# Set the timezone; see `sudo systemsetup -listtimezones` for other values
-sudo systemsetup -settimezone "Europe/Amsterdam" > /dev/null
-
-
 ###############################################################################
 # Screen                                                                      #
 ###############################################################################
