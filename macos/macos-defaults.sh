@@ -41,14 +41,6 @@ defaults write -g NSCloseAlwaysConfirmsChanges -bool true
 # https://github.com/drduh/macOS-Security-and-Privacy-Guide
 # https://benchmarks.cisecurity.org/tools2/osx/CIS_Apple_OSX_10.12_Benchmark_v1.0.0.pdf
 
-### TODO Came to here in the macos-defaults.sh file while splitting it up
-
-# Enable firewall. Possible values:
-#   0 = off
-#   1 = on for specific sevices
-#   2 = on for essential services
-sudo defaults write /Library/Preferences/com.apple.alf globalstate -int 1
-
 # This part is disabled for now, as it doesn't seem to be supported by default
 ## Disable remote apple events
 #sudo systemsetup -setremoteappleevents off
@@ -62,20 +54,16 @@ sudo defaults write /Library/Preferences/com.apple.alf globalstate -int 1
 ## Disable wake-on LAN
 #sudo systemsetup -setwakeonnetworkaccess off
 
-# Disable guest account login
-sudo defaults write /Library/Preferences/com.apple.loginwindow GuestEnabled -bool false
-
 # not disabling Gate Keeper anymore, let's find out where that gives problems!
 ## Disable OS X Gate Keeper, (you'll be able to install any app you want from here on, not just Mac App Store apps)
 #sudo spctl --master-disable
 #sudo defaults write /var/db/SystemPolicy-prefs.plist enabled -string no
 
-# Disable the “Are you sure you want to open this application?” dialog
-defaults write com.apple.LaunchServices LSQuarantine -bool false
-
 ###############################################################################
 # Trackpad, mouse, keyboard, Bluetooth accessories, and input                 #
 ###############################################################################
+
+### TODO Came to here in the macos-defaults.sh file while splitting it up
 
 # Trackpad: enable tap to click for this user and for the login screen
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
