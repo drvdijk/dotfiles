@@ -24,42 +24,36 @@ osascript -e 'tell application "System Preferences" to quit'
 # General UI/UX                                                               #
 ###############################################################################
 
-### TODO Came to here in the macos-defaults.sh file while splitting it up
-
-# Disable the sound effects on boot
-sudo nvram SystemAudioVolume=" "
-
-# Disable sound effect when changing volume
-defaults write -g com.apple.sound.beep.feedback -integer 0
-
 # Disable menu bar transparency
 defaults write -g AppleEnableMenuBarTransparency -bool false
 
 # Enable shortcut to switch between dark and light mode (control+option+command+T)
 sudo defaults write /Library/Preferences/.GlobalPreferences.plist _HIEnableThemeSwitchHotKey -bool true
 
-# Set appearance to Graphite
-defaults write -g AppleAquaColorVariant -int 6
-
-# Set sidebar icon size to small
-defaults write -g NSTableViewDefaultSizeMode -int 1
-
 # Ask to keep changes when closing documents
 defaults write -g NSCloseAlwaysConfirmsChanges -bool true
 
 # Increase window resize speed for Cocoa applications
+# TODO goes in other.sh
 defaults write -g NSWindowResizeTime -float 0.001
 
 # Expand save panel by default
+# TODO goes in other.sh
 defaults write -g NSNavPanelExpandedStateForSaveMode -bool true
+# TODO goes in other.sh
 defaults write -g NSNavPanelExpandedStateForSaveMode2 -bool true
 
 # Save to disk (not to iCloud) by default
+# TODO goes in icloud.sh
 defaults write -g NSDocumentSaveNewDocumentsToCloud -bool false
 
 # Expand print panel by default
+# TODO goes in printers-scanners.sh
 defaults write -g PMPrintingExpandedStateForPrint -bool true
+# TODO goes in printers-scanners.sh
 defaults write -g PMPrintingExpandedStateForPrint2 -bool true
+
+### TODO Came to here in the macos-defaults.sh file while splitting it up
 
 # Automatically quit printer app once the print jobs complete
 defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
