@@ -94,9 +94,9 @@ system_preferences=(
   language-region
   security-privacy
   spotlight
-  notifications
+  # notifications
 
-  displays
+  # displays
   energy-saver
   keyboard
   mouse
@@ -107,12 +107,13 @@ system_preferences=(
 
   icloud
   # internet-accounts
-  extensions
   app-store
   # network
-  bluetooth
-  sharing #DONE
+  # bluetooth
+  # extensions
+  sharing
 
+  # touch-id
   users-groups
   # parental-controls
   siri
@@ -136,9 +137,9 @@ done
 
 # Default Apps
 # set_prefs activity-monitor "Activity Monitor"
-set_prefs app-store "App Store"
-# set_prefs calendar "Calendar"
-# set_prefs contacts "Contacts"
+# set_prefs app-store "App Store"
+set_prefs calendar "Calendar"
+set_prefs contacts "Contacts"
 set_prefs disk-utility "Disk Utility"
 set_prefs finder "Finder"
 # set_prefs font-book "Font Book"
