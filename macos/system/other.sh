@@ -4,12 +4,12 @@
 # Other
 ###############################################################################
 
-# Menu bar: hide the Battery, Clock, Time Machine, and User icons
-defaults -currentHost write dontAutoLoad -array \
-    "/System/Library/CoreServices/Menu Extras/Battery.menu" \
-    "/System/Library/CoreServices/Menu Extras/Clock.menu" \
-    "/System/Library/CoreServices/Menu Extras/TimeMachine.menu" \
-    "/System/Library/CoreServices/Menu Extras/User.menu"
+# Menu bar: hide the Battery, Time Machine, and User icons
+# TODO fix this (error: Unexpected argument /System/Library/CoreServices/Menu Extras/Volume.menu; leaving defaults unchanged.)
+# defaults -currentHost write dontAutoLoad -array \
+#     "/System/Library/CoreServices/Menu Extras/TimeMachine.menu" \
+#     "/System/Library/CoreServices/Menu Extras/Volume.menu" \
+#     "/System/Library/CoreServices/Menu Extras/User.menu"
 # Select which items to show in the menu bar (unrelated to what Bartender hides)
 defaults write com.apple.systemuiserver menuExtras -array \
     "/System/Library/CoreServices/Menu Extras/AirPort.menu" \
