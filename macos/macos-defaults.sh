@@ -82,37 +82,6 @@ defaults write com.apple.dock expose-animation-duration -float 0.1
 
 ### TODO Came to here in the macos-defaults.sh file while splitting it up
 
-# Don’t show Dashboard as a Space
-defaults write com.apple.dock dashboard-in-overlay -bool true
-
-# Don’t automatically rearrange Spaces based on most recent use
-defaults write com.apple.dock mru-spaces -bool false
-
-# Hot corners
-# Possible values:
-#  0: no-op
-#  2: Mission Control
-#  3: Show application windows
-#  4: Desktop
-#  5: Start screen saver
-#  6: Disable screen saver
-#  7: Dashboard
-# 10: Put display to sleep
-# 11: Launchpad
-# 12: Notification Center
-# Top left screen corner → Start screen saver
-defaults write com.apple.dock wvous-tl-corner -int 5
-defaults write com.apple.dock wvous-tl-modifier -int 0
-# Bottom left screen corner → Put screen to sleep
-defaults write com.apple.dock wvous-bl-corner -int 10
-defaults write com.apple.dock wvous-bl-modifier -int 0
-
-# Add spacer to the Dock (if there is none yet)
-if [[ $(defaults read com.apple.dock persistent-apps | grep spacer-tile | wc -c) -eq 0 ]]; then
-  defaults write com.apple.dock persistent-apps -array-add '{ "tile-type" = "spacer-tile"; }'
-fi
-
-
 ###############################################################################
 # Safari & WebKit                                                             #
 ###############################################################################
