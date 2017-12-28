@@ -33,20 +33,7 @@ sudo defaults write /Library/Preferences/.GlobalPreferences.plist _HIEnableTheme
 # Ask to keep changes when closing documents
 defaults write -g NSCloseAlwaysConfirmsChanges -bool true
 
-# Save to disk (not to iCloud) by default
-# TODO goes in icloud.sh
-defaults write -g NSDocumentSaveNewDocumentsToCloud -bool false
-
-# Expand print panel by default
-# TODO goes in printers-scanners.sh
-defaults write -g PMPrintingExpandedStateForPrint -bool true
-# TODO goes in printers-scanners.sh
-defaults write -g PMPrintingExpandedStateForPrint2 -bool true
-
 ### TODO Came to here in the macos-defaults.sh file while splitting it up
-
-# Automatically quit printer app once the print jobs complete
-defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
 
 # Restart automatically if the computer freezes
 sudo systemsetup -setrestartfreeze on
