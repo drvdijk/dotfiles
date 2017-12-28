@@ -68,7 +68,7 @@ function get_open_affected_apps {
   # Print the open apps in columns
   printf -- '%s\n' "${open_apps[@]}" | column -x
 
-  read -p "Would you like to quit these apps now? [Y/n] " -
+  read -p "Would you like to quit these apps now? [Y/n] " -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
       quit_apps
