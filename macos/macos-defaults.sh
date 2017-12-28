@@ -33,17 +33,6 @@ sudo defaults write /Library/Preferences/.GlobalPreferences.plist _HIEnableTheme
 # Ask to keep changes when closing documents
 defaults write -g NSCloseAlwaysConfirmsChanges -bool true
 
-### TODO Came to here in the macos-defaults.sh file while splitting it up
-
-# Restart automatically if the computer freezes
-sudo systemsetup -setrestartfreeze on
-
-# Disable smart quotes as they’re annoying when typing code
-defaults write -g NSAutomaticQuoteSubstitutionEnabled -bool false
-
-# Disable smart dashes as they’re annoying when typing code
-defaults write -g NSAutomaticDashSubstitutionEnabled -bool false
-
 ##############################################################################
 # Security                                                                   #
 ##############################################################################
@@ -51,6 +40,8 @@ defaults write -g NSAutomaticDashSubstitutionEnabled -bool false
 # https://github.com/atomantic/dotfiles/blob/master/install.sh
 # https://github.com/drduh/macOS-Security-and-Privacy-Guide
 # https://benchmarks.cisecurity.org/tools2/osx/CIS_Apple_OSX_10.12_Benchmark_v1.0.0.pdf
+
+### TODO Came to here in the macos-defaults.sh file while splitting it up
 
 # Enable firewall. Possible values:
 #   0 = off
@@ -110,23 +101,6 @@ defaults write com.apple.driver.AppleBluetoothMultitouch.mouse MouseOneFingerDou
 defaults write -g com.apple.trackpad.scaling 1.5
 defaults write -g com.apple.mouse.scaling 1.5
 
-# Use all F1, F2, etc. keys as standard function keys
-# does this still make sense with the touch bar?
-defaults write -g com.apple.keyboard.fnState -bool true
-
-# Enable full keyboard access for all controls
-# (e.g. enable Tab in modal dialogs)
-defaults write -g AppleKeyboardUIMode -int 2
-
-# Disable press-and-hold for keys in favor of key repeat.
-defaults write -g ApplePressAndHoldEnabled -bool false
-
-# Note OS X Sierra issues: https://github.com/mathiasbynens/dotfiles/commit/5e2360b8df0dfa50bc42c566b22fccbc846d5cf3
-# Set a blazingly fast keyboard repeat rate
-defaults write -g KeyRepeat -int 2
-# Set a shorter Delay until key repeat
-defaults write NSGlobalDomain InitialKeyRepeat -int 15
-
 # Set language and text formats
 # Note: if you’re in the US, replace `EUR` with `USD`, `Centimeters` with
 # `Inches`, `en_GB` with `en_US`, and `true` with `false`.
@@ -137,9 +111,6 @@ defaults write -g AppleMetricUnits -bool false
 
 # Set the timezone; see `sudo systemsetup -listtimezones` for other values
 sudo systemsetup -settimezone "Europe/Amsterdam" > /dev/null
-
-# Disable auto-correct
-defaults write -g NSAutomaticSpellingCorrectionEnabled -bool false
 
 
 ###############################################################################
