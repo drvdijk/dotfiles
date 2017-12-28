@@ -4,6 +4,9 @@
 # Other
 ###############################################################################
 
+# Ask to keep changes when closing documents
+defaults write -g NSCloseAlwaysConfirmsChanges -bool true
+
 # Menu bar: hide the Battery, Time Machine, and User icons
 # TODO fix this (error: Unexpected argument /System/Library/CoreServices/Menu Extras/Volume.menu; leaving defaults unchanged.)
 # defaults -currentHost write dontAutoLoad -array \

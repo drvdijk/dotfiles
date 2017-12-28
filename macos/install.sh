@@ -19,9 +19,6 @@ require_sudo
 
 bot "Let's set some reasonable OS X defaults!"
 
-# TODO the macos-defaults.sh should become completely obsolete!
-source $(dirname ${BASH_SOURCE[0]})/macos-defaults.sh
-
 # Set global variables
 PREF_FILES=()
 AFFECTED_APPS=()
@@ -102,7 +99,7 @@ system_preferences=(
   displays
   energy-saver
   keyboard
-  # mouse
+  mouse
   trackpad
   printers-scanners
   sound
@@ -138,23 +135,24 @@ for pane in "cfprefsd" "SystemUIServer" "Dock" "SpeechSynthesisServer"; do
 done
 
 # Default Apps
-set_prefs activity-monitor "Activity Monitor"
+# set_prefs activity-monitor "Activity Monitor"
 set_prefs app-store "App Store"
 # set_prefs calendar "Calendar"
-set_prefs contacts "Contacts"
+# set_prefs contacts "Contacts"
 set_prefs disk-utility "Disk Utility"
 set_prefs finder "Finder"
-set_prefs font-book "Font Book"
-set_prefs iwork "Keynote" "Numbers" "Pages"
-set_prefs mail "Mail"
+# set_prefs font-book "Font Book"
+# set_prefs iwork "Keynote" "Numbers" "Pages"
+# set_prefs mail "Mail"
 set_prefs messages "Messages"
-set_prefs quicktime "QuickTime Player"
+set_prefs photos "Photos"
+# set_prefs quicktime "QuickTime Player"
 set_prefs safari "Safari" "WebKit"
 set_prefs terminal # Do not kill "Terminal" - it will stop script execution
 set_prefs textedit "TextEdit"
 
 # Third Party Apps
-set_prefs dropbox "Dropbox"
+# set_prefs dropbox "Dropbox"
 set_prefs google-chrome "Google Chrome"
 
 # Close any open System Preferences panes, to prevent them from overriding
