@@ -23,4 +23,4 @@ defaults write com.apple.digihub com.apple.digihub.cd.picture.appeared -dict act
 defaults write com.apple.digihub com.apple.digihub.dvd.video.appeared  -dict action 1
 
 # Enable the MacBook Air SuperDrive on any Mac
-sudo nvram boot-args="mbasd=1"
+#sudo nvram boot-args="mbasd=1"
