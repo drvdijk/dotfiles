@@ -60,7 +60,7 @@ defaults write com.apple.Safari AutoOpenSafeDownloads -bool false
 # AutoFill using info from my Contacts card
 defaults write com.apple.Safari AutoFillFromAddressBook -bool false
 
-AutoFill user names and passwords
+# AutoFill user names and passwords
 defaults write com.apple.Safari AutoFillPasswords -bool false
 
 # AutoFill credit cards

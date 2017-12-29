@@ -81,7 +81,8 @@ defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
 # defaults write com.apple.finder OpenWindowForNewRemovableDisk    -bool false
 
 # Set icon view settings on desktop and in icon views
-for view in 'Desktop' 'FK_Standard' 'Standard'; do
+#for view in 'Desktop' 'FK_Standard' 'Standard'; do
+for view in 'Desktop' 'Standard'; do
 
     # Item info near icons
     /usr/libexec/PlistBuddy -c "Set :${view}ViewSettings:IconViewSettings:showItemInfo bool true" ~/Library/Preferences/com.apple.finder.plist
