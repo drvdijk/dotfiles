@@ -13,7 +13,7 @@
 # #sudo defaults write /Library/Preferences/com.apple.loginwindow autoLoginUser -string `whoami`
 
 # Allow guests to login to this computer
-sudo defaults write /Library/Preferences/com.apple.loginwindow GuestEnabled -bool false
+#sudo defaults write /Library/Preferences/com.apple.loginwindow GuestEnabled -bool false
 
 # # Show fast user switching menu as:
 # # 0 : Full Name
