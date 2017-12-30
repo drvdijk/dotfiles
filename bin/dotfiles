@@ -136,8 +136,10 @@ sub_gitconfig () {
     read -e git_authorname
     echo -e ' - What is your global git author email?'
     read -e git_authoremail
+    echo -e ' - What is your global git signing key?'
+    read -e git_signingkey
 
-    sed -e "s/AUTHORNAME/$git_authorname/g" -e "s/AUTHOREMAIL/$git_authoremail/g" $DOTFILES_DIR/git/gitconfig.symlink.example > $DOTFILES_DIR/git/gitconfig.symlink
+    sed -e "s/AUTHORNAME/$git_authorname/g" -e "s/AUTHOREMAIL/$git_authoremail/g" -e "s/AUTHORSIGNINGKEY/$git_signingkey/g" $DOTFILES_DIR/git/gitconfig.symlink.example > $DOTFILES_DIR/git/gitconfig.symlink
 
     ok 'gitconfig set up'
   fi
