@@ -4,6 +4,7 @@
 [user]
         name = AUTHORNAME
         email = AUTHOREMAIL
+        signingkey = AUTHORSIGNINGKEY
 [color]
         diff = auto
         status = auto
