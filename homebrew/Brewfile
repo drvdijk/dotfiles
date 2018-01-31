@@ -65,6 +65,7 @@ cask "the-unarchiver"
 # Development (split out?)
 cask "caskroom/versions/java8"
 brew "scala"
+brew "maven"
 cask "intellij-idea-ce"
 cask "sourcetree"
 cask "dash"
