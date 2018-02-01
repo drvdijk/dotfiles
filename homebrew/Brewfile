@@ -70,6 +70,8 @@ cask "intellij-idea-ce"
 cask "sourcetree"
 cask "dash"
 cask "docker"
+cask "kitematic"
+cask "postman"
 
 # MAS applications
 mas "Airmail 3", id: 918858936
