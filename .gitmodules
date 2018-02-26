@@ -1,3 +1,0 @@
-[submodule "zsh/zprezto.symlink"]
-	path = zsh/zprezto.symlink
-	url = https://github.com/sorin-ionescu/prezto.git
