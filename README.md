@@ -6,7 +6,7 @@ My dotfiles, probably never finished and ever changing
 
 On a clean machine (either Mac or Linux), clone this git repo:
 
-    git clone --recursive https://github.com/drvdijk/dotfiles.git ~/.dotfiles
+    git clone https://github.com/drvdijk/dotfiles.git ~/.dotfiles
 
 And run setup.sh (this step does not install any software, but just links dotfiles from the repo into the home dir):
 
@@ -47,8 +47,6 @@ Setting the shell to zsh for the current user:
 
 ## To do
 
-* switch over to Brewfile
-* gitconfig with pgp key
 * zsh
 * bash profile
 * heaps more
