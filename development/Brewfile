@@ -1,0 +1,32 @@
+# Cask directory for applications
+cask_args appdir: "/Applications"
+
+# Taps
+tap "caskroom/cask"
+# or (maybe):
+# tap "caskroom/cask", args: ["--full"]
+tap "caskroom/fonts"
+tap "caskroom/versions"
+tap "homebrew/bundle"
+tap "homebrew/core"
+
+cask "caskroom/versions/java8"
+brew "scala"
+brew "maven"
+brew "gradle"
+brew "gdub"
+brew "groovysdk"
+brew "node"
+cask "intellij-idea-ce"
+#cask "sourcetree" # how did sourcetree become so buggy? :'(
+cask "gitkraken"
+cask "dash"
+cask "dbeaver-community"
+cask "docker"
+cask "kitematic"
+cask "postman"
+
+cask "slack"
+cask "toggl"
+
+brew "jq"
