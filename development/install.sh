@@ -28,6 +28,8 @@ ok "brew updated..."
 brew upgrade
 ok "brew upgraded..."
 
+# Accept xcode developer license
+sudo xcodebuild -license accept
 
 # Install homebrew, cask, and mas stuff from brew file here
 brew bundle --file=$(dirname ${BASH_SOURCE[0]})/Brewfile
