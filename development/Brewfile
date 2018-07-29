@@ -12,21 +12,38 @@ tap "homebrew/core"
 
 cask "caskroom/versions/java8"
 brew "scala"
+brew "sbt"
 brew "maven"
 brew "gradle"
 brew "gdub"
 brew "groovysdk"
 brew "node"
-cask "intellij-idea-ce"
+cask "intellij-idea"
+#cask "intellij-idea-ce"
 #cask "sourcetree" # how did sourcetree become so buggy? :'(
 cask "gitkraken"
-cask "dash"
+#cask "dash"
 cask "dbeaver-community"
 cask "docker"
 cask "kitematic"
 cask "postman"
 
-cask "slack"
-cask "toggl"
+#cask "kafka-tool"
+cask "awscli"
+cask "aws-ecs-cli"
+
+#cask "carthage"
+#cask "gdub"
+#cask "watchman"
+#cask "android-file-transfer"
+#cask "android-studio"
+#cask "drawio"
+
+#cask "slack"
+#cask "toggl"
+cask "rocket-chat"
 
 brew "jq"
+
+mas "Xcode", id: 497799835
+
