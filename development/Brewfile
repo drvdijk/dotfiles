@@ -29,8 +29,8 @@ cask "kitematic"
 cask "postman"
 
 #cask "kafka-tool"
-cask "awscli"
-cask "aws-ecs-cli"
+brew "awscli"
+brew "amazon-ecs-cli"
 
 #cask "carthage"
 #cask "gdub"
