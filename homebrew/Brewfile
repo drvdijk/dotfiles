@@ -51,9 +51,6 @@ cask "gpg-suite"
 cask "iina"
 cask "istat-menus"
 cask "iterm2"
-cask "jadengeller-helium"
-cask "journey"
-cask "microsoft-office"
 cask "rclone-browser"
 cask "sizeup"
 cask "skype"
@@ -71,10 +68,15 @@ cask "tripmode"
 # cask "skitch"
 # cask "silverlight"
 # cask "skype"
+# cask "jadengeller-helium"
+# cask "journey"
+# cask "microsoft-office"
 #cask virtualbox # loads kernel module, TODO figure out how to do this nicely automatically
 
 # MAS applications
-mas "Airmail 3", id: 918858936
+mas "Adze Lite", id: 499527341
+#mas "Airmail 3", id: 918858936
 mas "DaisyDisk", id: 411643860
 mas "Flycut", id: 442160987
-mas "Wunderlist", id: 410628904
+mas "Trello", id: 1278508951
+#mas "Wunderlist", id: 410628904
