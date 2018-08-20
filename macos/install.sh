@@ -154,6 +154,7 @@ set_prefs textedit "TextEdit"
 
 # Third Party Apps
 # set_prefs dropbox "Dropbox"
+set_prefs bartender "Bartender"
 set_prefs google-chrome "Google Chrome"
 
 # Close any open System Preferences panes, to prevent them from overriding
