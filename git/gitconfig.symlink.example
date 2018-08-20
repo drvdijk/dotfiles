@@ -31,4 +31,7 @@
         # Setting to git 2.0 default to surpress warning message
         default = simple
 [alias]
-	up = pull --rebase=preserve
+        up = pull --rebase=preserve
+        # git change-commits GIT_COMMITTER_NAME "old name" "new name"
+        # https://github.com/brauliobo/gitconfig/blob/master/configs/.gitconfig
+        change-commits = "!f() { VAR=$1; OLD=$2; NEW=$3; shift 3; git filter-branch --env-filter \"if [[ \\\"$`echo $VAR`\\\" = '$OLD' ]]; then export $VAR='$NEW'; fi\" $@; }; f "
