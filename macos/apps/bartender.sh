@@ -27,7 +27,8 @@ defaults write com.surteesstudios.Bartender statusBarImageNamed -string "Bartend
 # defaults write com.surteesstudios.Bartender license2HoldersName "..."
 
 # Individual app settings
-defaults delete com.surteesstudios.Bartender appSettings 2>/dev/null
+defaults delete com.surteesstudios.Bartender appSettings 2>/dev/null | true
+
 plutil -insert appSettings -json '{
 	"com.google.Chrome": {
 		"showForUpdates": true,

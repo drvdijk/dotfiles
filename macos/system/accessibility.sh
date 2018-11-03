@@ -16,7 +16,7 @@
 # defaults write com.apple.universalaccess increaseContrast -bool false
 #
 # Reduce transparency (don't reduce transparency)
-defaults write com.apple.universalaccess reduceTransparency -bool false
+#defaults write com.apple.universalaccess reduceTransparency -bool false
 
 #
 # # Shake mouse cursor to locate

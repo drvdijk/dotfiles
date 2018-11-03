@@ -82,10 +82,10 @@ defaults write com.apple.dock show-process-indicators -bool true
 #   Recent/Favorite items stack: '{ "tile-data" = { "list-type" = 1; }; "tile-type" = "recents-tile"; }'
 # Add a spacer to the left of the Dock
 # defaults write com.apple.dock persistent-apps -array-add '{tile-data={}; tile-type="spacer-tile";}'
-# Add spacer to the Dock (if there is none yet)
-if [[ $(defaults read com.apple.dock persistent-apps | grep spacer-tile | wc -c) -eq 0 ]]; then
-  defaults write com.apple.dock persistent-apps -array-add '{ "tile-type" = "spacer-tile"; }'
-fi
+# Add spacer to the Dock (if there is none yet). From Mojave onwards this doens't seem necessary anymore
+#if [[ $(defaults read com.apple.dock persistent-apps | grep spacer-tile | wc -c) -eq 0 ]]; then
+#  defaults write com.apple.dock persistent-apps -array-add '{ "tile-type" = "spacer-tile"; }'
+#fi
 
 
 # Display translucent Dock icons for hidden applications
