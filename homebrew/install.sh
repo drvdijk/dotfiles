@@ -42,6 +42,3 @@ fi
 
 # Remove outdated versions from the cellar
 brew cleanup && brew prune
-
-# Remove outdated cask versions from the cellar
-brew cask cleanup

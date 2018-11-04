@@ -48,5 +48,5 @@ cask "rocket-chat"
 
 brew "jq"
 
-mas "Xcode", id: 497799835
+#mas "Xcode", id: 497799835
 
