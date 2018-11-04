@@ -1,15 +1,11 @@
 [applications_to_sync]
 apptivate
 atom
-caffeine
-dash
 flycut
 forklift-3
 gnupg
 istat-menus-6
 iterm2
-lightroom
-macvim
 rclone
 sizeup
 ssh
