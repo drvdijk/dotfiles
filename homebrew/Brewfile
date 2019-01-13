@@ -40,7 +40,7 @@ cask "caskroom/fonts/font-source-code-pro"
 # GUI applications
 cask "1password"
 cask "apptivate"
-cask "atom"
+#cask "atom"
 cask "authy"
 cask "bartender"
 #cask "caffeine"
