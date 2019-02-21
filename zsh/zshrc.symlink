@@ -22,7 +22,11 @@ export DOTFILES=$HOME/.dotfiles
 #
 
 # Install if not already installed
-source ~/.zplug/init.zsh || { curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh && source ~/.zplug/init.zsh }
+source ~/.zplug/init.zsh || { \
+	curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh && 
+	timeout 5 zsh -c -- 'while [ ! -f ~/.zplug/init.zsh ]; do echo "waiting..." && sleep 1; done' && \
+	source ~/.zplug/init.zsh \
+	}
 
 # zplug "miekg/lean"
 zplug "eendroroy/alien-minimal"
@@ -50,6 +54,13 @@ if ! zplug check --verbose; then
 fi
 
 zplug load
+
+#
+# end zplug
+#
+
+
+
 
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
