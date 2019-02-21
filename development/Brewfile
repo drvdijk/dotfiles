@@ -2,22 +2,23 @@
 cask_args appdir: "/Applications"
 
 # Taps
-tap "caskroom/cask"
+tap "homebrew/cask"
 # or (maybe):
-# tap "caskroom/cask", args: ["--full"]
-tap "caskroom/fonts"
-tap "caskroom/versions"
+# tap "homebrew/cask", args: ["--full"]
+#tap "homebrew/cask-fonts" # not used below
+tap "homebrew/cask-versions"
 tap "homebrew/bundle"
 tap "homebrew/core"
 
-cask "caskroom/versions/java8"
+cask "java8"
 #brew "scala"
 #brew "sbt"
 brew "maven"
 brew "gradle"
 brew "gdub"
 brew "groovysdk"
-#brew "node"
+brew "node"
+brew "graphviz"
 cask "intellij-idea"
 #cask "intellij-idea-ce"
 #cask "sourcetree" # how did sourcetree become so buggy? :'(
@@ -45,6 +46,7 @@ cask "tunnelblick"
 #cask "slack"
 #cask "toggl"
 cask "rocket-chat"
+cask "firefox"
 
 brew "jq"
 

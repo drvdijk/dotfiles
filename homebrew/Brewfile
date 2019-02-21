@@ -2,11 +2,10 @@
 cask_args appdir: "/Applications"
 
 # Taps
-tap "caskroom/cask"
+tap "homebrew/cask"
 # or (maybe):
-# tap "caskroom/cask", args: ["--full"]
-tap "caskroom/fonts"
-tap "caskroom/versions"
+# tap "homebrew/cask", args: ["--full"]
+tap "homebrew/cask-fonts"
 tap "homebrew/bundle"
 tap "homebrew/core"
 
@@ -34,8 +33,8 @@ brew "watch"
 brew "wget"
 
 # Fonts
-cask "caskroom/fonts/font-hack-nerd-font"
-cask "caskroom/fonts/font-source-code-pro"
+cask "font-hack-nerd-font"
+cask "font-source-code-pro"
 
 # GUI applications
 cask "1password"
@@ -50,6 +49,7 @@ cask "rclone-browser"
 cask "sizeup"
 cask "skype"
 cask "spotify"
+cask "sublime-text"
 cask "the-unarchiver"
 #cask "tripmode"
 
