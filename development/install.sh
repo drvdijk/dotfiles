@@ -9,15 +9,7 @@ source "$( cd "$( dirname "${BASH_SOURCE[0]}" )/../bin" && pwd )"/lib.sh
 # Check OS X & sudo
 require_osx
 require_sudo
-
-# Install Homebrew if not installed - brew.sh
-running "checking homebrew"
-if ! hash brew 2>/dev/null; then
-  action "installing homebrew"
-  ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)";
-  # can do full pull instead if specific versions are needed again at some point:
-  # ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" - --full
-fi
+require_homebrew
 
 bot "installing tools via homebrew..."
 # Make sure we’re using the latest Homebrew
@@ -35,4 +27,4 @@ sudo xcodebuild -license accept
 brew bundle --file=$(dirname ${BASH_SOURCE[0]})/Brewfile
 
 # Remove outdated versions from the cellar
-brew cleanup && brew prune
+brew cleanup

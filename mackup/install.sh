@@ -8,6 +8,7 @@
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../bin/lib.sh
 
 require_osx
+require_homebrew
 
 bot "Let's get Mackup up & running!"
 
