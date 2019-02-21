@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# Get dotfiles dir (so run this script from anywhere)
+export DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+
+# Exit immediately if anything exits with a non-zero status.
+set -e
+
 ###
 # some bash library helpers
 # @author Adam Eivy
@@ -16,12 +22,6 @@ COL_BLUE=$ESC_SEQ"34;01m"
 COL_MAGENTA=$ESC_SEQ"35;01m"
 COL_CYAN=$ESC_SEQ"36;01m"
 
-# Get dotfiles dir (so run this script from anywhere)
-export DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
-
-# Exit immediately if anything exits with a non-zero status.
-set -e
-
 function ok() {
     echo -e "$COL_GREEN[ok]$COL_RESET "$1
 }
@@ -31,7 +31,7 @@ function bot() {
 }
 
 function running() {
-    echo -en " ⇒ "$1"..."
+    echo -en "$COL_YELLOW ⇒ $COL_RESET"$1": "
 }
 
 function action() {
@@ -45,6 +45,7 @@ function warn() {
 function error() {
     echo -e "$COL_RED[error]$COL_RESET "$1
 }
+
 
 function require_sudo() {
     [ "$(sudo -n true 2>&1)" != "" ] && bot "I need you to enter your sudo password so I can install some things:"
@@ -61,10 +62,18 @@ function require_osx() {
     fi
 }
 
-function require_brew() {
-    if test ! $(which brew); then
-        $DOTFILES_DIR/homebrew/homebrew.sh
+function require_homebrew() {
+    # Install Homebrew if not installed - brew.sh
+    running "checking homebrew"
+    if ! hash brew 2>/dev/null; then
+        action "installing homebrew"
+        ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)";
+        # can do full pull instead if specific versions are needed again at some point:
+        # ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" - --full
     fi
+}
+
+function require_brew() {
     running "brew $1 $2"
     brew list $1 > /dev/null 2>&1 | true
     if [[ ${PIPESTATUS[0]} != 0 ]]; then
@@ -79,8 +88,6 @@ function require_brew() {
 }
 
 function require_cask() {
-    require_brew
-    brew tap caskroom/cask --full 2>/dev/null
     running "brew cask $1"
     brew cask list $1 > /dev/null 2>&1 | true
     if [[ ${PIPESTATUS[0]} != 0 ]]; then
