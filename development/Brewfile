@@ -49,6 +49,7 @@ cask "rocket-chat"
 cask "firefox"
 
 brew "jq"
+brew "git-flow"
 
 #mas "Xcode", id: 497799835
 
