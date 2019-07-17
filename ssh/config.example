@@ -1,0 +1,7 @@
+Include ~/.ssh/identity
+Host *
+  IgnoreUnknown AddKeysToAgent,UseKeychain
+  UseKeyChain yes
+  AddKeysToAgent yes
+Include ~/Dropbox/sync/.ssh/*
+

@@ -17,9 +17,9 @@ sub_help () {
     echo "   help                   This help message"
     echo "   bootstrap              Bootstrap the dotfiles"
     echo "   gitconfig              Setup git configuration"
+    echo "   sshconfig              Setup ssh config file"
     echo "   install macos          Install reasonable macOS defaults"
     echo "   install homebrew       Install homebrew & cask"
-    echo "   install mackup         Install mackup & restore config (requires/installs homebrew & cask)"
     echo "   install <x>            Install package x"
 }
 
@@ -143,6 +143,17 @@ sub_gitconfig () {
 
     ok 'gitconfig set up'
   fi
+}
+
+sub_sshconfig () {
+  if ! [ -f ~/.ssh/config ]
+  then
+    bot 'SSH config'
+    mkdir -p ~/.ssh
+    chmod 700 ~/.ssh
+    cp $DOTFILES_DIR/ssh/config.example ~/.ssh/config
+  fi
+  # TODO identity file filing, generating key here
 }
 
 sub_install () {

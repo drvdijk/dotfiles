@@ -16,12 +16,7 @@ Afterwards you can run various install scripts:
 
     ~/.dotfiles/bin/dotfiles install macos
     ~/.dotfiles/bin/dotfiles install homebrew
-    ~/.dotfiles/bin/dotfiles install mackup
-    ~/.dotfiles/bin/dotfiles install private
-
-Todo's here:
-* add the ~/.dotfiles/bin to the path through the bash or zsh profiles
-* install all in one go (scan folders for install.sh scripts)
+    ~/.dotfiles/bin/dotfiles install development
 
 ### dotfiles
 
@@ -50,3 +45,5 @@ Setting the shell to zsh for the current user:
 * zsh
 * bash profile
 * heaps more
+* add the `~/.dotfiles/bin` to the path through the bash or zsh profiles
+* install all in one go (scan folders for install.sh scripts)
