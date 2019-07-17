@@ -7,8 +7,9 @@ source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/bin/lib.sh
 
 bot "Let's install some dotfiles!"
 
-# Call dotfiles gitconfig, bootstrap, and help
+# Call dotfiles gitconfig, sshconfig, bootstrap, and help
 $DOTFILES_DIR/bin/dotfiles gitconfig
+$DOTFILES_DIR/bin/dotfiles sshconfig
 $DOTFILES_DIR/bin/dotfiles bootstrap
 
 bot "Setup done, check out dotfiles!"

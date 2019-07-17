@@ -36,12 +36,6 @@ plutil -insert appSettings -json '{
 		"updateDisplayTime": 5,
 		"controlled": 1
 	},
-	"com.lightheadsw.caffeine": {
-		"showForUpdates": true,
-		"popupFix": false,
-		"updateDisplayTime": 5,
-		"controlled": 0
-	},
 	"BatteryExtra": {
 		"showForUpdates": true,
 		"popupFix": false,
@@ -76,12 +70,6 @@ plutil -insert appSettings -json '{
 		"showForUpdates": false,
 		"popupFix": false,
 		"updateDisplayTime": 5,
-		"controlled": 1
-	},
-	"se.cocoabeans.apptivate": {
-		"searchName": "Apptivate",
-		"showForUpdates": true,
-		"updateDisplayTime": 15,
 		"controlled": 1
 	},
 	"com.apple.Spotlight": {
