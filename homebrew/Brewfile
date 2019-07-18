@@ -5,7 +5,9 @@ cask_args appdir: "/Applications"
 tap "homebrew/cask"
 # or (maybe):
 # tap "homebrew/cask", args: ["--full"]
+tap "homebrew/cask-drivers"
 tap "homebrew/cask-fonts"
+tap "homebrew/cask-versions"
 tap "homebrew/bundle"
 tap "homebrew/core"
 
@@ -26,7 +28,6 @@ brew "par2"
 brew "rclone"
 brew "telnet"
 brew "tmux"
-brew "trash"
 brew "tree"
 brew "watch"
 brew "wget"
@@ -44,13 +45,14 @@ cask "gpg-suite"
 cask "iina"
 cask "istat-menus"
 cask "iterm2"
+cask "macpar-deluxe"
 cask "rclone-browser"
 cask "sizeup"
 cask "skype"
 cask "spotify"
 cask "sublime-text"
+cask "sublime-merge"
 cask "the-unarchiver"
-#cask "tripmode"
 
 # disabled
 # cask "adobe-photoshop-lightroom"
@@ -70,6 +72,7 @@ cask "the-unarchiver"
 # cask "authy"
 # cask "caffeine"
 # cask "forklift"
+# cask "tripmode"
 #cask virtualbox # loads kernel module, TODO figure out how to do this nicely automatically
 
 # MAS applications
