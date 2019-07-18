@@ -11,6 +11,7 @@ tap "homebrew/bundle"
 tap "homebrew/core"
 
 #cask "java8"
+cask "adoptopenjdk8"
 #brew "scala"
 #brew "sbt"
 #brew "maven"
