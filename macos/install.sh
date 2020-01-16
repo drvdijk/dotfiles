@@ -46,7 +46,7 @@ function quit_apps {
         qlmanage -r
         ;;
       *)
-        killall "$app" &>/dev/null
+        killall "$app" &>/dev/null || true
         # osascript -e "tell application \"${app}\" to quit"
         ;;
     esac
