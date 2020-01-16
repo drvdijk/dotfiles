@@ -48,10 +48,8 @@ cask "iterm2"
 cask "macpar-deluxe"
 cask "rclone-browser"
 cask "sizeup"
-cask "skype"
 cask "spotify"
 cask "sublime-text"
-cask "sublime-merge"
 cask "the-unarchiver"
 
 # disabled
@@ -77,9 +75,8 @@ cask "the-unarchiver"
 
 # MAS applications
 #mas "Adze Lite", id: 499527341
-#mas "Airmail 3", id: 918858936
 mas "Amphetamine", id: 937984704
 mas "DaisyDisk", id: 411643860
 mas "Flycut", id: 442160987
+mas "Slack", id: 803453959
 mas "Trello", id: 1278508951
-#mas "Wunderlist", id: 410628904
