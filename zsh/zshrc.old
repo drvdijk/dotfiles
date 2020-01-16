@@ -1,0 +1,103 @@
+# Old prezto stuff
+# # Previously using prezto setup, but zplug is easier to list which plugins are loaded.
+# # Still want to use some of those modules though, but the general idea is to use as little of them as possible.
+# # This is the list that was used before switching to zplug
+# #
+# # zplug "modules/environment", from:prezto
+# # zplug "modules/terminal", from:prezto
+# zplug "modules/editor", from:prezto
+# zplug "modules/history", from:prezto
+# # zplug "modules/directory", from:prezto
+# # zplug "modules/spectrum", from:prezto
+# zplug "modules/utility", from:prezto
+# zplug "modules/git", from:prezto
+# # zplug "modules/completion", from:prezto
+# # zplug "modules/syntax-highlighting", from:prezto # uses git submodule, load through zsh-users instead
+# # zplug "modules/history-substring-search", from:prezto
+# zplug "modules/prompt", from:prezto
+# zstyle ':prezto:module:prompt' theme 'sorin'
+# 
+# if zplug check zsh-users/zsh-history-substring-search; then
+#   if [[ -n "$key_info" ]]; then
+#     # Emacs and Vi
+#     for keymap in 'emacs' 'viins'; do
+#       bindkey -M "$keymap" "$key_info[Up]" history-substring-search-up
+#       bindkey -M "$keymap" "$key_info[Down]" history-substring-search-down
+#     done
+#     unset keymap
+#   fi
+# fi
+# 
+# # zstyle for completion system, copied from prezto module, commented as much as possible
+# zstyle ':completion:*:*:*:*:*' menu select
+# # zstyle ':completion:*:matches' group 'yes'
+# # zstyle ':completion:*:options' description 'yes'
+# # zstyle ':completion:*:options' auto-description '%d'
+# # zstyle ':completion:*:corrections' format ' %F{green}-- %d (errors: %e) --%f'
+# # zstyle ':completion:*:descriptions' format ' %F{yellow}-- %d --%f'
+# # zstyle ':completion:*:messages' format ' %F{purple} -- %d --%f'
+# # zstyle ':completion:*:warnings' format ' %F{red}-- no matches found --%f'
+# # zstyle ':completion:*:default' list-prompt '%S%M matches%s'
+# zstyle ':completion:*' format ' %F{yellow}-- %d --%f'
+# # zstyle ':completion:*' group-name ''
+# # zstyle ':completion:*' verbose yes
+
+
+# # IGNORE: This is a zgen playground, in the hope to improve terminal speed a bit
+# #
+# # zgen
+# #
+# # 
+# source "${HOME}/.zgen/zgen.zsh" || { git clone https://github.com/tarjoilija/zgen.git "${HOME}/.zgen" && source "${HOME}/.zgen/zgen.zsh" }
+# 
+# # if the init scipt doesn't exist
+# if ! zgen saved; then
+# 
+#   # zgen load bhilburn/powerlevel9k powerlevel9k
+#   zgen load miekg/lean
+#   # zgen load denysdovhan/spaceship-prompt spaceship
+# 
+#   zgen load "zsh-users/zsh-completions"
+#   zgen load "zsh-users/zsh-autosuggestions" # slows down terminal ..
+#   zgen load "zsh-users/zsh-syntax-highlighting"
+#   zgen load "zsh-users/zsh-history-substring-search"
+# 
+#   zgen load 'djui/alias-tips'
+#   zgen load 'xvoland/Extract'
+#   zgen load 'supercrabtree/k'
+# 
+#   # # prezto options
+#   # # zgen prezto editor key-bindings 'emacs'
+#   # zgen prezto prompt theme 'sorin'
+#   # 
+#   # # specify plugins here
+#   # # zgen prezto # this loads the full prezto setup ...
+#   # zgen prezto editor
+#   # zgen prezto history
+#   # zgen prezto utility
+#   # zgen prezto git
+#   # zgen prezto prompt
+#   # 
+#   # generate the init script from plugins above
+#   zgen save
+# fi
+# 
+# bindkey '^[[A' history-substring-search-up
+# bindkey '^[[B' history-substring-search-down
+# zstyle ':completion:*:*:*:*:*' menu select
+# zstyle ':completion:*' format ' %F{yellow}-- %d --%f'
+
+
+# POWERLEVEL9K_MODE='nerdfont-complete'
+# POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir)
+# POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(vcs)
+
+
+# # IGNORE: This is an antigen playground, in the hope to improve terminal speed a bit
+# #
+# # Antigen
+# #
+# 
+# source "${HOME}/.antigen/antigen.zsh" || { git clone https://github.com/zsh-users/antigen.git "${HOME}/.antigen" && source "${HOME}/.antigen/antigen.zsh" }
+# # Tell antigen that you're done.
+# antigen apply
