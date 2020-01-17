@@ -152,8 +152,15 @@ sub_sshconfig () {
     mkdir -p ~/.ssh
     chmod 700 ~/.ssh
     cp $DOTFILES_DIR/ssh/config.example ~/.ssh/config
+
+    echo -e ' What will the key name be? eg "name" will become id.name[.pub]'
+    read
+    if [[ ! -z $REPLY ]]; then
+      ssh-keygen -t ed25519 -f ~/.ssh/id.$REPLY
+      echo "IdentityFile ~/.ssh/id.$REPLY" > ~/.ssh/identity
+      chmod 600 ~/.ssh/identity
+    fi
   fi
-  # TODO identity file filing, generating key here
 }
 
 sub_install () {

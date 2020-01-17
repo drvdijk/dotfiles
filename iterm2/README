@@ -1,0 +1,2 @@
+This is where iTerm2 will store its settings.
+iTerm is instructed to do so in the ~/.dotfiles/macos/apps/iterm.sh script
