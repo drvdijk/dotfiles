@@ -14,6 +14,11 @@ require_homebrew
 # Install all available updates
 sudo softwareupdate -ia --verbose
 
+# Install Rosetta 2 if on M1 platform
+if [[ "$(uname -s)" == "Darwin" ]] && [[ "$(uname -p)" == "arm" ]]; then
+	softwareupdate --install-rosetta --agree-to-license
+fi
+
 bot "installing tools via homebrew..."
 # Make sure we’re using the latest Homebrew
 action "update brew..."
@@ -22,6 +27,12 @@ ok "brew updated..."
 # Need to run brew upgrade at this point to make sure `brew list` works correctly...
 brew upgrade
 ok "brew upgraded..."
+
+# Wait until app store sign-in is done
+until mas account > /dev/null 2>&1; do                                       
+  echo "Please sign in to the Mac App store manually..."
+  sleep 3
+done
 
 # Install homebrew, cask, and mas stuff from brew file here
 brew bundle --file=$(dirname ${BASH_SOURCE[0]})/Brewfile

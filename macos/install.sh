@@ -154,11 +154,11 @@ set_prefs textedit "TextEdit"
 
 # Third Party Apps
 # set_prefs dropbox "Dropbox"
-set_prefs bartender "Bartender"
+# set_prefs bartender "Bartender"
 set_prefs flycut "Flycut"
 set_prefs google-chrome "Google Chrome"
 set_prefs iterm "iTerm"
-set_prefs sizeup "SizeUp"
+# set_prefs sizeup "SizeUp"
 set_prefs sublime-text-3 "Sublime Text"
 
 # Close any open System Preferences panes, to prevent them from overriding

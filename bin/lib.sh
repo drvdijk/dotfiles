@@ -67,9 +67,10 @@ function require_homebrew() {
     running "checking homebrew"
     if ! hash brew 2>/dev/null; then
         action "installing homebrew"
-        ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)";
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         # can do full pull instead if specific versions are needed again at some point:
         # ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" - --full
+        eval "$(/opt/homebrew/bin/brew shellenv)"
     fi
 }
 
