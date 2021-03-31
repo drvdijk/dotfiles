@@ -42,5 +42,8 @@ if [[ $(cat /etc/shells | grep $(which zsh) | wc -c) -eq 0 ]]; then
     echo $(which zsh) | sudo tee -a /etc/shells
 fi
 
+# Fix zsh audit errors
+compaudit | xargs chmod g-w
+
 # Remove outdated versions from the cellar
 brew cleanup
