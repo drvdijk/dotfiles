@@ -38,22 +38,23 @@ cask "font-source-code-pro"
 
 # GUI applications
 cask "1password"
-cask "bartender"
 cask "dropbox"
 cask "google-chrome"
 cask "gpg-suite"
+cask "hiddenbar"
 cask "iina"
 cask "istat-menus"
 cask "iterm2"
 cask "macpar-deluxe"
+cask "rectangle"
 cask "rclone-browser"
-cask "sizeup"
 cask "spotify"
 cask "sublime-text"
 cask "the-unarchiver"
 
 # disabled
 # cask "adobe-photoshop-lightroom"
+# cask "bartender"
 # cask "firefox"
 # cask "flash-player"
 # cask "franz"
@@ -61,7 +62,7 @@ cask "the-unarchiver"
 # cask "sequel-pro"
 # cask "skitch"
 # cask "silverlight"
-# cask "skype"
+# cask "sizeup"
 # cask "jadengeller-helium"
 # cask "journey"
 # cask "microsoft-office"
@@ -71,7 +72,7 @@ cask "the-unarchiver"
 # cask "caffeine"
 # cask "forklift"
 # cask "tripmode"
-#cask virtualbox # loads kernel module, TODO figure out how to do this nicely automatically
+# cask virtualbox # loads kernel module, TODO figure out how to do this nicely automatically
 
 # MAS applications
 #mas "Adze Lite", id: 499527341
@@ -79,4 +80,5 @@ cask "the-unarchiver"
 mas "DaisyDisk", id: 411643860
 mas "Flycut", id: 442160987
 mas "Slack", id: 803453959
-mas "Trello", id: 1278508951
+mas "Todoist", id: 585829637
+#mas "Trello", id: 1278508951
