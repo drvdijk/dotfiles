@@ -50,6 +50,7 @@ cask "rectangle"
 cask "rclone-browser"
 cask "spotify"
 cask "sublime-text"
+cask "sublime-merge"
 cask "the-unarchiver"
 
 # disabled
