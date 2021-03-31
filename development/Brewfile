@@ -17,11 +17,10 @@ tap "homebrew/core"
 #brew "sbt"
 #brew "maven"
 #brew "gradle"
-brew "gdub"
+#brew "gdub"
 #brew "groovysdk"
 #brew "node"
 
-cask "sublime-merge"
 #cask "sourcetree" # how did sourcetree become so buggy? :'(
 #cask "gitkraken"
 
@@ -31,9 +30,11 @@ cask "intellij-idea"
 #cask "kdiff3"
 #cask "dash"
 #cask "dbeaver-community"
-cask "docker"
+#cask "docker" # m1 version is rc2 right now, manual install
 #cask "kitematic"
 cask "postman"
+
+brew "google-cloud-sdk"
 
 #cask "kafka-tool"
 #brew "awscli"
