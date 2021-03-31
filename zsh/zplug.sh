@@ -27,7 +27,7 @@ source ~/.zplug/init.zsh || { \
 	curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh && 
   timeout 10 "while \[ ! -f ~/.zplug/init.zsh ]; do sleep 1; done" && \
 	source ~/.zplug/init.zsh \
-	}
+}
 
 # zplug "miekg/lean"
 zplug "eendroroy/alien-minimal"
@@ -40,7 +40,7 @@ zplug "zsh-users/zsh-history-substring-search", defer:3
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 
-zplug 'djui/alias-tips'
+#zplug 'djui/alias-tips'
 zplug 'xvoland/Extract', use:'*.sh'
 zplug 'supercrabtree/k'
 
