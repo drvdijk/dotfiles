@@ -225,3 +225,8 @@ defaults write NSGlobalDomain WebKitDeveloperExtras -bool true
 # # Print backgrounds
 # defaults write com.apple.Safari WebKitShouldPrintBackgroundsPreferenceKey -bool false
 # defaults write com.apple.Safari "com.apple.Safari.ContentPageGroupIdentifier.WebKit2ShouldPrintBackgrounds" -bool false
+
+# Enable continuous spell checking
+defaults write com.apple.Safari WebContinuousSpellCheckingEnabled -bool true
+# Disable auto-correct
+defaults write com.apple.Safari WebAutomaticSpellingCorrectionEnabled -bool false
