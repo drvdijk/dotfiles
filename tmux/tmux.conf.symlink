@@ -1,7 +1,13 @@
+#new-session -A -s main
+
 set-option -g prefix C-a
+
 bind-key C-a last-window
 bind-key a send-prefix
+bind-key = set-window-option synchronize-panes\; display-message "synchronize-panes is now #{?pane_synchronized,on,off}"
+bind-key / move-window -s tmux-cssh
+
 set -g base-index 1
 set -g default-terminal "screen-256color"
-set-option -g mouse on
 
+set-option -g mouse on
