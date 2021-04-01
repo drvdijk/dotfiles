@@ -34,7 +34,7 @@ cask "intellij-idea"
 #cask "kitematic"
 cask "postman"
 
-brew "google-cloud-sdk"
+cask "google-cloud-sdk"
 
 #cask "kafka-tool"
 #brew "awscli"
