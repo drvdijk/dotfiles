@@ -45,3 +45,5 @@ unset config_files
 
 # Load tmux
 #[[ $SHLVL == "1" ]] && tmux new
+
+# Prevent sdkman.io installer from edititing this file by having 'sdkman-init.sh' on this exact line
