@@ -48,7 +48,6 @@ cask "iterm2"
 cask "macpar-deluxe"
 cask "rectangle"
 cask "rclone-browser"
-cask "spotify"
 cask "sublime-text"
 cask "sublime-merge"
 cask "the-unarchiver"
@@ -74,6 +73,7 @@ cask "the-unarchiver"
 # cask "forklift"
 # cask "tripmode"
 # cask virtualbox # loads kernel module, TODO figure out how to do this nicely automatically
+#cask "spotify"
 
 # MAS applications
 #mas "Adze Lite", id: 499527341
@@ -82,4 +82,5 @@ mas "DaisyDisk", id: 411643860
 mas "Flycut", id: 442160987
 mas "Slack", id: 803453959
 mas "Todoist", id: 585829637
+mas "Notability", id: 360593530
 #mas "Trello", id: 1278508951
