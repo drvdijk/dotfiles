@@ -10,50 +10,40 @@ tap "homebrew/cask"
 tap "homebrew/bundle"
 tap "homebrew/core"
 
-#todo through sdkman.io, sample here: https://gist.github.com/yunspace/a2888c655ac67fa26092aa0996e0b898
-#cask "java8"
-#cask "adoptopenjdk8"
-#brew "scala"
-#brew "sbt"
-#brew "maven"
-#brew "gradle"
-#brew "gdub"
-#brew "groovysdk"
-#brew "node"
+# SDKs (the ones not with sdkman.io)
+brew "node"
 
+# Source control
+cask "sublime-merge"
 #cask "sourcetree" # how did sourcetree become so buggy? :'(
 #cask "gitkraken"
 
-#brew "graphviz"
+# IDEs & tools
 cask "intellij-idea"
 #cask "intellij-idea-ce"
 #cask "kdiff3"
 #cask "dash"
-#cask "dbeaver-community"
-#cask "docker" # m1 version is rc2 right now, manual install
+cask "docker"
 #cask "kitematic"
+cask "dbeaver-community"
+brew "graphviz"
 cask "postman"
-
-cask "google-cloud-sdk"
-
-#cask "kafka-tool"
-#brew "awscli"
-#brew "amazon-ecs-cli"
-#cask "tunnelblick"
-
-#brew "carthage"
-#brew "watchman"
-#cask "android-file-transfer"
-#cask "android-studio"
 #cask "drawio"
-#cask "nordic-nrf5x-command-line-tools"
-#cask "segger-jlink"
-
-#cask "toggl"
-#cask "rocket-chat"
-cask "firefox"
-
+#brew "watchman"
+cask "google-cloud-sdk"
 brew "jq"
-#brew "git-flow"
+brew "git-flow"
+cask "firefox"
+cask "mongodb-compass"
+#cask "royal-tsx" # disabled, use v5 beta instead
+
+# Other tools
+cask "forticlient-vpn" # note post-install step!
+cask "resilio-sync"
+cask "zoom"
+cask "microsoft-outlook"
+cask "microsoft-teams"
+
+
 
 #mas "Xcode", id: 497799835
