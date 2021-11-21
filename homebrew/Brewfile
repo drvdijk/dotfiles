@@ -33,53 +33,31 @@ brew "watch"
 brew "wget"
 
 # Fonts
-cask "font-hack-nerd-font"
-cask "font-source-code-pro"
+#cask "font-hack-nerd-font"
+#cask "font-source-code-pro"
 
 # GUI applications
 cask "1password"
-cask "dropbox"
+#cask "dropbox" # disable until M1 support is available, use maestral instead
 cask "google-chrome"
 cask "gpg-suite"
-cask "hiddenbar"
 cask "iina"
 cask "istat-menus"
 cask "iterm2"
+cask "keka"
 cask "macpar-deluxe"
+cask "maestral" # replaces dropbox, until dropbox finally adds M1 support
 cask "rectangle"
-cask "rclone-browser"
+casl "spotify"
 cask "sublime-text"
 cask "sublime-merge"
-cask "the-unarchiver"
-
-# disabled
-# cask "adobe-photoshop-lightroom"
-# cask "bartender"
-# cask "firefox"
-# cask "flash-player"
-# cask "franz"
-# cask "macvim"
-# cask "sequel-pro"
-# cask "skitch"
-# cask "silverlight"
-# cask "sizeup"
-# cask "jadengeller-helium"
-# cask "journey"
-# cask "microsoft-office"
-# cask "apptivate"
-# cask "atom"
-# cask "authy"
-# cask "caffeine"
-# cask "forklift"
-# cask "tripmode"
-# cask virtualbox # loads kernel module, TODO figure out how to do this nicely automatically
-#cask "spotify"
 
 # MAS applications
 #mas "Adze Lite", id: 499527341
 #mas "Amphetamine", id: 937984704
 mas "DaisyDisk", id: 411643860
 mas "Flycut", id: 442160987
+mas "Hidden Bar", id: 1452453066
 mas "Slack", id: 803453959
 mas "Todoist", id: 585829637
 mas "Notability", id: 360593530

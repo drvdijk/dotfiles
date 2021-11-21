@@ -23,7 +23,7 @@ cask "intellij-idea"
 #cask "intellij-idea-ce"
 #cask "kdiff3"
 #cask "dash"
-cask "docker"
+#cask "docker"
 #cask "kitematic"
 cask "dbeaver-community"
 brew "graphviz"
@@ -35,14 +35,12 @@ brew "jq"
 brew "git-flow"
 cask "firefox"
 cask "mongodb-compass"
-#cask "royal-tsx" # disabled, use v5 beta instead
+cask "royal-tsx"
 
 # Other tools
 cask "forticlient-vpn" # note post-install step!
-cask "resilio-sync"
 cask "zoom"
-cask "microsoft-outlook"
-cask "microsoft-teams"
+#cask "microsoft-teams"
 
 
 

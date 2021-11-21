@@ -28,11 +28,16 @@ ok "brew updated..."
 brew upgrade
 ok "brew upgraded..."
 
+# Make sure mas is installed
+brew install mas
+
 # Wait until app store sign-in is done
-until mas account > /dev/null 2>&1; do                                       
-  echo "Please sign in to the Mac App store manually..."
-  sleep 3
-done
+# mas account is broken: https://github.com/mas-cli/mas/issues/417
+read -p "Make sure you're logged into the App Store!" -r
+#until mas account > /dev/null 2>&1; do                                       
+#  echo "Please sign in to the Mac App store manually..."
+#  sleep 3
+#done
 
 # Install homebrew, cask, and mas stuff from brew file here
 brew bundle --file=$(dirname ${BASH_SOURCE[0]})/Brewfile
