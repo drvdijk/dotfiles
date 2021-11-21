@@ -87,44 +87,46 @@ function prompt_restart {
 
 # System Prefrences
 system_preferences=(
+  icloud
+
+
   general
-  desktop-screen-saver
+  # desktop-screen-saver
   dock
   mission-control
+  siri
+  # spotlight
   language-region
-  security-privacy
-  spotlight
   # notifications
 
-  # displays
-  energy-saver
-  keyboard
-  mouse
-  trackpad
-  printers-scanners
-  sound
-  # startup-disk
-
-  icloud
   # internet-accounts
-  app-store
+  # passwords
+  # wallet-apple-pay
+  users-groups
+  accessibility
+  # screen-time
+  # extensions
+  security-privacy
+
+
+  # software-update
   # network
   # bluetooth
-  # extensions
-  sharing
-
+  sound
   # touch-id
-  users-groups
-  # parental-controls
-  siri
+  keyboard
+  trackpad
+  mouse
+
+  # displays
+  printers-scanners
+  battery
   date-time
+  sharing
   time-machine
-  accessibility
+  # startup-disk
 
   other
-  dashboard
-  cds-dvds
-  # ssd
 )
 
 for pane in "${system_preferences[@]}"; do
@@ -137,7 +139,7 @@ done
 
 # Default Apps
 # set_prefs activity-monitor "Activity Monitor"
-# set_prefs app-store "App Store"
+set_prefs app-store "App Store"
 set_prefs calendar "Calendar"
 set_prefs contacts "Contacts"
 set_prefs disk-utility "Disk Utility"
