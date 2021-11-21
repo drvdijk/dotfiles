@@ -22,8 +22,6 @@
         prompt = false
 [help]
         autocorrect = 1
-[merge]
-        tool = kdiff3
 [push]
         # See `git help config` (search for push.default)
         # for more information on different options of the below setting.
@@ -37,3 +35,5 @@
         change-commits = "!f() { VAR=$1; OLD=$2; NEW=$3; shift 3; git filter-branch --env-filter \"if [[ \\\"$`echo $VAR`\\\" = '$OLD' ]]; then export $VAR='$NEW'; fi\" $@; }; f "
 [commit]
         gpgsign = true
+[pull]
+        ff = only
