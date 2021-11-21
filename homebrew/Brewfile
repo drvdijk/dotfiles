@@ -14,6 +14,11 @@ tap "homebrew/core"
 # Dependencies
 brew "mas"
 
+# Security
+cask "knockknock"
+cask "blockblock"
+cask "lulu"
+
 # Shells
 brew "zsh"
 brew "bash"
