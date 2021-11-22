@@ -43,6 +43,7 @@ brew "wget"
 
 # GUI applications
 cask "1password"
+cask "bartender"
 #cask "dropbox" # disable until M1 support is available, use maestral instead
 cask "google-chrome"
 cask "gpg-suite"
@@ -62,7 +63,7 @@ cask "sublime-merge"
 #mas "Amphetamine", id: 937984704
 mas "DaisyDisk", id: 411643860
 mas "Flycut", id: 442160987
-mas "Hidden Bar", id: 1452453066
+#mas "Hidden Bar", id: 1452453066
 mas "Slack", id: 803453959
 mas "Todoist", id: 585829637
 mas "Notability", id: 360593530

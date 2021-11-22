@@ -23,8 +23,9 @@ cask "intellij-idea"
 #cask "intellij-idea-ce"
 #cask "kdiff3"
 #cask "dash"
-#cask "docker"
-#cask "kitematic"
+cask "docker"
+brew "minikube"
+cask "lens"
 cask "dbeaver-community"
 brew "graphviz"
 cask "postman"
@@ -38,7 +39,8 @@ cask "mongodb-compass"
 cask "royal-tsx"
 
 # Other tools
-cask "forticlient-vpn" # note post-install step!
+brew "openfortivpn"
+#cask "forticlient-vpn" # note post-install step!
 cask "zoom"
 #cask "microsoft-teams"
 
