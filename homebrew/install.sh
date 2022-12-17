@@ -48,7 +48,10 @@ if [[ $(cat /etc/shells | grep $(which zsh) | wc -c) -eq 0 ]]; then
 fi
 
 # Fix zsh audit errors
-compaudit | xargs chmod g-w
+# TODO compaudit is a zsh command, how to run from bash?
+# compaudit | xargs chmod g-w
+ok "Run the following command from zsh to fix zsh audit errors:"
+ok "compaudit | xargs chmod g-w"
 
 # Remove outdated versions from the cellar
 brew cleanup

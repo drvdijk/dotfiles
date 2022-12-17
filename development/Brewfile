@@ -11,7 +11,8 @@ tap "homebrew/bundle"
 tap "homebrew/core"
 
 # SDKs (the ones not with sdkman.io)
-brew "node"
+#brew "node"
+#cask "android-studio"
 
 # Source control
 cask "sublime-merge"
@@ -24,9 +25,11 @@ cask "intellij-idea"
 #cask "kdiff3"
 #cask "dash"
 cask "docker"
-brew "minikube"
-cask "lens"
-cask "dbeaver-community"
+#brew "minikube"
+brew "kubectl"
+#cask "lens"
+brew "dive"
+#cask "dbeaver-community"
 brew "graphviz"
 cask "postman"
 #cask "drawio"
@@ -36,13 +39,25 @@ brew "jq"
 brew "git-flow"
 cask "firefox"
 cask "mongodb-compass"
+brew "websocat"
+
+# ops tools
+brew "ansible"
+brew "iperf"
+brew "iperf3"
+brew "nmap"
 cask "royal-tsx"
+cask "citrix-workspace"
 
 # Other tools
+cask "mountain-duck"
+brew "openssl"
+brew "gnu-sed"
 brew "openfortivpn"
+brew "pinentry-mac"
 #cask "forticlient-vpn" # note post-install step!
 cask "zoom"
-#cask "microsoft-teams"
+cask "microsoft-teams"
 
 
 
