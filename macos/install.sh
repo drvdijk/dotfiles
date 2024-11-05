@@ -89,7 +89,6 @@ function prompt_restart {
 system_preferences=(
   icloud
 
-
   general
   # desktop-screen-saver
   dock
