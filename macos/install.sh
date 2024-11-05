@@ -156,7 +156,7 @@ set_prefs textedit "TextEdit"
 # Third Party Apps
 # set_prefs dropbox "Dropbox"
 # set_prefs bartender "Bartender"
-set_prefs flycut "Flycut"
+# set_prefs flycut "Flycut"
 set_prefs google-chrome "Google Chrome"
 set_prefs iterm "iTerm"
 # set_prefs sizeup "SizeUp"

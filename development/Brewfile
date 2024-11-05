@@ -36,7 +36,7 @@ cask "postman"
 #brew "watchman"
 cask "google-cloud-sdk"
 brew "jq"
-brew "git-flow"
+#brew "git-flow"
 cask "firefox"
 cask "mongodb-compass"
 brew "websocat"
@@ -56,7 +56,7 @@ brew "gnu-sed"
 brew "openfortivpn"
 brew "pinentry-mac"
 #cask "forticlient-vpn" # note post-install step!
-cask "zoom"
+#cask "zoom"
 cask "microsoft-teams"
 
 
