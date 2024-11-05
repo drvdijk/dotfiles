@@ -30,7 +30,7 @@ source ~/.zplug/init.zsh || { \
 }
 
 # zplug "miekg/lean"
-zplug "eendroroy/alien-minimal"
+zplug "eendroroy/alien-minimal", as:theme
 zplug "zsh-users/zsh-completions"
 zstyle ':completion:*:*:*:*:*' menu select
 zstyle ':completion:*' format ' %F{yellow}-- %d --%f'
@@ -41,8 +41,8 @@ bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 
 #zplug 'djui/alias-tips'
-zplug 'xvoland/Extract', use:'*.sh'
-zplug 'supercrabtree/k'
+#zplug 'xvoland/Extract', use:'*.sh'
+#zplug 'supercrabtree/k'
 
 # Install plugins if there are plugins that have not been installed
 if ! zplug check --verbose; then
