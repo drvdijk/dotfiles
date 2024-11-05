@@ -3,7 +3,6 @@ cask_args appdir: "/Applications"
 
 cask "adobe-creative-cloud"
 cask "calibre"
-cask "keyboardcleantool"
 #cask "microsoft-office"
 #cask "microsoft-word"
 #cask "microsoft-excel"

@@ -44,7 +44,7 @@ brew "wget"
 
 # GUI applications
 cask "1password"
-cask "bartender"
+#cask "bartender"
 #cask "dropbox" # disable until M1 support is available, use maestral instead
 cask "google-chrome"
 cask "gpg-suite"
@@ -52,12 +52,13 @@ cask "iina"
 cask "istat-menus"
 cask "iterm2"
 cask "keka"
+cask "keyboardcleantool"
 cask "logi-options-plus"
 cask "macpar-deluxe"
 #cask "maestral" # replaces dropbox, until dropbox finally adds M1 support
 cask "mountain-duck"
 cask "obsidian"
-cask "rectangle"
+#cask "rectangle"
 cask "spotify"
 cask "sublime-text"
 cask "sublime-merge"
@@ -66,9 +67,9 @@ cask "sublime-merge"
 #mas "Adze Lite", id: 499527341
 #mas "Amphetamine", id: 937984704
 mas "DaisyDisk", id: 411643860
-mas "Flycut", id: 442160987
+#mas "Flycut", id: 442160987
 #mas "Hidden Bar", id: 1452453066
 mas "Slack", id: 803453959
 mas "Todoist", id: 585829637
-mas "Notability", id: 360593530
+#mas "Notability", id: 360593530
 #mas "Trello", id: 1278508951
