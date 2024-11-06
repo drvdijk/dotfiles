@@ -37,7 +37,7 @@ export AM_DIR_EXPANSION_LEVEL=3
 #  export AM_GIT_PULL_SYM='↓'
 #  export AM_GIT_STASH_SYM='@'
 #  export AM_GIT_BARE_SYM='☢'
-export AM_PROMPT_START_TAG='\b'
+export AM_PROMPT_START_TAG=' '
 #  export AM_PROMPT_END_TAG=''
 
 ## ===> COLORS
