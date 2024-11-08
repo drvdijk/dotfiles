@@ -2,14 +2,7 @@
 cask_args appdir: "/Applications"
 
 # Taps
-tap "homebrew/cask"
-# or (maybe):
-# tap "homebrew/cask", args: ["--full"]
-tap "homebrew/cask-drivers"
-tap "homebrew/cask-fonts"
-tap "homebrew/cask-versions"
 tap "homebrew/bundle"
-tap "homebrew/core"
 
 # Dependencies
 brew "mas"
