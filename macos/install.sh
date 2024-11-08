@@ -140,7 +140,7 @@ done
 # set_prefs activity-monitor "Activity Monitor"
 set_prefs app-store "App Store"
 set_prefs calendar "Calendar"
-set_prefs contacts "Contacts"
+# set_prefs contacts "Contacts" # disabled, fails in terminal, cannot access contact info from defaults
 set_prefs disk-utility "Disk Utility"
 set_prefs finder "Finder"
 # set_prefs font-book "Font Book"
