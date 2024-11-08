@@ -5,13 +5,13 @@
 ###############################################################################
 
 # Set the timezone; see `systemsetup -listtimezones` for other values
-sudo systemsetup -settimezone "Europe/Amsterdam" > /dev/null
+sudo systemsetup -settimezone "Europe/Amsterdam" 2>/dev/null
 
 # Set date and time automatically
-sudo systemsetup -setusingnetworktime on > /dev/null
+sudo systemsetup -setusingnetworktime on 2>/dev/null
 
 # Set time server
-sudo systemsetup -setnetworktimeserver "time.apple.com" > /dev/null
+sudo systemsetup -setnetworktimeserver "time.apple.com" 2>/dev/null
 
 # Set time zome automatically using current location
 sudo defaults write /Library/Preferences/com.apple.timezone.auto.plist Active -bool true
