@@ -7,4 +7,5 @@ cask "calibre"
 #cask "microsoft-word"
 #cask "microsoft-excel"
 #cask "microsoft-powerpoint"
+mas "Paprika Recipe Manager 3", id: 1303222628
 #cask "powerphotos"
