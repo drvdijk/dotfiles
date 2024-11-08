@@ -23,7 +23,7 @@ defaults write com.apple.dock mineffect -string 'scale'
 # defaults write NSGlobalDomain AppleWindowTabbingMode -string 'always'
 
 # Dock orientation: 'left', 'bottom', 'right'
-defaults write com.apple.Dock orientation -string left
+defaults write com.apple.Dock orientation -string bottom
 
 # # Dock pinning: 'start', 'middle', 'end'
 # # defaults write com.apple.dock pinning -string 'middle'
