@@ -14,6 +14,7 @@
 # Load libs
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )/../bin" && pwd )"/lib.sh
 
+require_full_disk_access
 require_osx
 require_sudo
 
