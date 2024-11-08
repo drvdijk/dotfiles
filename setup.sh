@@ -12,6 +12,10 @@ $DOTFILES_DIR/bin/dotfiles gitconfig
 $DOTFILES_DIR/bin/dotfiles sshconfig
 $DOTFILES_DIR/bin/dotfiles bootstrap
 
+# Reload shell
+if []
+source ~/.zshrc
+
 bot "Setup done, check out dotfiles!"
 $DOTFILES_DIR/bin/dotfiles help
 
