@@ -13,8 +13,9 @@ $DOTFILES_DIR/bin/dotfiles sshconfig
 $DOTFILES_DIR/bin/dotfiles bootstrap
 
 # Reload shell
-if []
-source ~/.zshrc
+if [ -e ~/.zshrc ]; then
+	source ~/.zshrc
+fi
 
 bot "Setup done, check out dotfiles!"
 $DOTFILES_DIR/bin/dotfiles help
