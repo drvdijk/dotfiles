@@ -1,64 +1,38 @@
 # Cask directory for applications
 cask_args appdir: "/Applications"
 
-# Taps
-tap "homebrew/cask"
-# or (maybe):
-# tap "homebrew/cask", args: ["--full"]
-#tap "homebrew/cask-fonts" # not used below
-#tap "homebrew/cask-versions" # not used below
-tap "homebrew/bundle"
-tap "homebrew/core"
+tap "hashicorp/tap"
 
-# SDKs (the ones not with sdkman.io)
-#brew "node"
-#cask "android-studio"
-
-# Source control
-cask "sublime-merge"
-#cask "sourcetree" # how did sourcetree become so buggy? :'(
-#cask "gitkraken"
-
-# IDEs & tools
-cask "intellij-idea"
-#cask "intellij-idea-ce"
-#cask "kdiff3"
+brew "ansible"
+cask "citrix-workspace"
 #cask "dash"
-cask "docker"
-#brew "minikube"
-brew "kubectl"
-#cask "lens"
 brew "dive"
 #cask "dbeaver-community"
-brew "graphviz"
-cask "postman"
+cask "docker"
 #cask "drawio"
-#brew "watchman"
-cask "google-cloud-sdk"
-brew "jq"
-#brew "git-flow"
 cask "firefox"
-cask "mongodb-compass"
-brew "websocat"
-
-# ops tools
-brew "ansible"
-brew "iperf"
-brew "iperf3"
-brew "nmap"
-cask "royal-tsx"
-cask "citrix-workspace"
-
-# Other tools
-cask "mountain-duck"
-brew "openssl"
+#brew "git-flow"
+cask "google-cloud-sdk"
 brew "gnu-sed"
-brew "openfortivpn"
-brew "pinentry-mac"
-#cask "forticlient-vpn" # note post-install step!
-#cask "zoom"
+brew "graphviz"
+brew "hashicorp/tap/terraform"
+cask "intellij-idea"
+#brew "iperf"
+#brew "iperf3"
+brew "jq"
+brew "kubectl"
 cask "microsoft-teams"
-
-
-
-#mas "Xcode", id: 497799835
+#brew "minikube"
+cask "mongodb-compass"
+cask "mountain-duck"
+brew "nmap"
+brew "openfortivpn"
+cask "openlens"
+brew "openssl"
+brew "pinentry-mac"
+cask "postman"
+cask "royal-tsx"
+cask "sublime-merge"
+#brew "watchman"
+brew "websocat"
+cask "wireshark"
