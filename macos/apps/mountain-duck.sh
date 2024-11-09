@@ -4,4 +4,4 @@
 # Mountain Duck
 ###############################################################################
 
-ln -s /Users/drvdijk/Library/Group\ Containers/G69SCX94XU.duck/Library/Application\ Support/duck/Volumes.noindex/Dropbox ~/Dropbox
+ln -s /Users/drvdijk/Library/Application\ Support/Mountain\ Duck/Volumes.noindex/Dropbox.localized ~/Dropbox
