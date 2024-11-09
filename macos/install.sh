@@ -160,6 +160,7 @@ set_prefs textedit "TextEdit"
 # set_prefs flycut "Flycut"
 set_prefs google-chrome "Google Chrome"
 set_prefs iterm "iTerm"
+set_prefs mountain-duck "Mountain Duck"
 # set_prefs sizeup "SizeUp"
 set_prefs sublime-text-3 "Sublime Text"
 
