@@ -21,6 +21,9 @@ defaults write com.apple.systemuiserver menuExtras -array \
     "/System/Library/CoreServices/Menu Extras/TimeMachine.menu" \
     "/System/Library/CoreServices/Menu Extras/Volume.menu"
 
+# Menu bar: spacing
+defaults -currentHost write -globalDomain NSStatusItemSpacing -int 5
+
 # Increase window resize speed for Cocoa applications
 defaults write NSGlobalDomain NSWindowResizeTime -float 0.001
 
