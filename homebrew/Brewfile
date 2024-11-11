@@ -60,6 +60,7 @@ cask "raycast"
 cask "spotify"
 cask "sublime-text"
 cask "sublime-merge"
+cask "vivaldi"
 
 # MAS applications
 #mas "Adze Lite", id: 499527341
