@@ -20,3 +20,9 @@ sudo tee /private/etc/sudoers.d/openfortivpn > /dev/null <<EOF
 $USER ALL = NOPASSWD: /opt/homebrew/bin/openfortivpn
 $USER ALL = NOPASSWD: /usr/bin/killall openfortivpn
 EOF
+
+if [ -s $(command asdf) ]; then
+	asdf install java temurin-17.0.13+11
+	asdf install maven 3.9.2
+	asdf install tomcat 9.0.82
+fi
