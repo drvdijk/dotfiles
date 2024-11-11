@@ -21,8 +21,13 @@ $USER ALL = NOPASSWD: /opt/homebrew/bin/openfortivpn
 $USER ALL = NOPASSWD: /usr/bin/killall openfortivpn
 EOF
 
-if [ -s $(command asdf) ]; then
+if [ -x "$(command -v asdf)" ]; then 
+	asdf plugin add java
+	asdf plugin add maven
+	asdf plugin add tomcat
 	asdf install java temurin-17.0.13+11
 	asdf install maven 3.9.2
 	asdf install tomcat 9.0.82
+	asdf global java temurin-17.0.13+11
+	asdf global maven 3.9.2
 fi
