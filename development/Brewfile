@@ -3,6 +3,7 @@ cask_args appdir: "/Applications"
 
 tap "hashicorp/tap"
 
+brew "asdf"
 brew "ansible"
 cask "citrix-workspace"
 #cask "dash"
