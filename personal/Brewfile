@@ -2,6 +2,7 @@
 cask_args appdir: "/Applications"
 
 cask "adobe-creative-cloud"
+brew "exiftool"
 cask "calibre"
 #cask "microsoft-office"
 #cask "microsoft-word"
