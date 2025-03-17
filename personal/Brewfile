@@ -10,3 +10,4 @@ cask "calibre"
 #cask "microsoft-powerpoint"
 mas "Paprika Recipe Manager 3", id: 1303222628
 #cask "powerphotos"
+mas "DaisyDisk", id: 411643860
