@@ -1,0 +1,55 @@
+{
+	"binary_file_patterns":
+	[
+		"*.pyc",
+		"*.pyo",
+		"*.exe",
+		"*.dll",
+		"*.obj",
+		"*.o",
+		"*.a",
+		"*.lib",
+		"*.so",
+		"*.dylib",
+		"*.ncb",
+		"*.sdf",
+		"*.suo",
+		"*.pdb",
+		"*.idb",
+		"*.class",
+		"*.psd",
+		"*.db",
+		"*.sublime-workspace",
+		"*.jpg",
+		"*.jpeg",
+		"*.png",
+		"*.gif",
+		"*.ttf",
+		"*.tga",
+		"*.dds",
+		"*.ico",
+		"*.eot",
+		"*.pdf",
+		"*.swf",
+		"*.jar",
+		"*.zip"
+	],
+	"color_scheme": "Monokai.sublime-color-scheme",
+	"file_exclude_patterns":
+	[
+		".DS_Store",
+		"._*"
+	],
+	"folder_exclude_patterns":
+	[
+	],
+	"font_size": 13,
+	"ignored_packages":
+	[
+		"Vintage",
+	],
+	"save_on_focus_lost": true,
+	"theme": "Adaptive.sublime-theme",
+	"word_wrap": "false",
+	"index_files": true,
+}

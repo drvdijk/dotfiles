@@ -4,4 +4,4 @@ Host *
   UseKeyChain yes
   AddKeysToAgent yes
 Include ~/Dropbox/sync/.ssh/*
-
+Include ~/dev/keys/.ssh/*
