@@ -25,9 +25,10 @@ if [ -x "$(command -v asdf)" ]; then
 	asdf plugin add java
 	asdf plugin add maven
 	asdf plugin add tomcat
-	asdf install java temurin-17.0.13+11
+	asdf install java temurin-21.0.6+7.0.LTS
 	asdf install maven 3.9.2
-	asdf install tomcat 9.0.82
-	asdf global java temurin-17.0.13+11
-	asdf global maven 3.9.2
+	asdf install tomcat 9.0.102
+	asdf set java temurin-21.0.6+7.0.LTS
+	asdf set maven 3.9.2
+	asdf set tomcat 9.0.102
 fi
