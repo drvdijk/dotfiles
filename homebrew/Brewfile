@@ -59,6 +59,7 @@ cask "qlmarkdown"
 cask "raycast"
 #cask "rectangle"
 cask "signal"
+cask "slack"
 cask "spotify"
 cask "sublime-text"
 cask "sublime-merge"
@@ -72,7 +73,7 @@ mas "Fantastical", id: 975937182
 #mas "Flycut", id: 442160987
 #mas "Hidden Bar", id: 1452453066
 mas "reMarkable", id: 1276493162
-mas "Slack", id: 803453959
+#mas "Slack", id: 803453959  # Use brew version instead to prevent screen flickring when people draw on your shared screen
 mas "Todoist", id: 585829637
 #mas "Notability", id: 360593530
 #mas "Trello", id: 1278508951
