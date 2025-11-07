@@ -28,3 +28,6 @@ brew bundle --file=$(dirname ${BASH_SOURCE[0]})/Brewfile
 
 # Remove outdated versions from the cellar
 brew cleanup
+
+# Post homebrew installations
+gcloud components install gke-gcloud-auth-plugin

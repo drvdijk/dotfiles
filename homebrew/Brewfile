@@ -2,7 +2,6 @@
 cask_args appdir: "/Applications"
 
 # Taps
-tap "homebrew/bundle"
 
 # Dependencies
 brew "mas"
@@ -38,26 +37,21 @@ brew "wget"
 
 # GUI applications
 cask "1password"
-#cask "bartender"
 #cask "dropbox" # disable until M1 support is available, use maestral instead
 cask "forklift"
 cask "google-chrome"
 cask "gpg-suite"
-#cask "hyperkey"
 cask "iina"
 cask "istat-menus"
 cask "iterm2"
-cask "jordanbaird-ice"
+#cask "jordanbaird-ice"
 cask "keka"
 cask "keyboardcleantool"
 cask "logi-options-plus"
 cask "macpar-deluxe"
-#cask "maestral" # replaces dropbox, until dropbox finally adds M1 support
 cask "mountain-duck"
 cask "obsidian"
-cask "qlmarkdown"
 cask "raycast"
-#cask "rectangle"
 cask "signal"
 cask "slack"
 cask "spotify"
