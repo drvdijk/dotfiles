@@ -3,10 +3,14 @@
 # Load libs
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )/../bin" && pwd )"/lib.sh
 
-# Link keys folder if exists
-if [[ -e ~/Dropbox/sync/keys_loc && -d $(cat ~/Dropbox/sync/keys_loc) ]]; then
+# Link keys folder
+bot "Work keys"
+echo " - Where is your keys folder? (leave blank to skip)"
+read -e keys_dir
+if [[ -n "$keys_dir" && -d "$keys_dir" ]]; then
 	mkdir -p ~/dev
-	ln -sf "$(cat ~/Dropbox/sync/keys_loc)" ~/dev/keys;
+	ln -sf "$keys_dir" ~/dev/keys
+	ok "keys linked from $keys_dir"
 fi
 
 # Set up local resolver
@@ -21,7 +25,22 @@ $USER ALL = NOPASSWD: /opt/homebrew/bin/openfortivpn
 $USER ALL = NOPASSWD: /usr/bin/killall openfortivpn
 EOF
 
-if [ -x "$(command -v asdf)" ]; then 
+# Link work agent skills into ~/.agents/skills/ (the tool-agnostic merge point)
+bot "Work agent skills"
+echo " - Where is your work agents repo cloned? (leave blank to skip)"
+read -e work_agents_dir
+if [[ -n "$work_agents_dir" && -d "$work_agents_dir/skills" ]]; then
+  mkdir -p ~/.agents/skills
+  for src in "$work_agents_dir"/skills/*; do
+    [ -e "$src" ] || continue
+    dst="$HOME/.agents/skills/$(basename "$src")"
+    [ -L "$dst" ] && rm "$dst"
+    ln -s "$src" "$dst"
+  done
+  ok "work agent skills linked from $work_agents_dir"
+fi
+
+if [ -x "$(command -v asdf)" ]; then
 	asdf plugin add java
 	asdf plugin add maven
 	asdf plugin add tomcat

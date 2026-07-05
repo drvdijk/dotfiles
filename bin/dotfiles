@@ -16,6 +16,7 @@ sub_help () {
     echo "Commands:"
     echo "   help                   This help message"
     echo "   bootstrap              Bootstrap the dotfiles"
+    echo "   skills                 Install agent skills"
     echo "   gitconfig              Setup git configuration"
     echo "   sshconfig              Setup ssh config file"
     echo "   install macos          Install reasonable macOS defaults"
@@ -125,6 +126,26 @@ sub_bootstrap () {
   done
 
   ok 'dotfiles installed'
+}
+
+sub_skills () {
+  bot 'Installing agent skills'
+
+  local overwrite_all=false backup_all=false skip_all=false
+
+  mkdir -p "$HOME/.agents/skills"
+
+  for src in $(find "$DOTFILES_DIR/agents/skills" -maxdepth 1 -mindepth 1 -not -name '.gitkeep' 2>/dev/null)
+  do
+    link_file "$src" "$HOME/.agents/skills/$(basename "$src")"
+  done
+
+  mkdir -p "$HOME/.claude"
+  mkdir -p "$HOME/.gemini"
+  link_file "$HOME/.agents/skills" "$HOME/.claude/skills"
+  link_file "$HOME/.agents/skills" "$HOME/.gemini/skills"
+
+  ok 'agent skills installed'
 }
 
 sub_gitconfig () {
