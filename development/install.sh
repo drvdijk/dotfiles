@@ -30,4 +30,10 @@ brew bundle --file=$(dirname ${BASH_SOURCE[0]})/Brewfile
 brew cleanup
 
 # Post homebrew installations
-gcloud components install gke-gcloud-auth-plugin
+GCLOUD_SDK="$(brew --prefix)/Caskroom/gcloud-cli/latest/google-cloud-sdk"
+if [[ -f "$GCLOUD_SDK/path.bash.inc" ]]; then
+	source "$GCLOUD_SDK/path.bash.inc"
+	gcloud components install gke-gcloud-auth-plugin
+else
+	warn "gcloud SDK not found at $GCLOUD_SDK, skipping gke-gcloud-auth-plugin install"
+fi
