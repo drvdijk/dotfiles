@@ -74,38 +74,6 @@ function require_homebrew() {
     fi
 }
 
-function require_brew() {
-    running "brew $1 $2"
-    brew list $1 > /dev/null 2>&1 | true
-    if [[ ${PIPESTATUS[0]} != 0 ]]; then
-        action "brew install $1 $2"
-        brew install $1 $2
-        if [[ $? != 0 ]]; then
-            error "failed to install $1! aborting..."
-            exit -1
-        fi
-    fi
-    ok
-}
-
-function require_cask() {
-    running "brew cask $1"
-    brew cask list $1 > /dev/null 2>&1 | true
-    if [[ ${PIPESTATUS[0]} != 0 ]]; then
-        action "brew cask install $1"
-        if [ -z "$HOMEBREW_CASK_OPTS" ]; then
-            # Install to /Applications instead of ~/Applications
-            export HOMEBREW_CASK_OPTS="--appdir=/Applications"
-        fi
-        brew cask install $1
-        if [[ $? != 0 ]]; then
-            error "failed to install $1! aborting..."
-            exit -1
-        fi
-    fi
-    ok
-}
-
 function require_full_disk_access() {
     if ! plutil -lint /Library/Preferences/com.apple.TimeMachine.plist >/dev/null ; then
         echo "This script requires your terminal app to have Full Disk Access."
