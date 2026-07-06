@@ -41,13 +41,22 @@ if [[ -n "$work_agents_dir" && -d "$work_agents_dir/skills" ]]; then
 fi
 
 if [ -x "$(command -v asdf)" ]; then
-	asdf plugin add java
-	asdf plugin add maven
-	asdf plugin add tomcat
-	asdf install java temurin-21.0.6+7.0.LTS
-	asdf install maven 3.9.2
-	asdf install tomcat 9.0.102
-	asdf set java temurin-21.0.6+7.0.LTS
-	asdf set maven 3.9.2
-	asdf set tomcat 9.0.102
+	asdf plugin list | grep -q java   || asdf plugin add java
+	asdf plugin list | grep -q maven  || asdf plugin add maven
+	asdf plugin list | grep -q tomcat || asdf plugin add tomcat
+	asdf plugin list | grep -q nodejs || asdf plugin add nodejs
+	bot "asdf tool versions"
+	echo " - Where is your tool-versions file? (leave blank for ~/dev/tool-versions)"
+	read -e tool_versions_file
+	tool_versions_file="${tool_versions_file:-$HOME/dev/tool-versions}"
+	if [[ -f "$tool_versions_file" ]]; then
+		while IFS=' ' read -r tool version; do
+			[[ -z "$tool" || "$tool" == \#* ]] && continue
+			asdf install "$tool" "$version"
+			asdf set --home "$tool" "$version"
+		done < "$tool_versions_file"
+		ok "asdf tools installed from $tool_versions_file"
+	else
+		warn "tool-versions file not found at $tool_versions_file, skipping"
+	fi
 fi
