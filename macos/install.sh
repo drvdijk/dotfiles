@@ -162,7 +162,7 @@ set_prefs google-chrome "Google Chrome"
 set_prefs iterm "iTerm"
 set_prefs mountain-duck "Mountain Duck"
 # set_prefs sizeup "SizeUp"
-set_prefs sublime-text-3 "Sublime Text"
+set_prefs sublime-text "Sublime Text"
 
 # Close any open System Preferences panes, to prevent them from overriding
 # settings we’re about to change
