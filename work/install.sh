@@ -35,7 +35,11 @@ if [[ -n "$work_agents_dir" && -d "$work_agents_dir/skills" ]]; then
     [ -e "$src" ] || continue
     dst="$HOME/.agents/skills/$(basename "$src")"
     [ -L "$dst" ] && rm "$dst"
-    ln -s "$src" "$dst"
+    if [ -e "$dst" ]; then
+      warn "skipping $dst: exists and is not a symlink"
+    else
+      ln -s "$src" "$dst"
+    fi
   done
   ok "work agent skills linked from $work_agents_dir"
 fi

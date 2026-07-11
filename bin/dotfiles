@@ -119,11 +119,11 @@ sub_bootstrap () {
 
   local overwrite_all=false backup_all=false skip_all=false
 
-  for src in $(find "$DOTFILES_DIR" -maxdepth 2 -name '*.symlink')
+  while IFS= read -r -d '' src
   do
     dst="$HOME/.$(basename "${src%.*}")"
     link_file "$src" "$dst"
-  done
+  done < <(find "$DOTFILES_DIR" -maxdepth 2 -name '*.symlink' -print0)
 
   ok 'dotfiles installed'
 }
@@ -135,10 +135,10 @@ sub_skills () {
 
   mkdir -p "$HOME/.agents/skills"
 
-  for src in $(find "$DOTFILES_DIR/agents/skills" -maxdepth 1 -mindepth 1 -not -name '.gitkeep' 2>/dev/null)
+  while IFS= read -r -d '' src
   do
     link_file "$src" "$HOME/.agents/skills/$(basename "$src")"
-  done
+  done < <(find "$DOTFILES_DIR/agents/skills" -maxdepth 1 -mindepth 1 -not -name '.gitkeep' -print0 2>/dev/null)
 
   mkdir -p "$HOME/.claude"
   mkdir -p "$HOME/.gemini"
