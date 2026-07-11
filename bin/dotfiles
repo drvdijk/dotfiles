@@ -21,7 +21,7 @@ sub_help () {
     echo "   install macos          Install reasonable macOS defaults"
     echo "   install macos <app>    Apply prefs for just one app/pane (e.g. finder, dock)"
     echo "   install homebrew       Install homebrew & cask"
-    echo "   install homebrew <x>   Install just one Brewfile entry (e.g. slack)"
+    echo "   install homebrew <x>   Install one Brewfile entry + its prefs (e.g. sublime-text)"
     echo "   install <x>            Install package x"
 }
 

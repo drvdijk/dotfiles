@@ -9,11 +9,27 @@ source "$( cd "$( dirname "${BASH_SOURCE[0]}" )/../bin" && pwd )"/lib.sh
 require_osx
 require_homebrew
 
+# Prefs for third-party apps installed from this Brewfile (see
+# bin/lib.sh for set_prefs/source_prefs/etc.)
+PREF_FILES=()
+AFFECTED_APPS=()
+PREF_APPS=()
+PREFS_DIR="$(dirname "${BASH_SOURCE[0]}")/apps"
+set_prefs google-chrome "Google Chrome"
+set_prefs iterm "iTerm"
+set_prefs mountain-duck "Mountain Duck"
+set_prefs sublime-text "Sublime Text"
+
 if [ "$#" -gt 0 ]; then
-	# Install just the named Brewfile entries, skip the full-machine dance.
+	# Install just the named Brewfile entries, skip the full-machine dance,
+	# then apply that app's prefs if it has any.
 	brew update
 	brew_install_from_file "$(dirname "${BASH_SOURCE[0]}")/Brewfile" "$@"
 	brew cleanup
+	if select_prefs "$@"; then
+		get_open_affected_apps
+		source_prefs
+	fi
 else
 	require_sudo
 
@@ -61,4 +77,8 @@ else
 
 	# Remove outdated versions from the cellar
 	brew cleanup
+
+	# Apply prefs for the third-party apps installed above
+	get_open_affected_apps
+	source_prefs
 fi

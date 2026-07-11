@@ -20,72 +20,10 @@ require_sudo
 
 bot "Let's set some reasonable OS X defaults!"
 
-# Set global variables
+# Set global variables (see bin/lib.sh for set_prefs/source_prefs/etc.)
 PREF_FILES=()
 AFFECTED_APPS=()
-# PREF_APPS is a parallel array to PREF_FILES: for each pref file, the
-# affected app names for *that file only*, "|"-joined. Used to scope down
-# AFFECTED_APPS when only a subset of PREF_FILES is selected (see below).
 PREF_APPS=()
-# Add preference file followed by any number of affected applications
-function set_prefs {
-  PREF_FILES+=("apps/$1.sh")
-  shift
-  PREF_APPS+=("$(IFS='|'; echo "$*")")
-  AFFECTED_APPS+=("$@")
-}
-
-# Add a system preference pane (always affects the same 4 processes)
-function add_system_pref {
-  PREF_FILES+=("system/$1.sh")
-  PREF_APPS+=("cfprefsd|SystemUIServer|Dock|SpeechSynthesisServer")
-}
-
-# Sources all the preference files
-function source_prefs {
-  for pref_file in "${PREF_FILES[@]}"; do
-    file=$( dirname "${BASH_SOURCE[0]}" )/$pref_file
-    [ -r "$file" ] && [ -f "$file" ] && source "$file"
-  done
-}
-
-# Quit affected applications
-function quit_apps {
-  for app in "${AFFECTED_APPS[@]}"; do
-    case "$app" in
-      'Quick Look')
-        # Restart Quick Look
-        qlmanage -r
-        ;;
-      *)
-        killall "$app" &>/dev/null || true
-        # osascript -e "tell application \"${app}\" to quit"
-        ;;
-    esac
-  done
-}
-
-# Check for open application
-function get_open_affected_apps {
-  open_apps=()
-
-  # Store the open apps in an array
-  for app in "${AFFECTED_APPS[@]}"; do
-    (( $(osascript -e "tell app \"System Events\" to count processes whose name is \"${app}\"") > 0 )) \
-    && open_apps+=("$app")
-  done
-
-  echo "The following open applications will be affected:"
-
-  # Print the open apps in columns
-  printf -- '%s\n' "${open_apps[@]}" | column -x
-
-  read -p "Would you like to quit these apps now? [Y/n] " -r
-  echo
-  if [[ $REPLY =~ ^[Yy]$ ]]; then
-      quit_apps
-  fi
-}
 
 # Prompt if user wants to restart the machine
 function prompt_restart {
@@ -140,15 +78,14 @@ system_preferences=(
   other
 )
 
+PREFS_DIR="$(dirname "${BASH_SOURCE[0]}")/system"
 for pane in "${system_preferences[@]}"; do
-  add_system_pref "$pane"
+  set_prefs "$pane" cfprefsd SystemUIServer Dock SpeechSynthesisServer
 done
 
-for pane in "cfprefsd" "SystemUIServer" "Dock" "SpeechSynthesisServer"; do
-  AFFECTED_APPS+=("$pane")
-done
-
-# Default Apps
+# Default Apps (built into macOS, so they live here rather than in a
+# Brewfile topic's apps/ dir)
+PREFS_DIR="$(dirname "${BASH_SOURCE[0]}")/apps"
 # set_prefs activity-monitor "Activity Monitor"
 set_prefs app-store "App Store"
 set_prefs calendar "Calendar"
@@ -165,15 +102,9 @@ set_prefs safari "Safari" "WebKit"
 set_prefs terminal # Do not kill "Terminal" - it will stop script execution
 set_prefs textedit "TextEdit"
 
-# Third Party Apps
-# set_prefs dropbox "Dropbox"
-# set_prefs bartender "Bartender"
-# set_prefs flycut "Flycut"
-set_prefs google-chrome "Google Chrome"
-set_prefs iterm "iTerm"
-set_prefs mountain-duck "Mountain Duck"
-# set_prefs sizeup "SizeUp"
-set_prefs sublime-text "Sublime Text"
+# Third-party app prefs live next to the Brewfile that installs them (e.g.
+# homebrew/apps/sublime-text.sh) and are applied via
+# `dotfiles install homebrew <app>` or a full `dotfiles install homebrew`.
 
 # Close any open System Preferences panes, to prevent them from overriding
 # settings we’re about to change
@@ -181,32 +112,12 @@ osascript -e 'tell application "System Preferences" to quit'
 
 if [ "$#" -gt 0 ]; then
   # Only apply the named app/pane prefs (e.g. "finder", "dock"), instead of
-  # the whole set. Scope AFFECTED_APPS down to just those matches too.
-  matched_files=()
-  matched_apps=()
-  for i in "${!PREF_FILES[@]}"; do
-    base="$(basename "${PREF_FILES[$i]}" .sh)"
-    for name in "$@"; do
-      if [ "$base" == "$name" ]; then
-        matched_files+=("${PREF_FILES[$i]}")
-        if [ -n "${PREF_APPS[$i]}" ]; then
-          IFS='|' read -ra parts <<< "${PREF_APPS[$i]}"
-          matched_apps+=("${parts[@]}")
-        fi
-      fi
-    done
-  done
-
-  if [ "${#matched_files[@]}" -eq 0 ]; then
-    error "No macOS prefs found for: $* (looked for apps/<name>.sh and system/<name>.sh)"
-  else
-    PREF_FILES=("${matched_files[@]}")
-    AFFECTED_APPS=("${matched_apps[@]}")
-    [ "${#AFFECTED_APPS[@]}" -gt 0 ] && get_open_affected_apps
+  # the whole set.
+  if select_prefs "$@"; then
+    get_open_affected_apps
     source_prefs
   fi
 else
-  # Run
   get_open_affected_apps
   source_prefs
 

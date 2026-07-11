@@ -82,6 +82,92 @@ function require_full_disk_access() {
     fi
 }
 
+###
+# Shared "apply app/system prefs" machinery, used by macos/install.sh and by
+# each Brewfile topic's install.sh for the apps it installs. Callers set
+# PREFS_DIR before calling set_prefs, and initialize PREF_FILES, PREF_APPS,
+# and AFFECTED_APPS as empty arrays first.
+###
+
+# Register a pref script (found at $PREFS_DIR/$1.sh) plus the process
+# name(s) it affects.
+function set_prefs() {
+    PREF_FILES+=("${PREFS_DIR}/$1.sh")
+    shift
+    PREF_APPS+=("$(IFS='|'; echo "$*")")
+    AFFECTED_APPS+=("$@")
+}
+
+# Narrow PREF_FILES/AFFECTED_APPS (in place) down to just the registered
+# entries whose script basename matches one of the given names.
+function select_prefs() {
+    local matched_files=() matched_apps=() base name i
+
+    for i in "${!PREF_FILES[@]}"; do
+        base="$(basename "${PREF_FILES[$i]}" .sh)"
+        for name in "$@"; do
+            if [ "$base" == "$name" ]; then
+                matched_files+=("${PREF_FILES[$i]}")
+                if [ -n "${PREF_APPS[$i]}" ]; then
+                    IFS='|' read -ra parts <<< "${PREF_APPS[$i]}"
+                    matched_apps+=("${parts[@]}")
+                fi
+            fi
+        done
+    done
+
+    if [ "${#matched_files[@]}" -eq 0 ]; then
+        error "no prefs found for: $*"
+        return 1
+    fi
+
+    PREF_FILES=("${matched_files[@]}")
+    AFFECTED_APPS=("${matched_apps[@]}")
+}
+
+# Sources all the registered preference files
+function source_prefs() {
+    for pref_file in "${PREF_FILES[@]}"; do
+        [ -r "$pref_file" ] && [ -f "$pref_file" ] && source "$pref_file"
+    done
+}
+
+# Quit affected applications
+function quit_apps() {
+    for app in "${AFFECTED_APPS[@]}"; do
+        case "$app" in
+            'Quick Look')
+                # Restart Quick Look
+                qlmanage -r
+                ;;
+            *)
+                killall "$app" &>/dev/null || true
+                ;;
+        esac
+    done
+}
+
+# Offer to quit whichever AFFECTED_APPS are currently open
+function get_open_affected_apps() {
+    open_apps=()
+
+    for app in "${AFFECTED_APPS[@]}"; do
+        (( $(osascript -e "tell app \"System Events\" to count processes whose name is \"${app}\"") > 0 )) \
+        && open_apps+=("$app")
+    done
+
+    [ "${#open_apps[@]}" -eq 0 ] && return
+
+    echo "The following open applications will be affected:"
+    printf -- '%s\n' "${open_apps[@]}" | column -x
+
+    read -p "Would you like to quit these apps now? [Y/n] " -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        quit_apps
+    fi
+}
+
 # Install just the named brew/cask/mas entries from a Brewfile, instead of
 # running the whole file through `brew bundle`. Looks up each name as an
 # exact match against a `brew "name"` / `cask "name"` / `mas "name", id: N`
