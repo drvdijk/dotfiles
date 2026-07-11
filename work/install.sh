@@ -20,10 +20,20 @@ if [[ -e ~/dev/keys/resolver_local.conf ]]; then
 fi
 
 # Allow user to call sudo openfortivpn without password
-sudo tee /private/etc/sudoers.d/openfortivpn > /dev/null <<EOF
+sudoers_tmp="$(mktemp)"
+cat > "$sudoers_tmp" <<EOF
 $USER ALL = NOPASSWD: /opt/homebrew/bin/openfortivpn
 $USER ALL = NOPASSWD: /usr/bin/killall openfortivpn
 EOF
+if visudo -cf "$sudoers_tmp"; then
+	sudo cp "$sudoers_tmp" /private/etc/sudoers.d/openfortivpn
+	sudo chown root:wheel /private/etc/sudoers.d/openfortivpn
+	sudo chmod 440 /private/etc/sudoers.d/openfortivpn
+	ok "sudoers.d/openfortivpn installed"
+else
+	error "generated sudoers fragment failed validation, not installing it"
+fi
+rm -f "$sudoers_tmp"
 
 # Link work agent skills into ~/.agents/skills/ (the tool-agnostic merge point)
 bot "Work agent skills"
