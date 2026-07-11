@@ -81,3 +81,42 @@ function require_full_disk_access() {
         exit -1
     fi
 }
+
+# Install just the named brew/cask/mas entries from a Brewfile, instead of
+# running the whole file through `brew bundle`. Looks up each name as an
+# exact match against a `brew "name"` / `cask "name"` / `mas "name", id: N`
+# line and installs it with the right brew subcommand.
+function brew_install_from_file() {
+    local brewfile="$1"; shift
+    local name line type id
+
+    for name in "$@"; do
+        line="$(grep -E "^(brew|cask|mas)[[:space:]]+\"${name}\"" "$brewfile" | head -1)"
+        if [ -z "$line" ]; then
+            error "no entry for '$name' in $(basename "$brewfile"), skipping"
+            continue
+        fi
+
+        type="$(echo "$line" | awk '{print $1}')"
+        case "$type" in
+            brew)
+                action "installing $name"
+                brew install "$name"
+                ;;
+            cask)
+                action "installing $name (cask)"
+                brew install --cask "$name"
+                ;;
+            mas)
+                hash mas 2>/dev/null || brew install mas
+                id="$(echo "$line" | grep -oE 'id:[[:space:]]*[0-9]+' | grep -oE '[0-9]+')"
+                if [ -n "$id" ]; then
+                    action "installing $name (App Store, id $id)"
+                    mas install "$id"
+                else
+                    error "could not parse App Store id for '$name'"
+                fi
+                ;;
+        esac
+    done
+}

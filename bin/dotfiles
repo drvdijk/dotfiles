@@ -8,7 +8,6 @@ source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/lib.sh
 set -e
 
 COMMAND_NAME=$1
-SUB_COMMAND_NAME=$2
 
 
 sub_help () {
@@ -20,7 +19,9 @@ sub_help () {
     echo "   gitconfig              Setup git configuration"
     echo "   sshconfig              Setup ssh config file"
     echo "   install macos          Install reasonable macOS defaults"
+    echo "   install macos <app>    Apply prefs for just one app/pane (e.g. finder, dock)"
     echo "   install homebrew       Install homebrew & cask"
+    echo "   install homebrew <x>   Install just one Brewfile entry (e.g. slack)"
     echo "   install <x>            Install package x"
 }
 
@@ -185,8 +186,13 @@ sub_sshconfig () {
 }
 
 sub_install () {
-    local SCRIPT="${DOTFILES_DIR}/${SUB_COMMAND_NAME}/install.sh"
-    [ -f "$SCRIPT" ] && source "$SCRIPT" || error "Unable to find script to install ${SUB_COMMAND_NAME}"
+    local topic="$1"; shift
+    local SCRIPT="${DOTFILES_DIR}/${topic}/install.sh"
+    if [ -f "$SCRIPT" ]; then
+        source "$SCRIPT" "$@"
+    else
+        error "Unable to find script to install ${topic}"
+    fi
 }
 
 
@@ -197,7 +203,7 @@ case $COMMAND_NAME in
     *)
         shift
         if test $(type -t sub_${COMMAND_NAME}); then
-            sub_${COMMAND_NAME} $@
+            sub_${COMMAND_NAME} "$@"
             if [ $? = 127 ]; then
                 error "'$COMMAND_NAME' is not a known command or has errors." >&2
             fi

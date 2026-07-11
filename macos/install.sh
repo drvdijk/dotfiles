@@ -23,11 +23,22 @@ bot "Let's set some reasonable OS X defaults!"
 # Set global variables
 PREF_FILES=()
 AFFECTED_APPS=()
+# PREF_APPS is a parallel array to PREF_FILES: for each pref file, the
+# affected app names for *that file only*, "|"-joined. Used to scope down
+# AFFECTED_APPS when only a subset of PREF_FILES is selected (see below).
+PREF_APPS=()
 # Add preference file followed by any number of affected applications
 function set_prefs {
   PREF_FILES+=("apps/$1.sh")
   shift
+  PREF_APPS+=("$(IFS='|'; echo "$*")")
   AFFECTED_APPS+=("$@")
+}
+
+# Add a system preference pane (always affects the same 4 processes)
+function add_system_pref {
+  PREF_FILES+=("system/$1.sh")
+  PREF_APPS+=("cfprefsd|SystemUIServer|Dock|SpeechSynthesisServer")
 }
 
 # Sources all the preference files
@@ -130,7 +141,7 @@ system_preferences=(
 )
 
 for pane in "${system_preferences[@]}"; do
-  PREF_FILES+=("system/${pane}.sh")
+  add_system_pref "$pane"
 done
 
 for pane in "cfprefsd" "SystemUIServer" "Dock" "SpeechSynthesisServer"; do
@@ -168,8 +179,36 @@ set_prefs sublime-text "Sublime Text"
 # settings we’re about to change
 osascript -e 'tell application "System Preferences" to quit'
 
-# Run
-get_open_affected_apps
-source_prefs
+if [ "$#" -gt 0 ]; then
+  # Only apply the named app/pane prefs (e.g. "finder", "dock"), instead of
+  # the whole set. Scope AFFECTED_APPS down to just those matches too.
+  matched_files=()
+  matched_apps=()
+  for i in "${!PREF_FILES[@]}"; do
+    base="$(basename "${PREF_FILES[$i]}" .sh)"
+    for name in "$@"; do
+      if [ "$base" == "$name" ]; then
+        matched_files+=("${PREF_FILES[$i]}")
+        if [ -n "${PREF_APPS[$i]}" ]; then
+          IFS='|' read -ra parts <<< "${PREF_APPS[$i]}"
+          matched_apps+=("${parts[@]}")
+        fi
+      fi
+    done
+  done
 
-prompt_restart
+  if [ "${#matched_files[@]}" -eq 0 ]; then
+    error "No macOS prefs found for: $* (looked for apps/<name>.sh and system/<name>.sh)"
+  else
+    PREF_FILES=("${matched_files[@]}")
+    AFFECTED_APPS=("${matched_apps[@]}")
+    [ "${#AFFECTED_APPS[@]}" -gt 0 ] && get_open_affected_apps
+    source_prefs
+  fi
+else
+  # Run
+  get_open_affected_apps
+  source_prefs
+
+  prompt_restart
+fi
