@@ -36,8 +36,10 @@ defaults write com.apple.screensaver askForPasswordDelay -int 5
 # # Disable automatic login
 # sudo defaults delete /Library/Preferences/com.apple.loginwindow autoLoginUser &> /dev/null
 
-# Disable the “Are you sure you want to open this application?” dialog
-defaults write com.apple.LaunchServices LSQuarantine -bool false
+# not disabling quarantine anymore, it's a real Gatekeeper protection against
+# running downloaded/unsigned apps unknowingly, not just an annoyance
+## Disable the “Are you sure you want to open this application?” dialog
+#defaults write com.apple.LaunchServices LSQuarantine -bool false
 
 # # Allow applications downloaded from anywhere
 # sudo spctl --master-disable
