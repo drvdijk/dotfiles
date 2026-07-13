@@ -12,10 +12,16 @@ export AM_THEME=soft
 export AM_DIR_EXPANSION_LEVEL=3
 
 ## ===> VI PROMPT
-#  export AM_ENABLE_VI_PROMPT=1
-#  export AM_VIM_INSERT_SYM='(i)'
-#  export AM_VIM_NORMAL_SYM='(n)'
-#  export AM_VI_PROMPT_POS='left_end'
+# Blanking AM_VIM_INSERT_SYM/AM_VIM_NORMAL_SYM doesn't work: symbols.zsh's
+# `[[ -z ... ]]` default check treats an empty string as unset and refills it.
+# Drop am_vi_prompt from the left section instead (default order otherwise).
+export AM_LEFT_SECTION=(
+  am_ssh_st
+  am_prompt_start_tag
+  am_prompt_dir
+  am_prompt_end_tag
+  am_venv
+)
 
 ## ===> SYMBOLS
 #  export AM_VERSIONS_PROMPT=(RUBY PYTHON GO CRYSTAL NODE PHP ELIXIR)
