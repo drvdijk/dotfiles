@@ -15,6 +15,7 @@ cask "knockknock"
 brew "zsh"
 brew "bash"
 brew "antidote"
+brew "starship"
 
 # CLI
 brew "coreutils"
@@ -33,6 +34,7 @@ brew "watch"
 brew "wget"
 
 # Fonts
+cask "font-meslo-lg-nerd-font"
 #cask "font-hack-nerd-font"
 #cask "font-source-code-pro"
 
