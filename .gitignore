@@ -1,3 +1,4 @@
 git/gitconfig.symlink
 **/*private*
 Brewfile.lock.json
+zsh/zsh_plugins.zsh
