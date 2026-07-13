@@ -78,7 +78,7 @@ function require_full_disk_access() {
     if ! plutil -lint /Library/Preferences/com.apple.TimeMachine.plist >/dev/null ; then
         echo "This script requires your terminal app to have Full Disk Access."
         echo "Add this terminal to the Full Disk Access list in System Preferences > Security & Privacy, quit the app, and re-run this script."
-        exit -1
+        exit 1
     fi
 }
 
