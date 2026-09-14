@@ -56,9 +56,113 @@ function require_sudo() {
     # otherwise be inherited by this backgrounded subshell: the first time
     # `sudo -n true` fails for any reason, errexit would kill the whole loop
     # silently, the ticket would then expire on its normal timeout, and every
-    # sudo-requiring step after that (e.g. each cask's pkg installer) would
-    # prompt again for the rest of the run.
+    # sudo-requiring step after that would prompt again for the rest of the run.
+    #
+    # Note this only keeps *this shell's own* sudo calls (e.g. `softwareupdate`
+    # below) from re-prompting. It can't help `brew install --cask` pkg
+    # installers: Homebrew pipes their stdin/stdout instead of connecting them
+    # to the real terminal, so `sudo` can't see this tty's cached ticket at all
+    # and always re-authenticates. See offer_passwordless_installer() for that.
     ( set +e; while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done ) 2>/dev/null &
+}
+
+# Homebrew casks fall back to `sudo cp`/`sudo chmod` whenever their target
+# (typically /Applications) isn't already writable by the current user - which
+# it isn't for a deliberately non-admin account, even one with full sudo
+# rights, since admin-group membership (not sudo) is what makes /Applications
+# group-writable. Rather than grant this account any standing permission (ACL,
+# admin-group membership, broad sudoers rules) to work around that, re-run the
+# exact same `dotfiles install <topic> [args...]` invocation as a genuine
+# admin user instead, authenticating with *that* user's own password via
+# `su` - identical to running it by hand under that account.
+#
+# Call this first thing in a topic's install.sh, before any other work, with
+# the topic name and the install.sh's own "$@" so the re-exec can reconstruct
+# the original command. No-ops if the current user is already in `admin`.
+function require_admin_user() {
+    local topic="$1"; shift
+
+    if id -Gn "$USER" 2>/dev/null | tr ' ' '\n' | grep -qx admin; then
+        return
+    fi
+
+    warn "$USER isn't in the admin group; installing apps needs one that is."
+    read -p "Which admin user should run this install? [grandmaster] " -r admin_user
+    admin_user="${admin_user:-grandmaster}"
+
+    bot "re-running as $admin_user (you'll need that account's password)..."
+    exec su "$admin_user" -c "$(printf '%q ' "$DOTFILES_DIR/bin/dotfiles" install "$topic" "$@")"
+}
+
+# Safely install a sudoers.d fragment: writes `content` to a temp file first
+# and validates it with `visudo -cf` *before* it ever touches the real config,
+# only then copying it into place with the ownership/permissions sudo
+# requires (root:wheel, 440). Always cleans up its temp file. `name` becomes
+# the filename under /etc/sudoers.d/. Returns non-zero (installing nothing)
+# if validation fails.
+function install_sudoers_fragment() {
+    local name="$1" content="$2"
+    local dest="/private/etc/sudoers.d/$name"
+    local tmp
+    tmp="$(mktemp)"
+    echo "$content" > "$tmp"
+    if visudo -cf "$tmp"; then
+        sudo cp "$tmp" "$dest"
+        sudo chown root:wheel "$dest"
+        sudo chmod 440 "$dest"
+        rm -f "$tmp"
+    else
+        error "generated sudoers fragment failed validation, not installing '$name'"
+        rm -f "$tmp"
+        return 1
+    fi
+}
+
+# Homebrew's `pkg`-cask installer always re-prompts for the sudo password, once
+# per cask, no matter how fresh the caller's own sudo ticket is: it runs
+# `/usr/sbin/installer` with stdin/stdout piped to itself (so it can relay and
+# format the output) rather than connected to the real terminal, so `sudo`
+# can't see this tty's cached credentials and falls back to authenticating
+# fresh every time. There's no way to fix that from this side of the pipe.
+#
+# As an opt-in workaround, this installs a sudoers.d rule that allows
+# passwordless `sudo /usr/sbin/installer` for the rest of the *current*
+# process only. It tries to remove the rule again on exit via an EXIT trap,
+# but that can't run if the process is killed outright (Ctrl-C landing on a
+# different process group, terminal closed, `kill -9`, a crash) - so on top
+# of that, any later call self-heals: it records the owning PID alongside
+# the rule, and if that PID is no longer running, treats the rule as a stale
+# leftover and removes it before deciding whether to offer a fresh one.
+# Call this before a step that installs several pkg-based casks (gpg-suite,
+# istat-menus, mountain-duck, ...) to avoid a password prompt after every
+# single one.
+function offer_passwordless_installer() {
+    local sudoers_file="/private/etc/sudoers.d/dotfiles-installer-nopasswd"
+    local pid_file="/private/tmp/dotfiles-installer-nopasswd.pid"
+
+    if [ -f "$sudoers_file" ]; then
+        if [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null; then
+            return # already active in this process tree
+        fi
+        warn "removing stale passwordless-installer sudoers rule left over from a previous run"
+        sudo rm -f "$sudoers_file"
+        rm -f "$pid_file"
+    fi
+
+    echo -e ' - Installing several apps can otherwise prompt for your password after every single one (a Homebrew limitation, not a security issue with your Mac).'
+    read -p "   Temporarily allow passwordless \`sudo installer\` for the rest of this run? [y/N] " -n 1 -r
+    echo
+    [[ $REPLY =~ ^[Yy]$ ]] || return
+
+    # SETENV is required because Homebrew's installer invocation sets
+    # LOGNAME/USER/USERNAME on the sudo command line itself (`sudo -E
+    # LOGNAME=... -- /usr/sbin/installer ...`); without it sudo won't treat
+    # that invocation as covered by this rule at all and re-prompts anyway.
+    if install_sudoers_fragment dotfiles-installer-nopasswd "$USER ALL = NOPASSWD:SETENV: /usr/sbin/installer"; then
+        echo "$$" > "$pid_file"
+        ok "passwordless installer enabled for the rest of this run"
+        trap 'sudo rm -f "'"$sudoers_file"'"; rm -f "'"$pid_file"'"' EXIT
+    fi
 }
 
 function require_osx() {

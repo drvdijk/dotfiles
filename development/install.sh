@@ -6,6 +6,7 @@
 # Load libs
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )/../bin" && pwd )"/lib.sh
 
+require_admin_user development "$@"
 require_osx
 require_homebrew
 
@@ -16,6 +17,7 @@ if [ "$#" -gt 0 ]; then
 	brew cleanup
 else
 	require_sudo
+	offer_passwordless_installer
 
 	bot "installing tools via homebrew..."
 	# Make sure we’re using the latest Homebrew

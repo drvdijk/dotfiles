@@ -6,6 +6,7 @@
 # Load libs
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )/../bin" && pwd )"/lib.sh
 
+require_admin_user homebrew "$@"
 require_osx
 require_homebrew
 
@@ -32,6 +33,7 @@ if [ "$#" -gt 0 ]; then
 	fi
 else
 	require_sudo
+	offer_passwordless_installer
 
 	# Install all available updates
 	sudo softwareupdate -ia --verbose
