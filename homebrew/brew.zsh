@@ -20,6 +20,7 @@ brew() {
     install reinstall uninstall remove rm upgrade
     tap untap unlink link pin unpin
     cleanup postinstall bundle services cask
+    update
   )
 
   # Not a write subcommand (or no subcommand at all) - just run it.
