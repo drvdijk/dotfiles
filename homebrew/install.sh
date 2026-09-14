@@ -49,18 +49,12 @@ if run_as_admin_if_needed homebrew "$@"; then
 		brew upgrade
 		ok "brew upgraded..."
 
-		# Make sure mas is installed
-		brew install mas
-
-		# Wait until app store sign-in is done
-		# mas account is broken: https://github.com/mas-cli/mas/issues/417
-		read -p "Make sure you're logged into the App Store!" -r
-		#until mas account > /dev/null 2>&1; do
-		#  echo "Please sign in to the Mac App store manually..."
-		#  sleep 3
-		#done
-
-		# Install homebrew, cask, and mas stuff from brew file here
+		# Install homebrew and cask stuff from the Brewfile. Mac App Store
+		# entries in it are handled separately below instead of here, since
+		# they need to run under the original account regardless (see that
+		# comment) - brew bundle will still attempt them here too, and
+		# that's fine; a failure for just those entries isn't fatal to the
+		# rest of the bundle.
 		brew bundle --file=$(dirname ${BASH_SOURCE[0]})/Brewfile
 
 		# Add zsh to shells list
@@ -76,6 +70,35 @@ if run_as_admin_if_needed homebrew "$@"; then
 
 		# Remove outdated versions from the cellar
 		brew cleanup
+	fi
+fi
+
+# Mac App Store installs go through the App Store's own daemon, tied to
+# whichever account is actually signed into the App Store in the GUI - not
+# to Unix admin permissions - and `su` doesn't carry a full GUI session
+# anyway. So unlike casks/formulae above, these never delegate to an admin
+# user, and (like prefs below) are skipped in the delegated admin run
+# itself. Only covers the full install (no args) for now - a purely
+# mas-named install (e.g. `dotfiles install homebrew Fantastical`) still
+# goes through the admin path above today and would need the same treatment
+# if that ever comes up.
+if [ -z "$DOTFILES_ADMIN_PHASE" ] && [ "$#" -eq 0 ]; then
+	brew install mas
+
+	# Wait until app store sign-in is done
+	# mas account is broken: https://github.com/mas-cli/mas/issues/417
+	read -p "Make sure you're logged into the App Store!" -r
+	#until mas account > /dev/null 2>&1; do
+	#  echo "Please sign in to the Mac App store manually..."
+	#  sleep 3
+	#done
+
+	mas_names=()
+	while IFS= read -r name; do
+		mas_names+=("$name")
+	done < <(grep -oE '^mas "[^"]+"' "$(dirname "${BASH_SOURCE[0]}")/Brewfile" | sed -E 's/^mas "(.*)"$/\1/')
+	if [ "${#mas_names[@]}" -gt 0 ]; then
+		brew_install_from_file "$(dirname "${BASH_SOURCE[0]}")/Brewfile" "${mas_names[@]}"
 	fi
 fi
 
