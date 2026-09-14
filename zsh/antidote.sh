@@ -19,8 +19,10 @@ fi
 # zsh-completions only extends fpath; compinit isn't called for us.
 autoload -Uz compinit && compinit
 
-bindkey '^[[A' history-substring-search-up
-bindkey '^[[B' history-substring-search-down
+if (( $+widgets[history-substring-search-up] )); then
+  bindkey '^[[A' history-substring-search-up
+  bindkey '^[[B' history-substring-search-down
+fi
 
 #
 # end antidote
