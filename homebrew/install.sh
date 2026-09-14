@@ -50,12 +50,17 @@ if run_as_admin_if_needed homebrew "$@"; then
 		ok "brew upgraded..."
 
 		# Install homebrew and cask stuff from the Brewfile. Mac App Store
-		# entries in it are handled separately below instead of here, since
-		# they need to run under the original account regardless (see that
-		# comment) - brew bundle will still attempt them here too, and
-		# that's fine; a failure for just those entries isn't fatal to the
-		# rest of the bundle.
-		brew bundle --file=$(dirname ${BASH_SOURCE[0]})/Brewfile
+		# entries are deliberately excluded here (see the mas section below,
+		# after this admin-delegated block, for why) - a failed `mas install`
+		# under the wrong account doesn't just fail quietly, it can disrupt
+		# the shared App Store session state (storeaccountd) that the
+		# correct, later attempt under the original account relies on,
+		# turning an otherwise-silent install into one that needs the Apple
+		# ID password re-entered.
+		brewfile_no_mas="$(mktemp)"
+		grep -v '^mas ' "$(dirname "${BASH_SOURCE[0]}")/Brewfile" > "$brewfile_no_mas"
+		brew bundle --file="$brewfile_no_mas"
+		rm -f "$brewfile_no_mas"
 
 		# Add zsh to shells list
 		if [[ $(cat /etc/shells | grep $(which zsh) | wc -c) -eq 0 ]]; then
