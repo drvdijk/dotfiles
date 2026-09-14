@@ -188,6 +188,14 @@ function require_osx() {
 }
 
 function require_homebrew() {
+    # Refresh PATH in case brew was just installed by a sibling process in
+    # this same run (e.g. an admin-delegated install - see
+    # run_as_admin_if_needed) - a shell's PATH only picks up
+    # /opt/homebrew/bin at startup (homebrew/path.zsh), so a brew that
+    # didn't exist yet when *this* shell started won't otherwise be found
+    # even after it's been installed on disk.
+    [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
+
     # Install Homebrew if not installed - brew.sh
     running "checking homebrew"
     if ! hash brew 2>/dev/null; then

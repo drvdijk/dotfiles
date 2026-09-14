@@ -88,6 +88,7 @@ fi
 # goes through the admin path above today and would need the same treatment
 # if that ever comes up.
 if [ -z "$DOTFILES_ADMIN_PHASE" ] && [ "$#" -eq 0 ]; then
+	require_homebrew
 	brew install mas
 
 	# Wait until app store sign-in is done
