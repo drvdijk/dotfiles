@@ -51,8 +51,14 @@ function require_sudo() {
     [ "$(sudo -n true 2>&1)" != "" ] && bot "I need you to enter your sudo password so I can install some things:"
     # Ask for the administrator password upfront
     sudo -v
-    # Keep-alive: update existing `sudo` time stamp until `.osx` has finished
-    while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+    # Keep-alive: update existing `sudo` time stamp until the script has finished.
+    # Runs with `set +e` because this file sets `set -e` above, and that would
+    # otherwise be inherited by this backgrounded subshell: the first time
+    # `sudo -n true` fails for any reason, errexit would kill the whole loop
+    # silently, the ticket would then expire on its normal timeout, and every
+    # sudo-requiring step after that (e.g. each cask's pkg installer) would
+    # prompt again for the rest of the run.
+    ( set +e; while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done ) 2>/dev/null &
 }
 
 function require_osx() {

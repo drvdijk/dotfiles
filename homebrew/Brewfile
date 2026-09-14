@@ -51,7 +51,7 @@ cask "iterm2"
 cask "keka"
 cask "keyboardcleantool"
 cask "logi-options+"
-cask "macpar-deluxe"
+#cask "macpar-deluxe" # disable, Intel only
 cask "mountain-duck"
 cask "obsidian"
 cask "raycast"
