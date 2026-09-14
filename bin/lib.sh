@@ -71,27 +71,42 @@ function require_sudo() {
 # it isn't for a deliberately non-admin account, even one with full sudo
 # rights, since admin-group membership (not sudo) is what makes /Applications
 # group-writable. Rather than grant this account any standing permission (ACL,
-# admin-group membership, broad sudoers rules) to work around that, re-run the
-# exact same `dotfiles install <topic> [args...]` invocation as a genuine
-# admin user instead, authenticating with *that* user's own password via
-# `su` - identical to running it by hand under that account.
+# admin-group membership, broad sudoers rules) to work around that, delegate
+# just the package-installing work to a genuine admin user via `su`
+# (authenticating with *that* user's own password), while anything the caller
+# does *after* this returns - e.g. applying per-user prefs - stays under the
+# original account, since that's inherently tied to a specific user's home
+# and should never silently end up targeting the admin account instead.
 #
-# Call this first thing in a topic's install.sh, before any other work, with
-# the topic name and the install.sh's own "$@" so the re-exec can reconstruct
-# the original command. No-ops if the current user is already in `admin`.
-function require_admin_user() {
+# Use it to guard only the actual install work in a topic's install.sh:
+#
+#   if run_as_admin_if_needed homebrew "$@"; then
+#       ... brew update / brew bundle / etc ...
+#   fi
+#   ... anything per-user, e.g. source_prefs, unconditionally after ...
+#
+# Returns 0 (run the install work yourself) if this account is already in
+# `admin`, or if this *is* the delegated admin run (DOTFILES_ADMIN_PHASE is
+# how it tells the two apart). Returns 1 (skip it, it already happened under
+# the admin account) after a delegation completes.
+function run_as_admin_if_needed() {
     local topic="$1"; shift
 
+    if [ -n "$DOTFILES_ADMIN_PHASE" ]; then
+        return 0 # we are the delegated admin run - just do the install work
+    fi
+
     if id -Gn "$USER" 2>/dev/null | tr ' ' '\n' | grep -qx admin; then
-        return
+        return 0 # already admin, nothing to delegate
     fi
 
     warn "$USER isn't in the admin group; installing apps needs one that is."
     read -p "Which admin user should run this install? [grandmaster] " -r admin_user
     admin_user="${admin_user:-grandmaster}"
 
-    bot "re-running as $admin_user (you'll need that account's password)..."
-    exec su "$admin_user" -c "$(printf '%q ' "$DOTFILES_DIR/bin/dotfiles" install "$topic" "$@")"
+    bot "installing as $admin_user (you'll need that account's password); anything per-user (prefs, ...) will still apply to $USER afterward..."
+    su "$admin_user" -c "DOTFILES_ADMIN_PHASE=1 $(printf '%q ' "$DOTFILES_DIR/bin/dotfiles" install "$topic" "$@")"
+    return 1 # already installed by the admin user - caller should skip its install step
 }
 
 # Safely install a sudoers.d fragment: writes `content` to a temp file first

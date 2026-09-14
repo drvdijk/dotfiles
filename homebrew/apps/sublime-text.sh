@@ -5,4 +5,4 @@
 ###############################################################################
 
 mkdir -p ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/User
-cp -R ~/.dotfiles/sublime-text/Packages/User/. ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/User/ || true
+cp -R "$DOTFILES_DIR/sublime-text/Packages/User/." ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/User/ || true
