@@ -117,12 +117,16 @@ if [ "$#" -gt 0 ]; then
   # Only apply the named app/pane prefs (e.g. "finder", "dock"), instead of
   # the whole set.
   if select_prefs "$@"; then
-    get_open_affected_apps
+    # Write the new values first, then quit the affected apps so they
+    # relaunch and pick the new values up. Quitting first (the old order)
+    # meant they'd respawn on the *old* prefs, since source_prefs hadn't
+    # run yet.
     source_prefs
+    get_open_affected_apps
   fi
 else
-  get_open_affected_apps
   source_prefs
+  get_open_affected_apps
 
   prompt_restart
 fi

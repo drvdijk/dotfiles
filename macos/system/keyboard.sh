@@ -47,11 +47,19 @@ defaults write com.apple.HIToolbox AppleFnUsageType -int 0
 # #launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2> /dev/null
 
 ###############################################################################
-# Keyboard Shortcuts > Spotlight
+# Keyboard Shortcuts > Spotlight & Services
 ###############################################################################
 
 # `defaults write ... -dict-add` writes bare values as strings, not the
-# bool/int types AppleSymbolicHotKeys needs, so use PlistBuddy instead.
+# bool/int types these domains need, so the two sections below edit the
+# plists directly via PlistBuddy instead. That bypasses cfprefsd — the
+# daemon that normally owns reads/writes to these prefs and caches them in
+# memory — so if it's running with a stale cache while we edit the file on
+# disk, it can silently flush that stale cache back over our change later
+# (even surviving a logout). Kill it immediately before and after these
+# direct edits so there's no stale cache on either side of them.
+killall cfprefsd 2>/dev/null
+
 HOTKEYS_PLIST="${HOME}/Library/Preferences/com.apple.symbolichotkeys.plist"
 
 # Disable a symbolic hotkey by id, recreating its `enabled`/`value` entry
@@ -116,6 +124,10 @@ disable_service "com.apple.ChineseTextConverterService - Convert Text from Tradi
 disable_service "com.apple.ChineseTextConverterService - Convert Text from Simplified to Traditional Chinese - convertTextToTraditionalChinese" true
 # Files and Folders > Send to Fantastical (⇧⌘M by default)
 disable_service "com.flexibits.fantastical2.mac - Send to Fantastical - sendToFantastical" false
+
+# Force cfprefsd to drop any cache it accumulated during the direct edits
+# above and re-read both plists fresh from disk.
+killall cfprefsd 2>/dev/null
 
 # Use smart quotes
 defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
