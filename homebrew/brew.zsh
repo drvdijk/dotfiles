@@ -47,6 +47,25 @@ brew() {
   local admin_user="${DOTFILES_BREW_ADMIN_USER:-$default_admin_user}"
   local brew_bin
   brew_bin="$(whence -p brew)"
+
+  # Cask's uninstall/zap stanzas resolve ~/-relative paths (LaunchAgents,
+  # App Support, trash, ...) via $HOME, and run quit/launchctl actions in
+  # whatever session the brew process itself is running under - both wrong
+  # once delegated to $admin_user below (HOME becomes $admin_user's, and
+  # $admin_user's launchctl can't see or unload *this* account's agents).
+  # installer.rb#uninstall runs that per-user cleanup (uninstall_artifacts)
+  # before the admin-only part (removing the Caskroom entry itself), so
+  # running the same command unprivileged first - as this account - does
+  # the per-user cleanup correctly; it's expected to then fail once it
+  # reaches the Caskroom/Cellar removal (this account can't write there,
+  # which is the whole reason we delegate at all). That failure is harmless
+  # and left for the delegated run below to actually finish.
+  local uninstall_subcommands=(uninstall remove rm)
+  if (( ${uninstall_subcommands[(Ie)$1]} )); then
+    print -u2 "brew: running '$*' unprivileged first, to clean up this account's own files (LaunchAgents, App Support, ...) that $admin_user can't reach - a permission error partway through is expected, not a failure"
+    command brew "$@"
+  fi
+
   print -u2 "brew: delegating '$*' to $admin_user (this account isn't in the admin group)"
 
   # $PWD carries over unchanged, but macOS locks down Desktop/Documents/
