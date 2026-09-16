@@ -19,12 +19,18 @@ brew() {
   local write_subcommands=(
     install reinstall uninstall remove rm upgrade
     tap untap unlink link pin unpin
-    cleanup postinstall bundle services cask
+    cleanup postinstall services cask
     update
   )
 
+  # `bundle`'s own subcommand decides whether it writes: bare `bundle`/
+  # `bundle install` and `bundle cleanup` can install/uninstall, but `dump`,
+  # `check`, `list`, and `exec` only read - no reason to delegate those.
+  local is_write_bundle=0
+  [[ $1 == bundle && ( $2 == install || $2 == cleanup || -z $2 || $2 == -* ) ]] && is_write_bundle=1
+
   # Not a write subcommand (or no subcommand at all) - just run it.
-  if (( $# == 0 )) || (( ! ${write_subcommands[(Ie)$1]} )); then
+  if (( $# == 0 )) || { (( ! ${write_subcommands[(Ie)$1]} )) && (( ! is_write_bundle )); }; then
     command brew "$@"
     return
   fi
@@ -42,5 +48,14 @@ brew() {
   local brew_bin
   brew_bin="$(whence -p brew)"
   print -u2 "brew: delegating '$*' to $admin_user (this account isn't in the admin group)"
-  sudo -u "$admin_user" -H "$brew_bin" "$@"
+
+  # $PWD carries over unchanged, but macOS locks down Desktop/Documents/
+  # Downloads (and possibly other dirs) to mode 700 by default, so
+  # $admin_user often can't even traverse into it - getcwd() then fails
+  # outright ("$PWD must be set to run brew") before brew gets to run at
+  # all. Sidestep that by always running from /tmp (world-traversable)
+  # instead of wherever this shell happens to be: no brew subcommand above
+  # cares about cwd, except `bundle` with an implicit ./Brewfile - pass
+  # `--file` explicitly for that.
+  sudo -u "$admin_user" -H sh -c 'cd /tmp && exec "$@"' -- "$brew_bin" "$@"
 }
