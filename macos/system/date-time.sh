@@ -16,15 +16,22 @@ sudo systemsetup -setnetworktimeserver "time.apple.com" 2>/dev/null
 # Set time zome automatically using current location
 sudo defaults write /Library/Preferences/com.apple.timezone.auto.plist Active -bool true
 
-# # Menu bar clock format
-# # "h:mm" Default
-# # "HH"   Use a 24-hour clock
-# # "a"    Show AM/PM
-# # "ss"   Display the time with seconds
-# defaults write com.apple.menuextra.clock DateFormat -string "HH:mm"
+# Menu bar clock format
+# "h:mm" Default
+# "HH"   Use a 24-hour clock
+# "a"    Show AM/PM
+# "ss"   Display the time with seconds
 #
-# # Flash the time separators
-# defaults write com.apple.menuextra.clock FlashDateSeparators -bool false
-#
-# # Analog menu bar clock
-# defaults write com.apple.menuextra.clock IsAnalog -bool false
+# Since Big Sur, DateFormat alone is no longer enough — Show24Hour/ShowAMPM/
+# ShowSeconds must be set explicitly. ControlCenter (not SystemUIServer) is
+# restarted by macos/install.sh's set_prefs call for this to take effect.
+defaults write com.apple.menuextra.clock DateFormat -string "HH:mm:ss"
+defaults write com.apple.menuextra.clock Show24Hour -bool true
+defaults write com.apple.menuextra.clock ShowAMPM -bool false
+defaults write com.apple.menuextra.clock ShowSeconds -bool true
+
+# Flash the time separators
+defaults write com.apple.menuextra.clock FlashDateSeparators -bool true
+
+# Analog menu bar clock
+defaults write com.apple.menuextra.clock IsAnalog -bool false

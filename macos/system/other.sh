@@ -14,12 +14,13 @@ defaults write -g NSCloseAlwaysConfirmsChanges -bool true
 #     "/System/Library/CoreServices/Menu Extras/Volume.menu" \
 #     "/System/Library/CoreServices/Menu Extras/User.menu"
 # Select which items to show in the menu bar
-defaults write com.apple.systemuiserver menuExtras -array \
-    "/System/Library/CoreServices/Menu Extras/AirPort.menu" \
-    "/System/Library/CoreServices/Menu Extras/Bluetooth.menu" \
-    "/System/Library/CoreServices/Menu Extras/Displays.menu" \
-    "/System/Library/CoreServices/Menu Extras/TimeMachine.menu" \
-    "/System/Library/CoreServices/Menu Extras/Volume.menu"
+# Since Big Sur, these are Control Center modules, not standalone Menu
+# Extras bundles (the old `.menu` paths above no longer exist on disk), so
+# the systemuiserver `menuExtras` array above is a no-op. The per-item
+# equivalent lives in the ByHost com.apple.controlcenter domain (e.g.
+# `defaults -currentHost write com.apple.controlcenter WiFi -int 18` for
+# "always show"), but visibility here is managed by hand via System
+# Settings → Control Center instead of being forced by this script.
 
 # Menu bar: spacing
 defaults -currentHost write -globalDomain NSStatusItemSpacing -int 5

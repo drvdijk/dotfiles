@@ -4,16 +4,17 @@
 # General
 ###############################################################################
 
-# Set appearance
-# Blue     : 1
-# Graphite : 6
-defaults write NSGlobalDomain AppleAquaColorVariant -int 6
+# Set accent color
+# AppleAquaColorVariant (the old Blue/Graphite-only toggle) was superseded
+# by AppleAccentColor's multi-color picker in Mojave.
+# Red : 0  Orange : 1  Yellow : 2  Green : 3  Blue : 4  Purple : 5  Pink : 6  Graphite : -1
+defaults write NSGlobalDomain AppleAccentColor -int -1
 
-# # Highlight color
-# # Graphite : `0.780400 0.815700 0.858800`
-# # Silver   : `0.776500 0.776500 0.776500`
-# # Blue     : `0.709800 0.835300 1.000000`
-# defaults write NSGlobalDomain AppleHighlightColor -string '0.780400 0.815700 0.858800'
+# Highlight color
+# Graphite : `0.780400 0.815700 0.858800`
+# Silver   : `0.776500 0.776500 0.776500`
+# Blue     : `0.709800 0.835300 1.000000`
+defaults write NSGlobalDomain AppleHighlightColor -string '0.780400 0.815700 0.858800'
 #
 # # Use Dark menu bar and Dock
 # defaults write NSGlobalDomain AppleInterfaceStyle -string "Dark"

@@ -80,7 +80,10 @@ system_preferences=(
 
 PREFS_DIR="$(dirname "${BASH_SOURCE[0]}")/system"
 for pane in "${system_preferences[@]}"; do
-  set_prefs "$pane" cfprefsd SystemUIServer Dock SpeechSynthesisServer
+  # ControlCenter is the process that actually owns menu bar items since Big
+  # Sur (clock, WiFi/Bluetooth/Sound/etc.) — SystemUIServer alone no longer
+  # picks up changes to those without a logout.
+  set_prefs "$pane" cfprefsd SystemUIServer ControlCenter Dock SpeechSynthesisServer
 done
 
 # Default Apps (built into macOS, so they live here rather than in a
