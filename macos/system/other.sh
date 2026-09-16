@@ -13,7 +13,7 @@ defaults write -g NSCloseAlwaysConfirmsChanges -bool true
 #     "/System/Library/CoreServices/Menu Extras/TimeMachine.menu" \
 #     "/System/Library/CoreServices/Menu Extras/Volume.menu" \
 #     "/System/Library/CoreServices/Menu Extras/User.menu"
-# Select which items to show in the menu bar (unrelated to what Bartender hides)
+# Select which items to show in the menu bar
 defaults write com.apple.systemuiserver menuExtras -array \
     "/System/Library/CoreServices/Menu Extras/AirPort.menu" \
     "/System/Library/CoreServices/Menu Extras/Bluetooth.menu" \
