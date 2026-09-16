@@ -30,6 +30,11 @@ defaults write com.apple.menuextra.clock Show24Hour -bool true
 defaults write com.apple.menuextra.clock ShowAMPM -bool false
 defaults write com.apple.menuextra.clock ShowSeconds -bool true
 
+# Show only the time, not the date, in the menu bar
+# ShowDate: 0 = When Space Allows, 1 = Always, 2 = Never
+defaults write com.apple.menuextra.clock ShowDate -int 2
+defaults write com.apple.menuextra.clock ShowDayOfWeek -bool false
+
 # Flash the time separators
 defaults write com.apple.menuextra.clock FlashDateSeparators -bool true
 
