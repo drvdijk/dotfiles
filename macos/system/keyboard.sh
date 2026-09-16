@@ -47,54 +47,22 @@ defaults write com.apple.HIToolbox AppleFnUsageType -int 0
 # #launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2> /dev/null
 
 ###############################################################################
-# Keyboard Shortcuts > Spotlight & Services
-###############################################################################
-
-# `defaults write ... -dict-add` writes bare values as strings, not the
-# bool/int types these domains need, so the two sections below edit the
-# plists directly via PlistBuddy instead. That bypasses cfprefsd — the
-# daemon that normally owns reads/writes to these prefs and caches them in
-# memory — so if it's running with a stale cache while we edit the file on
-# disk, it can silently flush that stale cache back over our change later
-# (even surviving a logout). Kill it immediately before and after these
-# direct edits so there's no stale cache on either side of them.
-killall cfprefsd 2>/dev/null || true
-
-HOTKEYS_PLIST="${HOME}/Library/Preferences/com.apple.symbolichotkeys.plist"
-
-# Disable a symbolic hotkey by id, recreating its `enabled`/`value` entry
-# with the given standard-shortcut parameters (keycode, unused, modifiers).
-disable_symbolic_hotkey() {
-  local id="$1" p0="$2" p1="$3" p2="$4"
-  # `|| true`: this whole script runs under `set -e` (bin/dotfiles), and
-  # PlistBuddy exits non-zero when the key doesn't exist yet — the normal
-  # case on a fresh install that's never touched this plist — which would
-  # otherwise silently abort the rest of this file right here.
-  /usr/libexec/PlistBuddy -c "Delete :AppleSymbolicHotKeys:${id}" "$HOTKEYS_PLIST" 2>/dev/null || true
-  /usr/libexec/PlistBuddy \
-    -c "Add :AppleSymbolicHotKeys:${id}:enabled bool false" \
-    -c "Add :AppleSymbolicHotKeys:${id}:value:type string standard" \
-    -c "Add :AppleSymbolicHotKeys:${id}:value:parameters array" \
-    -c "Add :AppleSymbolicHotKeys:${id}:value:parameters:0 integer ${p0}" \
-    -c "Add :AppleSymbolicHotKeys:${id}:value:parameters:1 integer ${p1}" \
-    -c "Add :AppleSymbolicHotKeys:${id}:value:parameters:2 integer ${p2}" \
-    "$HOTKEYS_PLIST"
-}
-
-# 64 : Show Spotlight search
-disable_symbolic_hotkey 64 32 49 1048576
-# 65 : Show Finder search window
-disable_symbolic_hotkey 65 32 49 1572864
-
-###############################################################################
 # Keyboard Shortcuts > Services
 ###############################################################################
 
+# `defaults write ... -dict-add` writes bare values as strings, not the
+# bool types this domain needs, so this section edits the plist directly
+# via PlistBuddy instead. That bypasses cfprefsd — the daemon that normally
+# owns reads/writes to these prefs and caches them in memory — so if it's
+# running with a stale cache while we edit the file on disk, it can
+# silently flush that stale cache back over our change later (even
+# surviving a logout). Kill it immediately before and after these direct
+# edits so there's no stale cache on either side of them.
+killall cfprefsd 2>/dev/null || true
+
 # A handful of Services are enabled with a keyboard shortcut out of the box
 # on a fresh install (e.g. Text > "Open man Page in Terminal" on ⇧⌘M).
-# Disable them via PlistBuddy for correct bool typing (see
-# disable_symbolic_hotkey above for why `defaults write -dict-add` isn't
-# used here).
+# Disable them via PlistBuddy for correct bool typing.
 PBS_PLIST="${HOME}/Library/Preferences/pbs.plist"
 
 # Disable a Services-menu entry by its full "bundle - Menu Title - method"
