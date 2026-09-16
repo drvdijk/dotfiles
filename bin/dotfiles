@@ -183,7 +183,13 @@ sub_sshconfig () {
     echo -e ' What will the key name be? eg "name" will become id.name[.pub]'
     read
     if [[ ! -z $REPLY ]]; then
-      ssh-keygen -t ed25519 -f ~/.ssh/id.$REPLY
+      # Build the key comment as username@keyname, like ssh-keygen's default
+      # username@hostname but using the key name in place of the hostname:
+      # this step can run before the machine's real ComputerName is set (see
+      # `install macos`), which would otherwise bake a stale/default hostname
+      # into the public key comment permanently. $(whoami) is correct at this
+      # point regardless of that ordering.
+      ssh-keygen -t ed25519 -C "$(whoami)@$REPLY" -f ~/.ssh/id.$REPLY
       echo "IdentityFile ~/.ssh/id.$REPLY" > ~/.ssh/identity
       chmod 600 ~/.ssh/identity
     fi
