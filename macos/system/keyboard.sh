@@ -58,7 +58,7 @@ defaults write com.apple.HIToolbox AppleFnUsageType -int 0
 # disk, it can silently flush that stale cache back over our change later
 # (even surviving a logout). Kill it immediately before and after these
 # direct edits so there's no stale cache on either side of them.
-killall cfprefsd 2>/dev/null
+killall cfprefsd 2>/dev/null || true
 
 HOTKEYS_PLIST="${HOME}/Library/Preferences/com.apple.symbolichotkeys.plist"
 
@@ -66,7 +66,11 @@ HOTKEYS_PLIST="${HOME}/Library/Preferences/com.apple.symbolichotkeys.plist"
 # with the given standard-shortcut parameters (keycode, unused, modifiers).
 disable_symbolic_hotkey() {
   local id="$1" p0="$2" p1="$3" p2="$4"
-  /usr/libexec/PlistBuddy -c "Delete :AppleSymbolicHotKeys:${id}" "$HOTKEYS_PLIST" 2>/dev/null
+  # `|| true`: this whole script runs under `set -e` (bin/dotfiles), and
+  # PlistBuddy exits non-zero when the key doesn't exist yet — the normal
+  # case on a fresh install that's never touched this plist — which would
+  # otherwise silently abort the rest of this file right here.
+  /usr/libexec/PlistBuddy -c "Delete :AppleSymbolicHotKeys:${id}" "$HOTKEYS_PLIST" 2>/dev/null || true
   /usr/libexec/PlistBuddy \
     -c "Add :AppleSymbolicHotKeys:${id}:enabled bool false" \
     -c "Add :AppleSymbolicHotKeys:${id}:value:type string standard" \
@@ -102,7 +106,9 @@ disable_service() {
   # Title - method"), so it must be quoted as a single PlistBuddy path
   # component — otherwise PlistBuddy's own whitespace-splitting command
   # parser mangles it into several bogus arguments.
-  /usr/libexec/PlistBuddy -c "Delete :NSServicesStatus:\"${key}\"" "$PBS_PLIST" 2>/dev/null
+  # `|| true`: see disable_symbolic_hotkey above — set -e would otherwise
+  # abort here on a fresh install where this key doesn't exist yet.
+  /usr/libexec/PlistBuddy -c "Delete :NSServicesStatus:\"${key}\"" "$PBS_PLIST" 2>/dev/null || true
   /usr/libexec/PlistBuddy \
     -c "Add :NSServicesStatus:\"${key}\":enabled_context_menu bool false" \
     -c "Add :NSServicesStatus:\"${key}\":enabled_services_menu bool false" \
@@ -127,7 +133,7 @@ disable_service "com.flexibits.fantastical2.mac - Send to Fantastical - sendToFa
 
 # Force cfprefsd to drop any cache it accumulated during the direct edits
 # above and re-read both plists fresh from disk.
-killall cfprefsd 2>/dev/null
+killall cfprefsd 2>/dev/null || true
 
 # Use smart quotes
 defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
