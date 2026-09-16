@@ -58,4 +58,18 @@ brew() {
   # cares about cwd, except `bundle` with an implicit ./Brewfile - pass
   # `--file` explicitly for that.
   sudo -u "$admin_user" -H sh -c 'cd /tmp && exec "$@"' -- "$brew_bin" "$@"
+
+  # 1Password's YubiKey/security-key support only trusts its app bundle when
+  # it's owned by root (see homebrew/install.sh for the full story) - any
+  # brew-driven install/reinstall/upgrade above, even a bare `brew upgrade`
+  # that touches it incidentally without naming it, resets that back to
+  # $admin_user ownership. Fix it up here too, not just in `dotfiles
+  # install`, since this wrapper is the everyday path apps actually get
+  # updated through.
+  if [[ -d /Applications/1Password.app ]] && [[ "$(stat -f '%Su' /Applications/1Password.app)" != root ]]; then
+    print -u2 "brew: chown'ing 1Password.app to root:wheel (needed for YubiKey support)..."
+    if ! sudo chown -R root:wheel /Applications/1Password.app; then
+      print -u2 "brew: chown failed - this terminal likely needs the \"App Management\" privacy permission (System Settings > Privacy & Security)."
+    fi
+  fi
 }

@@ -76,6 +76,34 @@ if run_as_admin_if_needed homebrew "$@"; then
 		# Remove outdated versions from the cellar
 		brew cleanup
 	fi
+
+	# 1Password's security-key (YubiKey) support only trusts the app bundle
+	# when it's owned by root or by the account actually running 1Password -
+	# never by some other account, which is exactly what grandmaster is from
+	# the app's point of view. Homebrew Cask can't be told to install it that
+	# way, so fix it up after the fact. This is a one-off, narrowly-scoped
+	# exception: Homebrew Cask's own uninstall/reinstall logic assumes
+	# whoever runs `brew remove`/`reinstall` owns the bundle being touched,
+	# so `brew remove/reinstall 1password` run through this same admin
+	# delegation will fail with permission errors from here on - to update,
+	# either let 1Password's own built-in updater handle it, or temporarily
+	# chown it back to grandmaster before reinstalling through brew.
+	#
+	# This also needs the calling terminal to hold the "App Management"
+	# privacy permission (System Settings > Privacy & Security). macOS checks
+	# that against the responsible GUI app in the process chain (Terminal,
+	# iTerm, ...), not the effective uid - sudo grants real root here, but
+	# doesn't bypass it - so without it this fails with a wall of
+	# "Operation not permitted" errors on the app's contents that look like
+	# a permissions bug but aren't.
+	if [ -d /Applications/1Password.app ] && [ "$(stat -f '%Su' /Applications/1Password.app)" != root ]; then
+		action "chown 1Password.app to root:wheel (needed for YubiKey support)..."
+		if ! sudo chown -R root:wheel /Applications/1Password.app; then
+			error "chown failed - your terminal app most likely needs the \"App Management\" privacy permission."
+			warn "opening System Settings > Privacy & Security > App Management - enable it for this terminal app, then re-run this install."
+			open "x-apple.systempreferences:com.apple.preference.security?Privacy_AppBundles" 2>/dev/null
+		fi
+	fi
 fi
 
 # Mac App Store installs go through the App Store's own daemon, tied to
