@@ -1,5 +1,8 @@
-# Cask directory for applications
-cask_args appdir: "/Applications"
+# Install apps and fonts to system-wide locations rather than the default
+# `~/Applications`/`~/Library/Fonts`, both because brew.zsh delegates writes
+# to an admin account (whose own ~ isn't the real user's), and so a shared
+# Mac's other accounts get the same apps/fonts too.
+cask_args appdir: "/Applications", fontdir: "/Library/Fonts"
 
 # Taps
 
