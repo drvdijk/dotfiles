@@ -100,19 +100,24 @@ function run_as_admin_if_needed() {
         return 0 # already admin, nothing to delegate
     fi
 
-    # Remember the chosen admin user across runs (default suggestion below,
-    # and picked up by homebrew/brew.zsh as the default for its own
-    # sudo -u delegation) rather than asking or configuring it twice. Lives
-    # in the repo (like git/gitconfig.symlink) but is gitignored - it's
-    # machine-specific, not something to commit.
+    # Remember the chosen admin user across runs (also picked up by
+    # homebrew/brew.zsh as the default for its own sudo -u delegation)
+    # rather than asking or configuring it twice. Lives in the repo (like
+    # git/gitconfig.symlink) but is gitignored - it's machine-specific, not
+    # something to commit.
     local admin_user_file="$DOTFILES_DIR/.admin-user"
-    local default_admin_user="grandmaster"
-    [ -r "$admin_user_file" ] && default_admin_user="$(cat "$admin_user_file")"
+    local admin_user
 
     warn "$USER isn't in the admin group; installing apps needs one that is."
-    read -p "Which admin user should run this install? [$default_admin_user] " -r admin_user
-    admin_user="${admin_user:-$default_admin_user}"
-    echo "$admin_user" > "$admin_user_file"
+    if [ -r "$admin_user_file" ]; then
+        admin_user="$(cat "$admin_user_file")"
+        running "using cached admin user from $admin_user_file"
+        echo "$admin_user"
+    else
+        read -p "Which admin user should run this install? [grandmaster] " -r admin_user
+        admin_user="${admin_user:-grandmaster}"
+        echo "$admin_user" > "$admin_user_file"
+    fi
 
     bot "installing as $admin_user (you'll need that account's password); anything per-user (prefs, ...) will still apply to $USER afterward..."
     su "$admin_user" -c "DOTFILES_ADMIN_PHASE=1 $(printf '%q ' "$DOTFILES_DIR/bin/dotfiles" install "$topic" "$@")"
