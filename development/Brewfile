@@ -1,7 +1,7 @@
 # Cask directory for applications
 cask_args appdir: "/Applications"
 
-tap "hashicorp/tap"
+#tap "hashicorp/tap"
 
 brew "asdf"
 #brew "ansible"
@@ -13,7 +13,7 @@ brew "dive"
 #cask "dbeaver-community"
 cask "docker-desktop"
 #cask "drawio"
-cask "firefox"
+#cask "firefox"
 #brew "git-flow"
 #cask "gcloud-cli" # also check install.sh for post-install steps
 brew "gnu-sed"
@@ -42,5 +42,5 @@ brew "openssl"
 #cask "remote-desktop-manager"
 #brew "watchman"
 #brew "websocat"
-cask "wireshark-app"
+#cask "wireshark-app"
 #cask "xbar"
