@@ -1,0 +1,48 @@
+This is Ghostty's config, translated from the iTerm2 profile in ../iterm2
+(kept there for reference/comparison; its cask is commented out in
+../homebrew/Brewfile now that ghostty has replaced it).
+
+Ghostty reads its config from ~/.config/ghostty/config (there's no prefs
+folder setting like iTerm's PrefsCustomFolder), so it lives here at
+.config/ghostty/config.symlink - sub_bootstrap in ../bin/dotfiles mirrors
+a topic dir's *.symlink files onto $HOME as-is (minus the .symlink
+suffix), so this one lands at ~/.config/ghostty/config. Run
+`dotfiles bootstrap` (or just `ln -sf` it yourself) to pick up changes.
+
+Settings from the iTerm profile with no direct Ghostty equivalent (i.e.
+not translated into .config/ghostty/config.symlink):
+
+- DimBackgroundWindows: iTerm dims whole unfocused *windows*, not just
+  split panes. Ghostty only has unfocused-split-opacity (panes within one
+  window); nothing dims an unfocused window.
+- DimOnlyText: iTerm can dim just the text of inactive panes, leaving the
+  background alone. Ghostty's unfocused-split-opacity dims the whole pane.
+- Disable Window Resizing: prevented apps/escape sequences from resizing
+  the iTerm window. No Ghostty equivalent found; likely less necessary
+  since Ghostty's resize is instant rather than jarring.
+- AlternateMouseScroll: had scroll wheel send arrow keys in the alt screen
+  (e.g. less, vim). This is standard/default behavior in most modern
+  terminals including Ghostty, so no setting should be needed - verify.
+- Custom Keyboard Map: iTerm had explicit remaps for Option/Cmd + Arrow/
+  Delete to send readline-style word/line-editing sequences (word-left/
+  right, delete-word, kill-line, etc). Ghostty ships its own macOS-native
+  defaults for these same combos, so this probably doesn't need
+  reproducing - but test them after switching, and add `keybind` lines in
+  ./config if anything regresses.
+- Per-pane/window chrome: ShowPaneTitles, WindowNumber, UseBorder,
+  TabStyleWithAutomaticOption, TabViewType, PreserveWindowSizeWhenTabBar-
+  VisibilityChanges. These are iTerm-specific UI chrome with no Ghostty
+  config equivalent - Ghostty uses native macOS tabs/window chrome
+  instead.
+
+One thing worth double-checking given how much SSH shows up in the iTerm
+profile (Jobs to Ignore: ssh, rlogin, slogin, telnet): Ghostty reports
+TERM=xterm-ghostty by default, not xterm-256color like iTerm. Most modern
+remote hosts handle this fine, but older ones may not have the
+xterm-ghostty terminfo entry installed, which can break things like
+tmux/vim on that host. Install Ghostty's terminfo there with:
+
+    infocmp -x xterm-ghostty | ssh <host> -- tic -x -
+
+or set `term = xterm-256color` in .config/ghostty/config.symlink to
+sidestep it entirely.

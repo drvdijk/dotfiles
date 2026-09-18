@@ -1,0 +1,72 @@
+# Ghostty config, translated from the iTerm2 "Default" profile in
+# ../../../iterm2/com.googlecode.iterm2.plist so the two terminals behave
+# the same while both are in use. See ../../README (ghostty/README) for
+# how this gets linked into place, and for notes on settings that don't
+# have a direct Ghostty equivalent.
+
+# --- Font ---
+# iTerm profile used "MesloLGSNFM-Regular 12" for both ASCII and non-ASCII
+# (Use Non-ASCII Font was off, so only one face was ever in play). Installed
+# via the font-meslo-lg-nerd-font cask in ../homebrew/Brewfile.
+font-family = MesloLGS NF
+font-size = 12
+
+# --- Colors ---
+# iTerm's Default profile uses the classic 16-color "xterm" palette, not a
+# custom scheme, so it's spelled out explicitly here rather than relying on
+# Ghostty's own default theme (which is close but not guaranteed identical).
+background = #000000
+foreground = #BBBBBB
+cursor-color = #BBBBBB
+cursor-text = #FFFFFF
+selection-background = #B5D5FF
+selection-foreground = #000000
+
+palette = 0=#000000
+palette = 1=#BB0000
+palette = 2=#00BB00
+palette = 3=#BBBB00
+palette = 4=#0000BB
+palette = 5=#BB00BB
+palette = 6=#00BBBB
+palette = 7=#BBBBBB
+palette = 8=#555555
+palette = 9=#FF5555
+palette = 10=#55FF55
+palette = 11=#FFFF55
+palette = 12=#5555FF
+palette = 13=#FF55FF
+palette = 14=#55FFFF
+palette = 15=#FFFFFF
+
+# --- Cursor ---
+cursor-style = block
+cursor-style-blink = false
+
+# --- Window size ---
+# iTerm profile: Columns 80, Rows 25 - Ghostty sizes windows in cells too,
+# so this maps directly.
+window-width = 80
+window-height = 25
+
+# --- Scrollback ---
+# iTerm profile: 10000 lines, not unlimited.
+scrollback-limit-lines = 10000
+
+# --- Bell ---
+# iTerm profile: Visual Bell on, Flashing/Silence Bell off.
+bell = visual
+
+# --- Splits ---
+# iTerm: DimInactiveSplitPanes on, SplitPaneDimmingAmount ~0.40 (dims to
+# ~60% opacity). Ghostty's default is 0.7; nudged down to match more
+# closely. Unlike iTerm's "DimOnlyText", Ghostty dims the whole pane, not
+# just the text - see README for other dimming differences.
+unfocused-split-opacity = 0.6
+
+# --- Option key ---
+# iTerm profile: Option Key Sends "Normal" (both left and right), i.e.
+# Option types special/accented characters rather than acting as Meta.
+# This is also Ghostty's default (macos-option-as-alt = false), so nothing
+# to set here - listed for the record.
+# macos-option-as-alt = false

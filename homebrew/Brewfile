@@ -45,11 +45,12 @@ cask "font-meslo-lg-nerd-font"
 cask "1password"
 #cask "dropbox" # disable until M1 support is available, use maestral instead
 cask "forklift"
+cask "ghostty"
 cask "google-chrome"
 cask "gpg-suite"
 cask "iina"
 cask "istat-menus"
-cask "iterm2"
+#cask "iterm2" # replaced by ghostty, see ../ghostty
 #cask "jordanbaird-ice"
 cask "keka"
 cask "keyboardcleantool"
