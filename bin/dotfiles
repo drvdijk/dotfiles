@@ -15,13 +15,13 @@ sub_help () {
     echo "Commands:"
     echo "   help                   This help message"
     echo "   bootstrap              Bootstrap the dotfiles"
-    echo "   skills                 Install agent skills"
     echo "   gitconfig              Setup git configuration"
     echo "   sshconfig              Setup ssh config file"
     echo "   install macos          Install reasonable macOS defaults"
     echo "   install macos <app>    Apply prefs for just one app/pane (e.g. finder, dock)"
     echo "   install homebrew       Install homebrew & cask"
     echo "   install homebrew <x>   Install one Brewfile entry + its prefs (e.g. sublime-text)"
+    echo "   install ai             Install AI tooling (sbx, Claude desktop) & agent skills"
     echo "   install <x>            Install package x"
 }
 
@@ -150,26 +150,6 @@ sub_bootstrap () {
   done < <(find "$DOTFILES_DIR" -mindepth 2 -not -path "$DOTFILES_DIR/.git/*" -name '*.symlink' -print0)
 
   ok 'dotfiles installed'
-}
-
-sub_skills () {
-  bot 'Installing agent skills'
-
-  local overwrite_all=false backup_all=false skip_all=false
-
-  mkdir -p "$HOME/.agents/skills"
-
-  while IFS= read -r -d '' src
-  do
-    link_file "$src" "$HOME/.agents/skills/$(basename "$src")"
-  done < <(find "$DOTFILES_DIR/agents/skills" -maxdepth 1 -mindepth 1 -not -name '.gitkeep' -print0 2>/dev/null)
-
-  mkdir -p "$HOME/.claude"
-  mkdir -p "$HOME/.gemini"
-  link_file "$HOME/.agents/skills" "$HOME/.claude/skills"
-  link_file "$HOME/.agents/skills" "$HOME/.gemini/skills"
-
-  ok 'agent skills installed'
 }
 
 sub_gitconfig () {
