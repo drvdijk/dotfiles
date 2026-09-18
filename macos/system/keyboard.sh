@@ -96,8 +96,8 @@ disable_service "com.apple.Terminal - Search man Page Index in Terminal - search
 disable_service "com.apple.ChineseTextConverterService - Convert Text from Traditional to Simplified Chinese - convertTextToSimplifiedChinese" true
 # Text > Convert Text from Simplified to Traditional Chinese (^⇧⌘C by default)
 disable_service "com.apple.ChineseTextConverterService - Convert Text from Simplified to Traditional Chinese - convertTextToTraditionalChinese" true
-# Files and Folders > Send to Fantastical (⇧⌘M by default)
-disable_service "com.flexibits.fantastical2.mac - Send to Fantastical - sendToFantastical" false
+## Files and Folders > Send to Fantastical (⇧⌘M by default)
+#disable_service "com.flexibits.fantastical2.mac - Send to Fantastical - sendToFantastical" false
 
 # Force cfprefsd to drop any cache it accumulated during the direct edits
 # above and re-read both plists fresh from disk.
