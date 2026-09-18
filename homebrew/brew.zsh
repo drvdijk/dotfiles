@@ -20,7 +20,7 @@ brew() {
     install reinstall uninstall remove rm upgrade
     tap untap unlink link pin unpin
     cleanup postinstall services cask
-    update
+    update doctor
   )
 
   # `bundle`'s own subcommand decides whether it writes: bare `bundle`/
