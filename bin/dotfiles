@@ -53,8 +53,15 @@ link_file () {
         action=
         until [ -n "$action" ]
         do
-          warn "File already exists: $(basename "$src"), what do you want to do? [s]kip, [S]kip all, [o]verwrite, [O]verwrite all, [b]ackup, [B]ackup all?"
-          read -n 1 action
+          warn "$dst already exists, what do you want to do? [s]kip, [S]kip all, [o]verwrite, [O]verwrite all, [b]ackup, [B]ackup all?"
+          # Read from the controlling terminal explicitly, not stdin: callers
+          # like sub_bootstrap run this inside a `while read < <(find ...)`
+          # loop, which binds fd 0 to the find pipe for the whole loop body.
+          # A plain `read` here would silently steal bytes off that pipe
+          # instead of waiting for a keypress - resolving prompts on stray
+          # characters from upcoming filenames and corrupting the next
+          # iteration's $src in the process.
+          read -n 1 action < /dev/tty
           echo
 
           case "$action" in
@@ -127,9 +134,20 @@ sub_bootstrap () {
 
   while IFS= read -r -d '' src
   do
-    dst="$HOME/.$(basename "${src%.*}")"
+    # Everything below the topic dir (the *.symlink file's path relative to
+    # the immediate child-of-$DOTFILES_DIR directory it lives in) is mirrored
+    # as-is under $HOME, with the .symlink suffix stripped. E.g.
+    # zsh/.zshrc.symlink -> ~/.zshrc, and
+    # ghostty/.config/ghostty/config.symlink -> ~/.config/ghostty/config.
+    # Nothing adds a leading dot implicitly (unlike the old basename-only
+    # rule this replaced) - a top-level dotfile source has to spell it out
+    # itself, e.g. zsh/.zshrc.symlink, not zsh/zshrc.symlink.
+    rel="${src#"$DOTFILES_DIR"/}"
+    rel="${rel#*/}"
+    dst="$HOME/${rel%.symlink}"
+    mkdir -p "$(dirname "$dst")"
     link_file "$src" "$dst"
-  done < <(find "$DOTFILES_DIR" -maxdepth 2 -name '*.symlink' -print0)
+  done < <(find "$DOTFILES_DIR" -mindepth 2 -not -path "$DOTFILES_DIR/.git/*" -name '*.symlink' -print0)
 
   ok 'dotfiles installed'
 }
@@ -155,7 +173,7 @@ sub_skills () {
 }
 
 sub_gitconfig () {
-  if ! [ -f $DOTFILES_DIR/git/gitconfig.symlink ]
+  if ! [ -f $DOTFILES_DIR/git/.gitconfig.symlink ]
   then
     bot 'Setup gitconfig'
 
@@ -166,7 +184,7 @@ sub_gitconfig () {
     echo -e ' - What is your global git signing key?'
     read -e git_signingkey
 
-    sed -e "s/AUTHORNAME/$git_authorname/g" -e "s/AUTHOREMAIL/$git_authoremail/g" -e "s/AUTHORSIGNINGKEY/$git_signingkey/g" $DOTFILES_DIR/git/gitconfig.symlink.example > $DOTFILES_DIR/git/gitconfig.symlink
+    sed -e "s/AUTHORNAME/$git_authorname/g" -e "s/AUTHOREMAIL/$git_authoremail/g" -e "s/AUTHORSIGNINGKEY/$git_signingkey/g" $DOTFILES_DIR/git/gitconfig.symlink.example > $DOTFILES_DIR/git/.gitconfig.symlink
 
     ok 'gitconfig set up'
   fi
