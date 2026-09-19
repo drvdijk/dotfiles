@@ -62,7 +62,7 @@ system_preferences=(
   # network
   # bluetooth
   sound
-  # touch-id
+  touch-id
   keyboard
   trackpad
   mouse
