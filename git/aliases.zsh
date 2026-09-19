@@ -1,8 +1,9 @@
 alias gs='git status'
 alias gb='git branch'
-alias go='git checkout'
-alias gh='git log --pretty=format:"%h %ad | %s%d [%an]" --graph --date=short'
-#alias gh='git hist'
+# Not `go` or `gh`: those shadow the Go toolchain and the GitHub CLI.
+alias gco='git checkout'
+alias gl='git log --pretty=format:"%h %ad | %s%d [%an]" --graph --date=short'
+#alias gl='git hist'
 
 alias gd='git diff'
 alias gdc='git diff --cached'

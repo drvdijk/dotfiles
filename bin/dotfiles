@@ -195,12 +195,21 @@ sub_sshconfig () {
 }
 
 sub_install () {
-    local topic="$1"; shift
+    # Not `local topic="$1"; shift`: with no arguments, that `shift` fails and
+    # set -e ends the whole script silently.
+    local topic="${1:-}"
+    if [ -z "$topic" ]; then
+        error "Missing topic to install, one of: $(cd "$DOTFILES_DIR" && ls -d */install.sh | sed 's|/install.sh$||' | tr '\n' ' ')"
+        return 1
+    fi
+    shift
+
     local SCRIPT="${DOTFILES_DIR}/${topic}/install.sh"
     if [ -f "$SCRIPT" ]; then
         source "$SCRIPT" "$@"
     else
         error "Unable to find script to install ${topic}"
+        return 1
     fi
 }
 

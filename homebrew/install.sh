@@ -142,7 +142,7 @@ fi
 # instead, so they always land in the right account's home.
 if [ -z "$DOTFILES_ADMIN_PHASE" ]; then
 	if [ "$#" -gt 0 ]; then
-		if select_prefs "$@"; then
+		if select_prefs -q "$@"; then
 			get_open_affected_apps
 			source_prefs
 		fi

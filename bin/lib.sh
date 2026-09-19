@@ -197,8 +197,8 @@ function offer_passwordless_installer() {
 
 function require_osx() {
     if [ "$(uname -s)" != "Darwin" ]; then
-        error "Only supported on OS X"
-        exit 0
+        error "Only supported on macOS"
+        exit 1
     fi
 }
 
@@ -243,13 +243,35 @@ function set_prefs() {
     PREF_FILES+=("${PREFS_DIR}/$1.sh")
     shift
     PREF_APPS+=("$(IFS='|'; echo "$*")")
-    AFFECTED_APPS+=("$@")
+    local app
+    for app in "$@"; do
+        add_affected_app "$app"
+    done
+}
+
+# Add one process name to AFFECTED_APPS unless it's already there. Many prefs
+# scripts affect the same few processes (every macOS pane lists cfprefsd,
+# Dock, ...), and without this each one is queried and killed once per script.
+function add_affected_app() {
+    local existing
+    for existing in "${AFFECTED_APPS[@]}"; do
+        [ "$existing" == "$1" ] && return 0
+    done
+    AFFECTED_APPS+=("$1")
 }
 
 # Narrow PREF_FILES/AFFECTED_APPS (in place) down to just the registered
-# entries whose script basename matches one of the given names.
+# entries whose script basename matches one of the given names. With -q, no
+# error is printed when nothing matches (still returns 1) - for callers where
+# "this entry has no prefs" is normal, e.g. `install homebrew <app>`.
 function select_prefs() {
-    local matched_files=() matched_apps=() base name i
+    local quiet=false
+    if [ "$1" == "-q" ]; then
+        quiet=true
+        shift
+    fi
+
+    local matched_files=() matched_apps=() base name i parts app
 
     for i in "${!PREF_FILES[@]}"; do
         base="$(basename "${PREF_FILES[$i]}" .sh)"
@@ -265,12 +287,15 @@ function select_prefs() {
     done
 
     if [ "${#matched_files[@]}" -eq 0 ]; then
-        error "no prefs found for: $*"
+        [ "$quiet" == "true" ] || error "no prefs found for: $*"
         return 1
     fi
 
     PREF_FILES=("${matched_files[@]}")
-    AFFECTED_APPS=("${matched_apps[@]}")
+    AFFECTED_APPS=()
+    for app in "${matched_apps[@]}"; do
+        add_affected_app "$app"
+    done
 }
 
 # Sources all the registered preference files
@@ -325,7 +350,15 @@ function brew_install_from_file() {
     local name line type id
 
     for name in "$@"; do
-        line="$(grep -E "^(brew|cask|mas)[[:space:]]+\"${name}\"" "$brewfile" | head -1)"
+        # Literal (not regex) match on the quoted name: entries like
+        # `cask "logi-options+"` contain regex metacharacters, and names with
+        # spaces (`mas "Paprika Recipe Manager 3", ...`) rule out splitting
+        # into fields.
+        line="$(NAME="$name" awk '
+            match($0, /^(brew|cask|mas)[[:space:]]+"/) {
+                rest = substr($0, RLENGTH + 1)
+                if (index(rest, ENVIRON["NAME"] "\"") == 1) { print; exit }
+            }' "$brewfile")"
         if [ -z "$line" ]; then
             error "no entry for '$name' in $(basename "$brewfile"), skipping"
             continue
