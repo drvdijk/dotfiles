@@ -1,68 +1,94 @@
-# Ghostty config, translated from the iTerm2 "Default" profile in
-# ../../../iterm2/com.googlecode.iterm2.plist so the two terminals behave
-# the same while both are in use. See ../../README (ghostty/README) for
-# how this gets linked into place, and for notes on settings that don't
-# have a direct Ghostty equivalent.
+# Ghostty config, started from a translation of the iTerm2 "Default" profile
+# in ../../../iterm2/com.googlecode.iterm2.plist. Uncommented lines are what
+# is in effect; commented-out lines are the iTerm values, kept for reference
+# where Ghostty's defaults (or a preference of mine) apply instead. See
+# ../../README (ghostty/README) for how this gets linked into place, and for
+# notes on settings that don't have a direct Ghostty equivalent.
 
 # --- Font ---
 # iTerm profile used "MesloLGSNFM-Regular 12" for both ASCII and non-ASCII
 # (Use Non-ASCII Font was off, so only one face was ever in play). Installed
-# via the font-meslo-lg-nerd-font cask in ../homebrew/Brewfile.
-font-family = MesloLGS NF
-font-size = 12
+# via the font-meslo-lg-nerd-font cask in ../homebrew/Brewfile. That
+# PostScript name ("NFM" = Nerd Font Mono) is this family in Ghostty's terms;
+# "MesloLGS NF" is the older Nerd Fonts v2 spelling and matches nothing
+# installed by the current cask. Confirm with:
+#   ghostty +list-fonts | grep -i meslo
+font-family = MesloLGS Nerd Font Mono
+font-size = 13
 
 # --- Colors ---
-# iTerm's Default profile uses the classic 16-color "xterm" palette, not a
-# custom scheme, so it's spelled out explicitly here rather than relying on
-# Ghostty's own default theme (which is close but not guaranteed identical).
-background = #000000
-foreground = #BBBBBB
-cursor-color = #BBBBBB
-cursor-text = #FFFFFF
-selection-background = #B5D5FF
-selection-foreground = #000000
-
-palette = 0=#000000
-palette = 1=#BB0000
-palette = 2=#00BB00
-palette = 3=#BBBB00
-palette = 4=#0000BB
-palette = 5=#BB00BB
-palette = 6=#00BBBB
-palette = 7=#BBBBBB
-palette = 8=#555555
-palette = 9=#FF5555
-palette = 10=#55FF55
-palette = 11=#FFFF55
-palette = 12=#5555FF
-palette = 13=#FF55FF
-palette = 14=#55FFFF
-palette = 15=#FFFFFF
+# These are the iTerm values, kept commented for reference: its Default
+# profile uses the classic 16-color "xterm" palette, not a custom scheme.
+# Ghostty's own defaults apply instead.
+# background = #000000
+# foreground = #BBBBBB
+# cursor-color = #BBBBBB
+# cursor-text = #FFFFFF
+# selection-background = #B5D5FF
+# selection-foreground = #000000
+# palette = 0=#000000
+# palette = 1=#BB0000
+# palette = 2=#00BB00
+# palette = 3=#BBBB00
+# palette = 4=#0000BB
+# palette = 5=#BB00BB
+# palette = 6=#00BBBB
+# palette = 7=#BBBBBB
+# palette = 8=#555555
+# palette = 9=#FF5555
+# palette = 10=#55FF55
+# palette = 11=#FFFF55
+# palette = 12=#5555FF
+# palette = 13=#FF55FF
+# palette = 14=#55FFFF
+# palette = 15=#FFFFFF
 
 # --- Cursor ---
+# A steady block. `cursor-style = block` is already Ghostty's default, so it
+# changes nothing on its own; what actually overrides it is shell integration,
+# which switches the cursor to a bar at every zsh prompt "regardless of this
+# configuration" (steady or blinking depending on cursor-style-blink). Turning
+# that one feature off lets the two settings above apply at the prompt too.
+# Read when a shell starts, so open a new window/tab after changing any of these.
 cursor-style = block
 cursor-style-blink = false
+shell-integration-features = no-cursor
 
 # --- Window size ---
-# iTerm profile: Columns 80, Rows 25 - Ghostty sizes windows in cells too,
-# so this maps directly.
-window-width = 80
-window-height = 25
+# These are the iTerm values, kept commented for reference: Columns 80,
+# Rows 25. Ghostty sizes windows in cells too, so they map directly; without
+# them it picks its own default size.
+# window-width = 80
+# window-height = 25
 
 # --- Scrollback ---
-# iTerm profile: 10000 lines, not unlimited.
-scrollback-limit-lines = 10000
+# iTerm profile: 10000 lines, not unlimited. Ghostty (1.3) can only limit
+# scrollback by size in bytes, not by lines, so this is an estimate: 10 MB is
+# roughly 10000 lines at ~100-120 columns. It's also the built-in default;
+# it's spelled out so it stays put if a later Ghostty changes the default
+# (the unreleased 1.4 renames this to `scrollback-limit-bytes`, and accepts
+# this old name as an alias).
+scrollback-limit = 10000000
 
 # --- Bell ---
-# iTerm profile: Visual Bell on, Flashing/Silence Bell off.
-bell = visual
+# iTerm profile: Visual Bell on, Flashing Bell off, Silence Bell off - i.e. the
+# bell was both audible and visible. Ghostty has no `bell` key; the option is
+# `bell-features`, a comma-separated list where anything omitted keeps its
+# default (`attention` and `title` on, the rest off).
+#   system - play the macOS alert sound (the audible half; drop it or use
+#            `no-system` to silence the bell)
+#   title  - 🔔 in the title of the alerted surface until you return to it
+#            (the visual half, on by default)
+#   attention - bounce the dock icon once while unfocused (on by default)
+# Add `border` for a border around the alerted surface as well.
+bell-features = system
 
 # --- Splits ---
-# iTerm: DimInactiveSplitPanes on, SplitPaneDimmingAmount ~0.40 (dims to
-# ~60% opacity). Ghostty's default is 0.7; nudged down to match more
-# closely. Unlike iTerm's "DimOnlyText", Ghostty dims the whole pane, not
-# just the text - see README for other dimming differences.
-unfocused-split-opacity = 0.6
+# This is the iTerm value, kept commented for reference: DimInactiveSplitPanes
+# on, SplitPaneDimmingAmount ~0.40 (dims to ~60% opacity), so 0.6 here. Ghostty's
+# default of 0.7 applies instead. Unlike iTerm's "DimOnlyText", Ghostty dims
+# the whole pane, not just the text - see README for other dimming differences.
+# unfocused-split-opacity = 0.6
 
 # --- Option key ---
 # iTerm profile: Option Key Sends "Normal" (both left and right), i.e.
