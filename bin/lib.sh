@@ -120,7 +120,14 @@ function run_as_admin_if_needed() {
     fi
 
     bot "installing as $admin_user (you'll need that account's password); anything per-user (prefs, ...) will still apply to $USER afterward..."
-    su "$admin_user" -c "DOTFILES_ADMIN_PHASE=1 $(printf '%q ' "$DOTFILES_DIR/bin/dotfiles" install "$topic" "$@")"
+    # Checked explicitly: this function is normally called as an `if`
+    # condition, which disables `set -e` inside it, so a failed su (wrong
+    # password, or the admin run itself failing) would otherwise be ignored
+    # and the caller's per-user steps would run as if the install had happened.
+    if ! su "$admin_user" -c "DOTFILES_ADMIN_PHASE=1 $(printf '%q ' "$DOTFILES_DIR/bin/dotfiles" install "$topic" "$@")"; then
+        error "the install as $admin_user failed (wrong password? see output above); stopping so nothing continues as $USER."
+        exit 1
+    fi
     return 1 # already installed by the admin user - caller should skip its install step
 }
 
