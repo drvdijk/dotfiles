@@ -87,6 +87,19 @@ if [ -z "$DOTFILES_ADMIN_PHASE" ] && [ -d /Applications/1Password.app ] && [ "$(
 	fi
 fi
 
+# Mountain Duck also refuses to work when its app bundle is left owned by
+# the admin delegate (grandmaster:admin) from Homebrew Cask's install -
+# same root cause as the 1Password case above, so it gets the same
+# root:wheel fixup here.
+if [ -z "$DOTFILES_ADMIN_PHASE" ] && [ -d "/Applications/Mountain Duck.app" ] && [ "$(stat -f '%Su' "/Applications/Mountain Duck.app")" != root ]; then
+	action "chown Mountain Duck.app to root:wheel..."
+	if ! sudo chown -R root:wheel "/Applications/Mountain Duck.app"; then
+		error "chown failed - your terminal app most likely needs the \"App Management\" privacy permission."
+		warn "opening System Settings > Privacy & Security > App Management - enable it for this terminal app, then re-run this install."
+		open "x-apple.systempreferences:com.apple.preference.security?Privacy_AppBundles" 2>/dev/null
+	fi
+fi
+
 # Apply prefs for the third-party apps installed above. Skipped when this IS
 # the delegated admin run (see run_as_admin_if_needed in bin/lib.sh) - the
 # original, non-admin invocation applies them once control returns to it
