@@ -15,7 +15,6 @@ brew "dive"
 #cask "drawio"
 #cask "firefox"
 #brew "git-flow"
-#cask "gcloud-cli" # also check install.sh for post-install steps
 brew "gnu-sed"
 brew "graphviz"
 #brew "hashicorp/tap/consul"

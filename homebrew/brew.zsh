@@ -17,10 +17,12 @@
 # way with: export DOTFILES_BREW_ADMIN_USER=eindbaas
 brew() {
   local write_subcommands=(
-    install reinstall uninstall remove rm upgrade
-    tap untap unlink link pin unpin
-    cleanup postinstall services cask
-    update doctor
+    install reinstall upgrade postinstall
+    uninstall remove rm autoremove
+    link unlink pin unpin
+    tap untap
+    update update-reset migrate
+    cleanup services cask doctor
   )
 
   # `bundle`'s own subcommand decides whether it writes: bare `bundle`/

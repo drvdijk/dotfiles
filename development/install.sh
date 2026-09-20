@@ -37,14 +37,5 @@ if run_as_admin_if_needed development "$@"; then
 
 		# Remove outdated versions from the cellar
 		brew cleanup
-
-		# # Post homebrew installations
-		# GCLOUD_SDK="$(brew --prefix)/Caskroom/gcloud-cli/latest/google-cloud-sdk"
-		# if [[ -f "$GCLOUD_SDK/path.bash.inc" ]]; then
-		# 	source "$GCLOUD_SDK/path.bash.inc"
-		# 	gcloud components install gke-gcloud-auth-plugin
-		# else
-		# 	warn "gcloud SDK not found at $GCLOUD_SDK, skipping gke-gcloud-auth-plugin install"
-		# fi
 	fi
 fi
