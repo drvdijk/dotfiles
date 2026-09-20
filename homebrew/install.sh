@@ -20,113 +20,70 @@ set_prefs iterm "iTerm"
 set_prefs mountain-duck "Mountain Duck"
 set_prefs sublime-text "Sublime Text"
 
-if run_as_admin_if_needed homebrew "$@"; then
-	require_homebrew
+# OS-level prep for the full-machine install. Unlike the Brewfile install
+# below, softwareupdate/Rosetta only need root via sudo, not admin-group
+# membership (that constraint is specific to Homebrew Cask's un-sudo'd
+# writes into /Applications - see run_as_admin_if_needed in bin/lib.sh), so
+# this runs directly under this account instead of piggybacking on
+# install_brewfile's admin delegation. Skipped for named-entry installs
+# (matches the original single-entry fast path) and during
+# install_brewfile's own delegated re-invocation of this whole script
+# below (DOTFILES_ADMIN_PHASE) - without that second guard this would run
+# twice, once here and once again as the admin user.
+if [ "$#" -eq 0 ] && [ -z "$DOTFILES_ADMIN_PHASE" ]; then
+	require_sudo
 
-	if [ "$#" -gt 0 ]; then
-		# Install just the named Brewfile entries, skip the full-machine dance.
-		brew update
-		brew_install_from_file "$(dirname "${BASH_SOURCE[0]}")/Brewfile" "$@"
-		brew cleanup
-	else
-		require_sudo
-		offer_passwordless_installer
+	# Install all available updates
+	sudo softwareupdate -ia --verbose
 
-		# Install all available updates
-		sudo softwareupdate -ia --verbose
-
-		# Install Rosetta 2 if on M1 platform
-		if [[ "$(uname -s)" == "Darwin" ]] && [[ "$(uname -p)" == "arm" ]]; then
-			softwareupdate --install-rosetta --agree-to-license
-		fi
-
-		bot "installing tools via homebrew..."
-		# Make sure we’re using the latest Homebrew
-		action "update brew..."
-		brew update
-		ok "brew updated..."
-		# Need to run brew upgrade at this point to make sure `brew list` works correctly...
-		brew upgrade
-		ok "brew upgraded..."
-
-		# Install homebrew and cask stuff from the Brewfile. Mac App Store
-		# entries are deliberately excluded here (see the mas section below,
-		# after this admin-delegated block, for why) - a failed `mas install`
-		# under the wrong account doesn't just fail quietly, it can disrupt
-		# the shared App Store session state (storeaccountd) that the
-		# correct, later attempt under the original account relies on,
-		# turning an otherwise-silent install into one that needs the Apple
-		# ID password re-entered.
-		brewfile_no_mas="$(mktemp)"
-		grep -v '^mas ' "$(dirname "${BASH_SOURCE[0]}")/Brewfile" > "$brewfile_no_mas"
-		brew bundle --file="$brewfile_no_mas"
-		rm -f "$brewfile_no_mas"
-
-		# Add zsh to shells list
-		if [[ $(cat /etc/shells | grep $(which zsh) | wc -c) -eq 0 ]]; then
-		    echo $(which zsh) | sudo tee -a /etc/shells
-		fi
-
-		# Remove outdated versions from the cellar
-		brew cleanup
-	fi
-
-	# 1Password's security-key (YubiKey) support only trusts the app bundle
-	# when it's owned by root or by the account actually running 1Password -
-	# never by some other account, which is exactly what grandmaster is from
-	# the app's point of view. Homebrew Cask can't be told to install it that
-	# way, so fix it up after the fact. This is a one-off, narrowly-scoped
-	# exception: Homebrew Cask's own uninstall/reinstall logic assumes
-	# whoever runs `brew remove`/`reinstall` owns the bundle being touched,
-	# so `brew remove/reinstall 1password` run through this same admin
-	# delegation will fail with permission errors from here on - to update,
-	# either let 1Password's own built-in updater handle it, or temporarily
-	# chown it back to grandmaster before reinstalling through brew.
-	#
-	# This also needs the calling terminal to hold the "App Management"
-	# privacy permission (System Settings > Privacy & Security). macOS checks
-	# that against the responsible GUI app in the process chain (Terminal,
-	# iTerm, ...), not the effective uid - sudo grants real root here, but
-	# doesn't bypass it - so without it this fails with a wall of
-	# "Operation not permitted" errors on the app's contents that look like
-	# a permissions bug but aren't.
-	if [ -d /Applications/1Password.app ] && [ "$(stat -f '%Su' /Applications/1Password.app)" != root ]; then
-		action "chown 1Password.app to root:wheel (needed for YubiKey support)..."
-		if ! sudo chown -R root:wheel /Applications/1Password.app; then
-			error "chown failed - your terminal app most likely needs the \"App Management\" privacy permission."
-			warn "opening System Settings > Privacy & Security > App Management - enable it for this terminal app, then re-run this install."
-			open "x-apple.systempreferences:com.apple.preference.security?Privacy_AppBundles" 2>/dev/null
-		fi
+	# Install Rosetta 2 if on M1 platform
+	if [[ "$(uname -s)" == "Darwin" ]] && [[ "$(uname -p)" == "arm" ]]; then
+		softwareupdate --install-rosetta --agree-to-license
 	fi
 fi
 
-# Mac App Store installs go through the App Store's own daemon, tied to
-# whichever account is actually signed into the App Store in the GUI - not
-# to Unix admin permissions - and `su` doesn't carry a full GUI session
-# anyway. So unlike casks/formulae above, these never delegate to an admin
-# user, and (like prefs below) are skipped in the delegated admin run
-# itself. Only covers the full install (no args) for now - a purely
-# mas-named install (e.g. `dotfiles install homebrew Fantastical`) still
-# goes through the admin path above today and would need the same treatment
-# if that ever comes up.
-if [ -z "$DOTFILES_ADMIN_PHASE" ] && [ "$#" -eq 0 ]; then
+install_brewfile homebrew "$(dirname "${BASH_SOURCE[0]}")/Brewfile" "$@"
+
+# Add zsh (installed by the Brewfile above) to the shells list. Same
+# full-install/DOTFILES_ADMIN_PHASE gating as the OS-level prep above, and
+# needs require_homebrew re-run first: when the Brewfile install just above
+# delegated to the admin user, zsh landed in the shared Homebrew prefix
+# from a *different* process, so this process's PATH may not have picked
+# it up yet (see require_homebrew's own comment on this).
+if [ "$#" -eq 0 ] && [ -z "$DOTFILES_ADMIN_PHASE" ]; then
 	require_homebrew
-	brew install mas
+	if [[ $(cat /etc/shells | grep $(which zsh) | wc -c) -eq 0 ]]; then
+	    echo $(which zsh) | sudo tee -a /etc/shells
+	fi
+fi
 
-	# Wait until app store sign-in is done
-	# mas account is broken: https://github.com/mas-cli/mas/issues/417
-	read -p "Make sure you're logged into the App Store!" -r
-	#until mas account > /dev/null 2>&1; do
-	#  echo "Please sign in to the Mac App store manually..."
-	#  sleep 3
-	#done
-
-	mas_names=()
-	while IFS= read -r name; do
-		mas_names+=("$name")
-	done < <(grep -oE '^mas "[^"]+"' "$(dirname "${BASH_SOURCE[0]}")/Brewfile" | sed -E 's/^mas "(.*)"$/\1/')
-	if [ "${#mas_names[@]}" -gt 0 ]; then
-		brew_install_from_file "$(dirname "${BASH_SOURCE[0]}")/Brewfile" "${mas_names[@]}"
+# 1Password's security-key (YubiKey) support only trusts the app bundle
+# when it's owned by root or by the account actually running 1Password -
+# never by some other account, which is what an admin delegate would be
+# from the app's point of view. Homebrew Cask can't be told to install it
+# that way, so fix it up after the fact, directly under this account (only
+# needs root via sudo, same reasoning as the OS-level prep above). This is
+# a one-off, narrowly-scoped exception: Homebrew Cask's own uninstall/
+# reinstall logic assumes whoever runs `brew remove`/`reinstall` owns the
+# bundle being touched, so `brew remove/reinstall 1password` run through
+# install_brewfile's admin delegation will fail with permission errors
+# from here on - to update, either let 1Password's own built-in updater
+# handle it, or temporarily chown it back to the admin user before
+# reinstalling through brew.
+#
+# This also needs the calling terminal to hold the "App Management"
+# privacy permission (System Settings > Privacy & Security). macOS checks
+# that against the responsible GUI app in the process chain (Terminal,
+# iTerm, ...), not the effective uid - sudo grants real root here, but
+# doesn't bypass it - so without it this fails with a wall of
+# "Operation not permitted" errors on the app's contents that look like
+# a permissions bug but aren't.
+if [ -z "$DOTFILES_ADMIN_PHASE" ] && [ -d /Applications/1Password.app ] && [ "$(stat -f '%Su' /Applications/1Password.app)" != root ]; then
+	action "chown 1Password.app to root:wheel (needed for YubiKey support)..."
+	if ! sudo chown -R root:wheel /Applications/1Password.app; then
+		error "chown failed - your terminal app most likely needs the \"App Management\" privacy permission."
+		warn "opening System Settings > Privacy & Security > App Management - enable it for this terminal app, then re-run this install."
+		open "x-apple.systempreferences:com.apple.preference.security?Privacy_AppBundles" 2>/dev/null
 	fi
 fi
 

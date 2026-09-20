@@ -181,7 +181,7 @@ function offer_passwordless_installer() {
         if [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null; then
             return # already active in this process tree
         fi
-        warn "removing stale passwordless-installer sudoers rule left over from a previous run"
+        bot "removing stale passwordless-installer sudoers rule left over from a previous run"
         sudo rm -f "$sudoers_file"
         rm -f "$pid_file"
     fi
@@ -189,7 +189,9 @@ function offer_passwordless_installer() {
     echo -e ' - Installing several apps can otherwise prompt for your password after every single one (a Homebrew limitation, not a security issue with your Mac).'
     read -p "   Temporarily allow passwordless \`sudo installer\` for the rest of this run? [y/N] " -n 1 -r
     echo
-    [[ $REPLY =~ ^[Yy]$ ]] || return
+    # Explicit 0: a bare `return` would hand back the failed test's status,
+    # and declining is not an error (set -e would abort the whole install).
+    [[ $REPLY =~ ^[Yy]$ ]] || return 0
 
     # SETENV is required because Homebrew's installer invocation sets
     # LOGNAME/USER/USERNAME on the sudo command line itself (`sudo -E
@@ -198,7 +200,10 @@ function offer_passwordless_installer() {
     if install_sudoers_fragment dotfiles-installer-nopasswd "$USER ALL = NOPASSWD:SETENV: /usr/sbin/installer"; then
         echo "$$" > "$pid_file"
         ok "passwordless installer enabled for the rest of this run"
-        trap 'sudo rm -f "'"$sudoers_file"'"; rm -f "'"$pid_file"'"' EXIT
+        # The sudo ticket from require_sudo can have lapsed by exit time
+        # (its keep-alive only refreshes a live ticket, never re-prompts),
+        # so say what a possible password prompt here is for.
+        trap 'bot "removing the temporary passwordless-installer sudoers rule (may ask for your password)"; sudo rm -f "'"$sudoers_file"'"; rm -f "'"$pid_file"'"' EXIT
     fi
 }
 
@@ -393,4 +398,106 @@ function brew_install_from_file() {
                 ;;
         esac
     done
+}
+
+# Runs `brew bundle` against a Brewfile with all `mas "..."` lines filtered
+# out. Mac App Store entries must go through install_mas_apps_from_file
+# instead (see there for why) - never through an admin-delegated bundle run.
+function brew_bundle_no_mas() {
+    local brewfile="$1"
+    local tmp
+    tmp="$(mktemp)"
+    grep -v '^mas ' "$brewfile" > "$tmp"
+    brew bundle --file="$tmp"
+    rm -f "$tmp"
+}
+
+# Installs every `mas "..."` entry from a Brewfile under the current,
+# non-delegated account. Mac App Store installs go through the App Store's
+# own daemon, tied to whichever account is actually signed into the App
+# Store in the GUI - not to Unix admin-group permissions - and `su` doesn't
+# carry a full GUI session anyway. So unlike casks/formulae, these never
+# delegate to an admin user (run_as_admin_if_needed), and this is a no-op
+# during the delegated admin run itself (DOTFILES_ADMIN_PHASE) - the
+# original, non-admin invocation handles it once control returns, same as
+# prefs.
+#
+# Only covers the full-Brewfile case (no args) - a caller doing a
+# single-entry install (e.g. `dotfiles install homebrew Fantastical`) still
+# needs to route a mas-typed name through this instead of the admin path
+# itself if that ever comes up.
+function install_mas_apps_from_file() {
+    local brewfile="$1"
+    [ -n "$DOTFILES_ADMIN_PHASE" ] && return
+
+    local mas_names=()
+    while IFS= read -r name; do
+        mas_names+=("$name")
+    done < <(grep -oE '^mas "[^"]+"' "$brewfile" | sed -E 's/^mas "(.*)"$/\1/')
+    [ "${#mas_names[@]}" -eq 0 ] && return
+
+    # require_homebrew only matters here to refresh this process's PATH for
+    # a `mas` a sibling admin-delegated process just installed (see
+    # require_homebrew's own comment) - skip both it and the install
+    # entirely once `mas` is already found, same short-circuit
+    # brew_install_from_file's own mas case uses.
+    hash mas 2>/dev/null || { require_homebrew; brew install mas; }
+
+    # Wait until app store sign-in is done
+    # mas account is broken: https://github.com/mas-cli/mas/issues/417
+    read -p "Make sure you're logged into the App Store!" -r
+
+    brew_install_from_file "$brewfile" "${mas_names[@]}"
+}
+
+# Installs a topic's whole Brewfile: casks/formulae go through admin
+# delegation if this account needs it (run_as_admin_if_needed), Mac App
+# Store entries never do (install_mas_apps_from_file) and always install
+# under this account afterward instead. Handles both the full-Brewfile
+# install (no args) and installing just a handful of named entries (args) -
+# same two modes every topic's install.sh already branches on. Running
+# brew_bundle_no_mas/install_mas_apps_from_file against a Brewfile with no
+# `mas` lines is a harmless no-op, so this is safe to use even for topics
+# that don't have any App Store entries today.
+#
+# A topic's other admin-only steps (e.g. homebrew/install.sh's
+# softwareupdate/Rosetta/1Password fixup) don't need to share this call's
+# admin session - they only need root via sudo, not admin-group membership
+# (that's specific to Homebrew Cask's un-sudo'd writes into /Applications)
+# - so they can run directly under this account before/after this call
+# instead. Guard them with `[ -z "$DOTFILES_ADMIN_PHASE" ]` (and
+# `[ "$#" -eq 0 ]` if they're full-install-only) so they don't also run
+# during this function's own delegated re-invocation of the whole script.
+function install_brewfile() {
+    local topic="$1" brewfile="$2"; shift 2
+
+    if run_as_admin_if_needed "$topic" "$@"; then
+        require_homebrew
+
+        if [ "$#" -gt 0 ]; then
+            # Install just the named Brewfile entries, skip the full-machine dance.
+            brew update
+            brew_install_from_file "$brewfile" "$@"
+            brew cleanup
+        else
+            require_sudo
+            offer_passwordless_installer
+
+            bot "installing tools via homebrew..."
+            action "update brew..."
+            brew update
+            ok "brew updated..."
+            # Need to run brew upgrade at this point to make sure `brew list` works correctly...
+            brew upgrade
+            ok "brew upgraded..."
+
+            brew_bundle_no_mas "$brewfile"
+
+            brew cleanup
+        fi
+    fi
+
+    if [ "$#" -eq 0 ]; then
+        install_mas_apps_from_file "$brewfile"
+    fi
 }

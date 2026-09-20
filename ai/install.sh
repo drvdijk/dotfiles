@@ -8,42 +8,15 @@ source "$( cd "$( dirname "${BASH_SOURCE[0]}" )/../bin" && pwd )"/lib.sh
 
 require_osx
 
-if run_as_admin_if_needed ai "$@"; then
-	require_homebrew
-
-	if [ "$#" -gt 0 ]; then
-		# Install just the named Brewfile entries, skip the full-machine dance.
-		brew update
-		brew_install_from_file "$(dirname "${BASH_SOURCE[0]}")/Brewfile" "$@"
-		brew cleanup
-	else
-		require_sudo
-		offer_passwordless_installer
-
-		bot "installing tools via homebrew..."
-		# Make sure we’re using the latest Homebrew
-		action "update brew..."
-		brew update
-		ok "brew updated..."
-		# Need to run brew upgrade at this point to make sure `brew list` works correctly...
-		brew upgrade
-		ok "brew upgraded..."
-
-		# Install homebrew, cask, and mas stuff from brew file here
-		brew bundle --file=$(dirname ${BASH_SOURCE[0]})/Brewfile
-
-		# Remove outdated versions from the cellar
-		brew cleanup
-	fi
-fi
+install_brewfile ai "$(dirname "${BASH_SOURCE[0]}")/Brewfile" "$@"
 
 # Agent skills: symlink this repo's personal skills into the tool-agnostic
 # ~/.agents/skills/ merge point, then fan that out to the tool-specific
 # dirs Claude/Gemini actually look in. Not a homebrew concern, so this runs
-# unconditionally rather than inside the run_as_admin_if_needed block above
-# - and, like the prefs application in homebrew/install.sh, it's skipped
-# during the delegated admin run itself so it always lands in the original
-# (non-admin) account's home, not the admin delegate's.
+# unconditionally rather than inside install_brewfile's admin delegation
+# above - and, like the prefs application in homebrew/install.sh, it's
+# skipped during the delegated admin run itself so it always lands in the
+# original (non-admin) account's home, not the admin delegate's.
 if [ -z "$DOTFILES_ADMIN_PHASE" ]; then
 	bot 'Installing agent skills'
 
