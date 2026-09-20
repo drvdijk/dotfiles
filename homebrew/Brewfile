@@ -44,6 +44,7 @@ cask "font-meslo-lg-nerd-font"
 # GUI applications
 cask "1password"
 #cask "dropbox" # disable until M1 support is available, use maestral instead
+cask "fastmail"
 cask "forklift"
 cask "ghostty"
 cask "google-chrome"
