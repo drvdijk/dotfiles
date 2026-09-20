@@ -1,4 +1,4 @@
-HISTFILE="${ZDOTDIR:-$HOME}/.zhistory"       # The path to the history file.
+export HISTFILE="${ZDOTDIR:-$HOME}/.zhistory" # The path to the history file. Exported so child processes (hstr) find it instead of defaulting to ~/.zsh_history.
 HISTSIZE=10000                   # The maximum number of events to save in the internal history.
 SAVEHIST=100000                  # The maximum number of events to save in the history file.
 setopt BANG_HIST                 # Treat the '!' character specially during expansion.
