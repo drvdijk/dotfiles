@@ -4,6 +4,6 @@ cask_args appdir: "/Applications"
 # Docker Sandboxes CLI - isolated sandboxes for coding agents.
 # https://docs.docker.com/ai/sandboxes/install/
 tap "docker/tap", trusted: true
-brew "docker/tap/sbx"
+cask "docker/tap/sbx"
 
 cask "claude" # Claude desktop app, for chats outside a sandbox
