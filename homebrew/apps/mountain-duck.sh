@@ -8,5 +8,5 @@
 # -e alone would call it missing and `ln -s` onto it would nest a new link
 # inside the (resolved) target instead of doing nothing.
 if [ ! -e "$HOME/Dropbox" ] && [ ! -L "$HOME/Dropbox" ]; then
-  ln -s "$HOME/Library/Application Support/Mountain Duck/Volumes.noindex/Dropbox.localized" "$HOME/Dropbox"
+  ln -s "$HOME/Library/CloudStorage/MountainDuck-Dropbox" "$HOME/Dropbox"
 fi
