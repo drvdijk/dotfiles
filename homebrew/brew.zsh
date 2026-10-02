@@ -21,7 +21,7 @@ brew() {
     uninstall remove rm autoremove
     link unlink pin unpin
     tap untap
-    update update-reset migrate
+    outdated update update-reset migrate
     cleanup services cask doctor
   )
 
