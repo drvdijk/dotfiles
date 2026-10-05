@@ -1,7 +1,6 @@
-Include ~/.ssh/identity
 Host *
-  IgnoreUnknown AddKeysToAgent,UseKeychain
-  UseKeyChain yes
-  AddKeysToAgent yes
+  # Private keys live in 1Password and are served by its SSH agent
+  # (1Password > Settings > Developer > Use the SSH agent).
+  IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 Include ~/Dropbox/sync/.ssh/*
 Include ~/dev/keys/.ssh/*

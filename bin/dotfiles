@@ -15,8 +15,9 @@ sub_help () {
     echo "Commands:"
     echo "   help                   This help message"
     echo "   bootstrap              Bootstrap the dotfiles"
-    echo "   gitconfig              Setup git configuration"
     echo "   sshconfig              Setup ssh config file"
+    echo "   gitconfig              Setup git configuration & SSH commit signing"
+    echo "   gitconfig --local      Setup commit signing (email, SSH key) for the current repo only"
     echo "   install macos          Install reasonable macOS defaults"
     echo "   install macos <app>    Apply prefs for just one app/pane (e.g. finder, dock)"
     echo "   install homebrew       Install homebrew & cask"
@@ -152,8 +153,60 @@ sub_bootstrap () {
   ok 'dotfiles installed'
 }
 
+# Asks for an SSH public key and leaves it in $git_signingkey as
+# "<type> <base64>" (any trailing comment dropped), or empty when the answer
+# was blank. Fails when the answer is not an SSH public key.
+read_signingkey () {
+  local key_type key_blob
+  read -e -r git_signingkey
+  read -r key_type key_blob _ <<< "$git_signingkey"
+
+  if [[ -z $git_signingkey ]]
+  then
+    return 0
+  elif [[ $key_type == ssh-* && -n $key_blob ]]
+  then
+    git_signingkey="$key_type $key_blob"
+  else
+    error 'That does not look like an SSH public key (expected "ssh-ed25519 AAAA..."), nothing changed.'
+    return 1
+  fi
+}
+
+# Turns on commit signing with an SSH key held in 1Password.
+# $1 is the public key, $2 the author email it signs for, the rest says which
+# git config to write to (`--file <path>`, `--local`).
+set_git_signing () {
+  local key=$1 email=$2
+  shift 2
+
+  git config "$@" user.signingkey "$key"
+  git config "$@" gpg.format ssh
+  git config "$@" gpg.ssh.program /Applications/1Password.app/Contents/MacOS/op-ssh-sign
+  git config "$@" gpg.ssh.allowedSignersFile '~/.ssh/allowed_signers'
+  git config "$@" commit.gpgsign true
+
+  # Lets `git log --show-signature` verify our own commits locally: the file
+  # maps an author email to the key(s) allowed to sign for it.
+  local signer="$email namespaces=\"git\" $key"
+  mkdir -p ~/.ssh
+  chmod 700 ~/.ssh
+  if ! grep -qxF "$signer" ~/.ssh/allowed_signers 2>/dev/null
+  then
+    echo "$signer" >> ~/.ssh/allowed_signers
+  fi
+}
+
 sub_gitconfig () {
-  if ! [ -f $DOTFILES_DIR/git/.gitconfig.symlink ]
+  if [ "${1:-}" = "--local" ]
+  then
+    sub_gitconfig_local
+    return
+  fi
+
+  local gitconfig="$DOTFILES_DIR/git/.gitconfig.symlink"
+
+  if ! [ -f "$gitconfig" ]
   then
     bot 'Setup gitconfig'
 
@@ -161,13 +214,85 @@ sub_gitconfig () {
     read -e git_authorname
     echo -e ' - What is your global git author email?'
     read -e git_authoremail
-    echo -e ' - What is your global git signing key?'
-    read -e git_signingkey
 
-    sed -e "s/AUTHORNAME/$git_authorname/g" -e "s/AUTHOREMAIL/$git_authoremail/g" -e "s/AUTHORSIGNINGKEY/$git_signingkey/g" $DOTFILES_DIR/git/gitconfig.symlink.example > $DOTFILES_DIR/git/.gitconfig.symlink
+    # Fill the template in with `git config` rather than sed: the values land
+    # in the file verbatim, whatever characters they contain.
+    cp "$DOTFILES_DIR/git/gitconfig.symlink.example" "$gitconfig"
+    git config --file "$gitconfig" user.name "$git_authorname"
+    git config --file "$gitconfig" user.email "$git_authoremail"
 
     ok 'gitconfig set up'
   fi
+
+  # Commits are signed with an SSH key that lives in 1Password. This is asked
+  # separately from the block above so it can be answered on a later run: on
+  # a fresh machine 1Password isn't installed yet when setup.sh gets here.
+  # It also converts a gitconfig generated before the switch from GPG.
+  local signingkey
+  signingkey="$(git config --file "$gitconfig" user.signingkey || true)"
+  if [[ $signingkey != ssh-* ]]
+  then
+    bot 'Git commit signing'
+
+    echo -e ' - Paste the public SSH key to sign commits with (in 1Password: the "public key" field of the SSH key item). Leave blank to set this up later.'
+    read_signingkey
+
+    if [[ -n $git_signingkey ]]
+    then
+      set_git_signing "$git_signingkey" "$(git config --file "$gitconfig" user.email)" --file "$gitconfig"
+      ok 'commit signing set up'
+    elif [[ -z $signingkey || $signingkey == AUTHORSIGNINGKEY ]]
+    then
+      # No key at all: signing has to be off, or every commit fails.
+      git config --file "$gitconfig" --unset user.signingkey || true
+      git config --file "$gitconfig" commit.gpgsign false
+      warn 'No signing key set, commit signing is off. Run `dotfiles gitconfig` again to set one.'
+    else
+      warn "Keeping the existing signing key ($signingkey). Run \`dotfiles gitconfig\` again to switch to an SSH key."
+    fi
+  fi
+}
+
+# `dotfiles gitconfig --local`: sets up commit signing for the repository in
+# the current directory only, for repos that use another author email and/or
+# another key than the global gitconfig. Can be re-run to change either.
+sub_gitconfig_local () {
+  local repo
+  if ! repo="$(git rev-parse --show-toplevel 2>/dev/null)"
+  then
+    error 'Not inside a git repository.'
+    return 1
+  fi
+
+  bot "Git commit signing for $repo"
+
+  local email signingkey
+  email="$(git config user.email || true)"
+  signingkey="$(git config user.signingkey || true)"
+  [[ $signingkey == ssh-* ]] || signingkey=
+
+  echo -e " - What is the author email for this repository? Leave blank to keep ${email:-<none>}."
+  read -e -r git_authoremail
+  email="${git_authoremail:-$email}"
+  if [[ -z $email ]]
+  then
+    error 'No author email set, nothing changed.'
+    return 1
+  fi
+
+  echo -e " - Paste the public SSH key to sign commits with in this repository. Leave blank to keep ${signingkey:-<none>}."
+  read_signingkey
+  signingkey="${git_signingkey:-$signingkey}"
+  if [[ -z $signingkey ]]
+  then
+    error 'No SSH signing key given and none set globally, signing not changed.'
+    return 1
+  fi
+
+  # Written only now, so a rejected answer above leaves the repo untouched.
+  git config --local user.email "$email"
+  set_git_signing "$signingkey" "$email" --local
+  ok "commits in this repository are signed as $email"
 }
 
 sub_sshconfig () {
@@ -178,19 +303,10 @@ sub_sshconfig () {
     chmod 700 ~/.ssh
     cp $DOTFILES_DIR/ssh/config.example ~/.ssh/config
 
-    echo -e ' What will the key name be? eg "name" will become id.name[.pub]'
-    read
-    if [[ ! -z $REPLY ]]; then
-      # Build the key comment as username@keyname, like ssh-keygen's default
-      # username@hostname but using the key name in place of the hostname:
-      # this step can run before the machine's real ComputerName is set (see
-      # `install macos`), which would otherwise bake a stale/default hostname
-      # into the public key comment permanently. $(whoami) is correct at this
-      # point regardless of that ordering.
-      ssh-keygen -t ed25519 -C "$(whoami)@$REPLY" -f ~/.ssh/id.$REPLY
-      echo "IdentityFile ~/.ssh/id.$REPLY" > ~/.ssh/identity
-      chmod 600 ~/.ssh/identity
-    fi
+    # No key is generated here: private keys live in 1Password and are served
+    # by its SSH agent (see IdentityAgent in ssh/config.example), so there is
+    # nothing to put on disk.
+    warn 'SSH keys come from the 1Password SSH agent: turn it on in 1Password > Settings > Developer once 1Password is installed.'
   fi
 }
 

@@ -35,5 +35,12 @@
         change-commits = "!f() { VAR=$1; OLD=$2; NEW=$3; shift 3; git filter-branch --env-filter \"if [[ \\\"$`echo $VAR`\\\" = '$OLD' ]]; then export $VAR='$NEW'; fi\" $@; }; f "
 [commit]
         gpgsign = true
+[gpg]
+        # Sign with the SSH key in user.signingkey (a public key; the private
+        # key stays in 1Password) instead of GPG.
+        format = ssh
+[gpg "ssh"]
+        program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
+        allowedSignersFile = ~/.ssh/allowed_signers
 [pull]
         ff = only
