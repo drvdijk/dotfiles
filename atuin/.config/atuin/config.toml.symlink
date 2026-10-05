@@ -1,9 +1,10 @@
 # Atuin configuration - https://docs.atuin.sh/configuration/config/
 # Anything not set here uses atuin's defaults.
 
-# Local only: history stays in ~/.local/share/atuin/history.db. Syncing needs
-# an explicit `atuin register` / `atuin login` anyway.
-auto_sync = false
+# Sync is end-to-end encrypted with a key that never leaves the machine
+# (~/.local/share/atuin/key, also kept in 1Password). Does nothing until this
+# machine is logged in with `atuin register` or `atuin login`.
+auto_sync = true
 
 # Installed and upgraded through Homebrew.
 update_check = false

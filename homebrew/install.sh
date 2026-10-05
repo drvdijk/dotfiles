@@ -100,6 +100,15 @@ if [ -z "$DOTFILES_ADMIN_PHASE" ] && [ -d "/Applications/Mountain Duck.app" ] &&
 	fi
 fi
 
+# Atuin history sync is a manual, per-machine step: the account password and
+# encryption key live in 1Password, not in this repo. Skipped in the
+# delegated admin run, whose home isn't the one atuin gets used from.
+# The login state sits inside atuin's meta.db, so ask atuin itself; any
+# other failure of `atuin status` (offline, server down) stays quiet.
+if [ -z "$DOTFILES_ADMIN_PHASE" ] && [ -x "$(command -v atuin)" ] && atuin status 2>&1 | grep -qi 'not logged in'; then
+	warn 'Atuin history sync is not set up on this machine yet. Run `atuin login -u <user>` (password and key are in 1Password; first machine ever: `atuin register`, then save the output of `atuin key` in 1Password), then `atuin import auto` and `atuin sync`.'
+fi
+
 # Apply prefs for the third-party apps installed above. Skipped when this IS
 # the delegated admin run (see run_as_admin_if_needed in bin/lib.sh) - the
 # original, non-admin invocation applies them once control returns to it
