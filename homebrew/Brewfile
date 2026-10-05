@@ -21,6 +21,7 @@ brew "antidote"
 brew "starship"
 
 # CLI
+brew "atuin"
 brew "coreutils"
 brew "findutils"
 brew "git"

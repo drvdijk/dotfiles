@@ -1,0 +1,12 @@
+# Atuin configuration - https://docs.atuin.sh/configuration/config/
+# Anything not set here uses atuin's defaults.
+
+# Local only: history stays in ~/.local/share/atuin/history.db. Syncing needs
+# an explicit `atuin register` / `atuin login` anyway.
+auto_sync = false
+
+# Installed and upgraded through Homebrew.
+update_check = false
+
+# Enter runs the selected command, Tab puts it on the prompt to edit (same as hstr).
+enter_accept = true
