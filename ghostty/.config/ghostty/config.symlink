@@ -61,6 +61,12 @@ shell-integration-features = no-cursor
 # window-width = 80
 # window-height = 25
 
+# --- New window working directory ---
+# Ghostty defaults to inheriting the working directory of the previously
+# focused window/tab (window-inherit-working-directory = true). Off instead,
+# so new windows always start in the default directory (home).
+window-inherit-working-directory = false
+
 # --- Scrollback ---
 # iTerm profile: 10000 lines, not unlimited. Ghostty (1.3) can only limit
 # scrollback by size in bytes, not by lines, so this is an estimate: 10 MB is
