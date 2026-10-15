@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+#
+# Installs the tool versions a project asks for: adds any missing asdf
+# plugins first (plain `asdf install` refuses tools whose plugin isn't
+# there), then installs each version that isn't installed yet.
+#
+#   asdf-sync                  use ./.tool-versions plus the version files other
+#                              tools use (.nvmrc, .node-version, .java-version,
+#                              .sdkmanrc) in the current directory
+#   asdf-sync <file>           use just that tool-versions file
+#   asdf-sync --home [<file>]  also make the tool-versions versions the defaults
+#                              in ~/.tool-versions
+#
+
+set -e
+
+source "$( cd "$( dirname "${BASH_SOURCE[0]}" )/../bin" && pwd )"/lib.sh
+
+# Version files of other tools, and the asdf plugin that reads each one.
+# asdf only reads them with `legacy_version_file = yes` (asdf/.asdfrc.symlink).
+LEGACY_FILES=(
+	".nvmrc:nodejs"
+	".node-version:nodejs"
+	".java-version:java"
+	".sdkmanrc:java"
+)
+
+set_home=false
+if [ "${1:-}" = "--home" ]; then
+	set_home=true
+	shift
+fi
+tool_versions_file="${1:-.tool-versions}"
+# Without a file argument this is about the project in the current directory,
+# so its other version files count too.
+[ -z "${1:-}" ] && read_legacy=true || read_legacy=false
+
+if ! hash asdf 2>/dev/null; then
+	error "asdf not found, install the development topic first (dotfiles install development)"
+	exit 1
+fi
+
+ensure_plugin () {
+	if ! asdf plugin list 2>/dev/null | grep -qx "$1"; then
+		action "adding asdf plugin $1"
+		asdf plugin add "$1"
+	fi
+}
+
+found=false
+tool_versions_tools=" "
+
+if [ -f "$tool_versions_file" ]; then
+	found=true
+	while read -r line <&3 || [ -n "$line" ]; do
+		# Drop comments (whole-line and trailing) and skip blank lines
+		line="${line%%#*}"
+		read -r tool versions <<< "$line"
+		[ -z "$tool" ] && continue
+		tool_versions_tools+="$tool "
+
+		ensure_plugin "$tool"
+
+		# A line may list several versions (the first one wins, the rest are fallbacks)
+		for version in $versions; do
+			if asdf where "$tool" "$version" >/dev/null 2>&1; then
+				ok "$tool $version already installed"
+			else
+				action "installing $tool $version"
+				asdf install "$tool" "$version"
+			fi
+		done
+
+		if [ "$set_home" = "true" ]; then
+			asdf set --home "$tool" $versions
+		fi
+	done 3< "$tool_versions_file"
+elif [ "$read_legacy" = "false" ]; then
+	error "no tool-versions file at $tool_versions_file"
+	exit 1
+fi
+
+if [ "$read_legacy" = "true" ]; then
+	legacy_enabled=false
+	grep -qE '^[[:space:]]*legacy_version_file[[:space:]]*=[[:space:]]*yes' "${ASDF_CONFIG_FILE:-$HOME/.asdfrc}" 2>/dev/null && legacy_enabled=true
+
+	legacy_tools=" "
+	for entry in "${LEGACY_FILES[@]}"; do
+		file="${entry%%:*}" tool="${entry#*:}"
+		[ -f "$file" ] || continue
+		found=true
+		# .tool-versions wins over other version files, as it does in asdf itself
+		if [[ $tool_versions_tools == *" $tool "* ]]; then
+			warn "$file ignored, .tool-versions already sets $tool"
+			continue
+		fi
+		[[ $legacy_tools == *" $tool "* ]] && continue
+		if [ "$legacy_enabled" = "false" ]; then
+			warn "$file skipped: asdf only reads it with legacy_version_file = yes in ~/.asdfrc (dotfiles bootstrap links asdf/.asdfrc.symlink there)"
+			continue
+		fi
+		legacy_tools+="$tool "
+
+		ensure_plugin "$tool"
+		# Leave reading the file to the plugin: it knows its format (e.g.
+		# `lts/jod` in .nvmrc, `java=21.0.2-tem` in .sdkmanrc).
+		action "installing $tool from $file"
+		asdf install "$tool"
+	done
+fi
+
+if [ "$found" = "false" ]; then
+	error "no .tool-versions, .nvmrc, .node-version, .java-version or .sdkmanrc in $(pwd)"
+	exit 1
+fi
+
+ok "asdf tools installed"

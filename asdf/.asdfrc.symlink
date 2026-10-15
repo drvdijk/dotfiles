@@ -1,0 +1,4 @@
+# Also pick up the version files other tools use (.nvmrc, .node-version,
+# .java-version, .sdkmanrc, ...), so projects don't need a .tool-versions
+# just for asdf.
+legacy_version_file = yes

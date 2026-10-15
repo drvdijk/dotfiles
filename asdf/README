@@ -1,0 +1,26 @@
+asdf itself is installed by ../development/Brewfile, without any plugins.
+Which tools and versions are needed is up to each project instead.
+
+Projects say which versions they need either in an asdf .tool-versions
+file (see ./tool-versions.example), or in the version files other tools
+use: .nvmrc / .node-version (Node) and .java-version / .sdkmanrc (Java).
+asdf reads those too thanks to `legacy_version_file = yes` in
+./.asdfrc.symlink, which `dotfiles bootstrap` links to ~/.asdfrc.
+
+In a project's directory, run:
+
+    asdf-sync
+
+This adds any missing asdf plugins and installs the versions the project
+asks for. ./path.zsh puts this folder on the PATH, so the command is
+available in every shell. Note it only looks in the current directory,
+not in parent directories the way asdf itself does. From .sdkmanrc only
+the Java version is used (repos usually ship mvnw/gradlew for the rest).
+
+To set up global defaults in ~/.tool-versions from a file kept outside
+this repo (e.g. the tool-versions of a work machine):
+
+    dotfiles install asdf ~/dev/tool-versions
+
+Leave the file argument out to be asked for it (defaults to
+~/dev/tool-versions).

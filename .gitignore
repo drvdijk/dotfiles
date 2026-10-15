@@ -1,5 +1,6 @@
 git/.gitconfig.symlink
 .admin-user
+ai/.skill-sources
 **/*private*
 Brewfile.lock.json
 zsh/zsh_plugins.zsh
