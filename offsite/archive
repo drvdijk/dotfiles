@@ -1,0 +1,1297 @@
+#!/usr/bin/env bash
+#
+# archive: create, check, unpack and migrate encrypted, split and
+# par2-protected archives of folders. See `archive --help`.
+#
+# Written for macOS (works with its bash 3.2 too) but also runs on Linux.
+# Unencrypted data only ever flows through pipes, never onto disk.
+
+set -euo pipefail
+shopt -s nullglob
+
+PROG=$(basename "$0")
+
+# Current archive format (written to <name>.meta)
+FORMAT_VERSION=2
+CIPHER=aes-256-cbc
+KDF=pbkdf2
+DIGEST=sha256
+ITERATIONS=10000000
+SPLIT_SIZE=1000m
+PAR2_REDUNDANCY=25
+PAR2_BLOCKS=500
+
+TAR=${ARCHIVE_TAR:-tar}
+TAB=$(printf '\t')
+NL=$'\n'
+
+TMP=""
+OUT_NAME=""      # archive being written; its files are removed if we fail
+BG_PID=""
+WORK_DIR=""      # in-place migrate folder; removed on exit only if empty
+SCRATCH_DIR=""   # meta's folder for new par2 files; removed on exit
+META_BACKUP=""   # meta: copy of the old .meta, put back if we fail
+META_TARGET=""
+
+STEP_LABELS=()
+STEP_SECS=()
+STEP_START=""
+
+
+usage () {
+    case ${1:-} in
+        pack) cat <<EOF
+Usage: $PROG pack [--split-size SIZE] [--op-ref REF] <folder> <name>
+
+Create archive <name> from <folder>: encrypted file list, encrypted tar split
+into parts, <name>.meta and par2 recovery files. Only the folder's own name is
+stored in the tar (not the path leading to it). .DS_Store, ._* and macOS
+metadata (xattrs, ACLs, resource forks) are left out.
+
+  --split-size SIZE   part size for split (default: $SPLIT_SIZE)
+  --op-ref REF        1Password reference to note in .meta, e.g.
+                      op://Private/Archive key/password (default: taken from
+                      ARCHIVE_PASS_CMD when that is 'op read op://...')
+EOF
+        ;;
+        list) cat <<EOF
+Usage: $PROG list <name>
+
+Show the archive's file list (in \$PAGER, default less, or plain when the
+output is not a terminal).
+EOF
+        ;;
+        unpack) cat <<EOF
+Usage: $PROG unpack <name> [target]
+
+Unpack into [target] (default: ./<name without path>). The target must not
+exist yet or be empty. The password is checked on the file list first.
+EOF
+        ;;
+        check) cat <<EOF
+Usage: $PROG check [--full] <name>
+
+Check the password and format (by decrypting the file list) and run
+par2 verify. With --full, also decrypt and read all data.
+EOF
+        ;;
+        migrate) cat <<EOF
+Usage: $PROG migrate [options] <name>         in place, keeping the name
+       $PROG migrate [options] <old> <new>    into a new archive <new>
+
+Re-encrypt an archive (usually a legacy one) in the current format,
+streaming: nothing unencrypted touches the disk. Along the way:
+  - long legacy paths are shortened to the archived folder's own name
+    (e.g. Users/me/Pictures/Photos/... becomes Photos/...); this is shown
+    first and asked for confirmation
+  - ._* and .DS_Store entries are dropped
+  - a new file list, .meta and par2 files are written
+Then the new archive is decrypted again and every file's path, size, mode,
+mtime and sha256 is compared with the old one.
+
+In place, the new archive is built under its final name in <name>.migrating/
+(par2 and .meta hold file names, so it never gets renamed). Only after it has
+been verified, the old archive moves to <name>.legacy/ and the new one takes
+its place. The old archive is never deleted: remove <name>.legacy/ (or the
+listed files of <old>) yourself, locally and offsite.
+
+  --strip PREFIX   remove PREFIX from all paths instead of the detected one
+  --no-strip       keep paths as they are
+  -y, --yes        don't ask for confirmation
+  --op-ref REF     1Password reference to note in the new .meta (default:
+                   from ARCHIVE_PASS_CMD; when the password stays the same,
+                   from ARCHIVE_OLD_PASS_CMD or the old .meta)
+EOF
+        ;;
+        meta) cat <<EOF
+Usage: $PROG meta <name> [op_ref=REF]
+
+Show <name>.meta, or change the 1Password reference in it. The other values
+describe how the archive was made and can't be changed. Because .meta is
+covered by par2, the par2 data is checked first and then created anew (which
+reads all data); the archive is only touched once that has succeeded.
+EOF
+        ;;
+        info) cat <<EOF
+Usage: $PROG info [folder]
+
+Overview of the archives in [folder] (default: .): name, format, date,
+parts, total size and par2. Legacy archives are marked for migration, and
+archives that have already been migrated as safe to delete.
+EOF
+        ;;
+        *) cat <<EOF
+Usage: $PROG <command> [options] [args]
+
+Encrypted, split and par2-protected archives of folders.
+
+Commands:
+  pack <folder> <name>       create archive <name> from <folder>
+  list <name>                show the file list
+  unpack <name> [target]     unpack (into ./<name> by default)
+  check [--full] <name>      check password, format and par2 data
+  migrate <name>             re-encrypt into the current format in place, verified
+  migrate <old> <new>        same, into a new archive
+  meta <name> [op_ref=REF]   show .meta or set its 1Password reference
+  info [folder]              overview of the archives in a folder
+
+Run '$PROG <command> --help' for details. <name> is a path without extension
+(e.g. ~/archives/photos-2020); any of the archive's own files works too.
+
+Files per archive:
+  <name>.meta               format parameters (not secret)
+  <name>.txt.enc            encrypted, gzipped file list
+  <name>.tar.enc.000, ...   encrypted tar, split into $SPLIT_SIZE parts
+  <name>.par2, <name>.vol*  par2 recovery data over all of the above (${PAR2_REDUNDANCY}%, so
+                            about a quarter of the parts may go missing; $PAR2_BLOCKS blocks)
+Legacy archives (made with the old openssl/split commands) have no .meta and
+two-digit part numbers; they are read with md5 or sha256 key derivation.
+
+Format: $CIPHER, key from PBKDF2-HMAC-SHA256 with $ITERATIONS iterations
+(about 1.5 s per openssl call; the key is derived once per call, not per file).
+
+Password (never on the command line):
+  ARCHIVE_PASS              the password
+  ARCHIVE_PASS_CMD          command that prints it, e.g.
+                            'op read "op://Private/Archive key/password"'
+  ARCHIVE_OLD_PASS(_CMD)    migrate: the old archive's password
+                            (default: same as above)
+Without these you're prompted.
+
+Other environment:
+  ARCHIVE_OPENSSL   openssl to use (default: Homebrew's openssl@3, then the
+                    one on PATH, if it supports -pbkdf2)
+  ARCHIVE_TAR       tar to use (default: tar)
+
+Offsite archives: $PROG doesn't upload or download. Work on a local copy or
+an rclone mount of the Storage Box. After a migrate, replace the old files
+offsite with the new ones (migrate lists both); don't upload <name>.legacy/.
+
+Each step is shown with a timestamp, and the time per step and in total at
+the end.
+EOF
+        ;;
+    esac
+}
+
+say () {
+    printf '%s\n' "$*" >&2
+}
+
+die () {
+    printf '%s: %s\n' "$PROG" "$*" >&2
+    exit 1
+}
+
+cleanup () {
+    local rc=$? dir
+    if [ -n "$BG_PID" ]; then
+        kill "$BG_PID" 2>/dev/null || true
+    fi
+    if [ $rc -ne 0 ] && [ -n "$OUT_NAME" ]; then
+        rm -f -- "$OUT_NAME.meta" "$OUT_NAME.txt.enc" "$OUT_NAME".tar.enc.* \
+            "$OUT_NAME.par2" "$OUT_NAME".vol*.par2
+        say "Removed the incomplete archive $OUT_NAME."
+    fi
+    if [ $rc -ne 0 ] && [ -n "$META_BACKUP" ]; then
+        cp -p -- "$META_BACKUP" "$META_TARGET" && say "Restored the original $META_TARGET."
+    fi
+    if [ -n "$WORK_DIR" ]; then
+        rmdir -- "$WORK_DIR" 2>/dev/null || true
+    fi
+    for dir in "$SCRATCH_DIR" "$TMP"; do
+        if [ -n "$dir" ]; then rm -rf -- "$dir"; fi
+    done
+    exit $rc
+}
+trap cleanup EXIT
+trap 'exit 130' INT TERM
+
+
+#
+# Timing: every step gets a timestamp; step_summary prints the durations
+#
+
+step () {   # step <label> [detail]: starts a step (and ends the previous one)
+    step_end
+    STEP_LABELS+=("$1")
+    STEP_START=$SECONDS
+    say "[$(date +%H:%M:%S)] $1${2:+: $2}..."
+}
+
+step_end () {
+    if [ -n "$STEP_START" ]; then
+        STEP_SECS+=("$(( SECONDS - STEP_START ))")
+        STEP_START=""
+    fi
+}
+
+duration () {
+    local s=$1
+    if [ "$s" -ge 3600 ]; then printf '%dh%02dm%02ds' $(( s / 3600 )) $(( s % 3600 / 60 )) $(( s % 60 ))
+    elif [ "$s" -ge 60 ]; then printf '%dm%02ds' $(( s / 60 )) $(( s % 60 ))
+    else printf '%ds' "$s"; fi
+}
+
+step_summary () {
+    local i width=5
+    step_end
+    [ ${#STEP_LABELS[@]} -gt 0 ] || return 0
+    for i in "${!STEP_LABELS[@]}"; do
+        [ ${#STEP_LABELS[$i]} -le "$width" ] || width=${#STEP_LABELS[$i]}
+    done
+    say ""
+    say "Time:"
+    for i in "${!STEP_LABELS[@]}"; do
+        printf "  %-${width}s  %9s\n" "${STEP_LABELS[$i]}" "$(duration "${STEP_SECS[$i]}")" >&2
+    done
+    printf "  %-${width}s  %9s\n" "Total" "$(duration "$SECONDS")" >&2
+}
+
+
+#
+# Setup & dependencies
+#
+
+need () {
+    command -v "$1" >/dev/null 2>&1 || die "$1 not found${2:+ ($2)}"
+}
+
+make_tmp () {
+    # Only holds a fifo, probes and non-secret summaries, never archive data
+    TMP=$(mktemp -d "${TMPDIR:-/tmp}/archive.XXXXXX")
+}
+
+supports_pbkdf2 () {
+    printf x | "$1" enc -aes-256-cbc -pbkdf2 -iter 1 -md sha256 -pass pass:probe >/dev/null 2>&1
+}
+
+# macOS's own openssl is LibreSSL; Homebrew's openssl@3 is keg-only (not on PATH)
+find_openssl () {
+    local c brew_prefix=""
+    if [ -n "${ARCHIVE_OPENSSL:-}" ]; then
+        supports_pbkdf2 "$ARCHIVE_OPENSSL" || die "ARCHIVE_OPENSSL ($ARCHIVE_OPENSSL) doesn't work or doesn't support -pbkdf2"
+        OPENSSL=$ARCHIVE_OPENSSL
+        return
+    fi
+    if command -v brew >/dev/null 2>&1; then
+        brew_prefix=$(brew --prefix 2>/dev/null || true)
+    fi
+    for c in ${brew_prefix:+"$brew_prefix/opt/openssl@3/bin/openssl"} \
+             /opt/homebrew/opt/openssl@3/bin/openssl \
+             /usr/local/opt/openssl@3/bin/openssl \
+             "$(command -v openssl || true)"; do
+        if [ -n "$c" ] && [ -x "$c" ] && supports_pbkdf2 "$c"; then
+            OPENSSL=$c
+            return
+        fi
+    done
+    die "no openssl with -pbkdf2 support found; install it with 'brew install openssl@3' or set ARCHIVE_OPENSSL"
+}
+
+# Needs GNU-style numeric suffixes: gsplit on macOS, split on Linux
+find_split () {
+    local c probe=$TMP/split-probe
+    for c in gsplit split; do
+        command -v "$c" >/dev/null 2>&1 || continue
+        rm -rf "$probe" && mkdir "$probe"
+        if printf x | "$c" -d -a 3 -b 1m - "$probe/p." 2>/dev/null && [ -f "$probe/p.000" ]; then
+            SPLIT=$c
+            return
+        fi
+    done
+    die "no split with numeric suffixes found; install coreutils (gsplit) with brew"
+}
+
+setup () {
+    local what
+    make_tmp
+    find_openssl
+    for what in "$@"; do
+        case $what in
+            split) find_split ;;
+            par2) need par2 "brew install par2" ;;
+            python3) need python3 "install the Xcode Command Line Tools" ;;
+            tar) need "$TAR" ;;
+        esac
+    done
+}
+
+
+#
+# Names & files
+#
+
+# Accepts "photos", "dir/photos" or any of the archive's own files
+archive_name () {
+    local n=$1
+    n=${n%.meta}
+    n=${n%.txt.enc}
+    n=${n%.par2}
+    case $n in
+        *.vol[0-9]*) n=${n%.vol*} ;;
+        *.tar.enc.[0-9]*) n=${n%.tar.enc.*} ;;
+    esac
+    printf '%s\n' "$n"
+}
+
+archive_files () {
+    printf '%s\n' "$1.meta" "$1.txt.enc" "$1".tar.enc.[0-9]* "$1.par2" "$1".vol*.par2 |
+        while IFS= read -r f; do
+            if [ -e "$f" ]; then printf '%s\n' "$f"; fi
+        done
+}
+
+# Files named <name>.* that aren't part of the archive (e.g. par2 repair
+# backups like <name>.tar.enc.00.1), leaving out other archives' files
+other_files () {
+    local f known
+    known=$(archive_files "$1")
+    for f in "$1".*; do
+        [ -f "$f" ] || continue
+        printf '%s\n' "$known" | grep -Fxq -- "$f" && continue
+        [ -e "$(archive_name "$f").txt.enc" ] && [ "$(archive_name "$f")" != "$1" ] && continue
+        printf '%s\n' "$f"
+    done
+}
+
+check_new_name () {
+    local dir
+    dir=$(dirname "$1")
+    [ -d "$dir" ] || die "folder $dir doesn't exist"
+    [ -w "$dir" ] || die "folder $dir isn't writable"
+    if [ -n "$(archive_files "$1")" ]; then
+        die "archive $1 already exists"
+    fi
+}
+
+load_parts () {
+    PARTS=("$1".tar.enc.[0-9]*)
+    [ ${#PARTS[@]} -gt 0 ] || die "no data parts found ($1.tar.enc.*)"
+}
+
+file_size () {
+    stat -c %s "$1" 2>/dev/null || stat -f %z "$1"
+}
+
+file_date () {
+    local t
+    t=$(stat -c %Y "$1" 2>/dev/null || stat -f %m "$1")
+    date -d "@$t" +%Y-%m-%d 2>/dev/null || date -r "$t" +%Y-%m-%d
+}
+
+human () {
+    awk -v b="$1" 'BEGIN {
+        split("B KB MB GB TB PB", u); i = 1
+        while (b >= 1000 && i < 6) { b /= 1000; i++ }
+        printf(i == 1 ? "%d %s\n" : "%.1f %s\n", b, u[i])
+    }'
+}
+
+
+#
+# Metadata
+#
+
+# Sets META_* from <name>.meta; META_FORMAT=legacy when there is none
+read_meta () {
+    local f=$1.meta k v
+    META_FORMAT=legacy META_CIPHER=$CIPHER META_KDF=none META_DIGEST=""
+    META_ITER=0 META_CREATED="" META_FROM="" META_OPREF=""
+    [ -f "$f" ] || return 0
+    META_FORMAT=""
+    while IFS='=' read -r k v; do
+        case $k in
+            format) META_FORMAT=$v ;;
+            cipher) META_CIPHER=$v ;;
+            kdf) META_KDF=$v ;;
+            digest) META_DIGEST=$v ;;
+            iterations) META_ITER=$v ;;
+            created) META_CREATED=$v ;;
+            migrated_from) META_FROM=$v ;;
+            op_ref) META_OPREF=$v ;;
+        esac
+    done < "$f"
+    [ "$META_FORMAT" = 2 ] || die "$f: unknown format '$META_FORMAT'"
+    [ "$META_CIPHER" = "$CIPHER" ] || die "$f: unsupported cipher '$META_CIPHER'"
+    case $META_KDF/$META_DIGEST in
+        pbkdf2/sha256|pbkdf2/sha512) ;;
+        *) die "$f: unsupported kdf/digest '$META_KDF/$META_DIGEST'" ;;
+    esac
+    case $META_ITER in
+        ''|*[!0-9]*) die "$f: invalid iterations '$META_ITER'" ;;
+    esac
+}
+
+write_meta () {
+    local name=$1 extra
+    shift
+    {
+        echo "# Written by $PROG. Not secret: never contains the password."
+        echo "format=$FORMAT_VERSION"
+        echo "cipher=$CIPHER"
+        echo "kdf=$KDF"
+        echo "digest=$DIGEST"
+        echo "iterations=$ITERATIONS"
+        echo "created=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        echo "split_size=$SPLIT_SIZE"
+        echo "par2_redundancy=$PAR2_REDUNDANCY"
+        echo "par2_blocks=$PAR2_BLOCKS"
+        echo "par2_version=$(par2_version)"
+        echo "op_ref=$OP_REF"
+        for extra in "$@"; do
+            echo "$extra"
+        done
+    } > "$name.meta"
+}
+
+describe () {   # describe <format> <digest> <kdf> <iterations>
+    if [ "$1" = legacy ]; then
+        echo "legacy (${2:-md5 or sha256}, no key stretching)"
+    else
+        echo "v$1 ($CIPHER, $3-$2, $4 iterations)"
+    fi
+}
+
+par2_version () {
+    par2 -V 2>/dev/null | head -n 1 || true
+}
+
+warn_no_op_ref () {   # warn_no_op_ref <name>
+    if [ -z "$OP_REF" ]; then
+        say ""
+        say "Warning: $1.meta has no 1Password reference (op_ref is empty), so nothing"
+        say "records where the password is kept. Add it with:"
+        say "  $PROG meta $1 op_ref=op://<vault>/<item>/password"
+    fi
+}
+
+short_iter () {
+    if [ $(( $1 % 1000000 )) -eq 0 ]; then echo "$(( $1 / 1000000 ))M"
+    elif [ $(( $1 % 1000 )) -eq 0 ]; then echo "$(( $1 / 1000 ))k"
+    else echo "$1"; fi
+}
+
+
+#
+# Passwords
+#
+
+# get_password <env prefix> <prompt> [confirm]: from <prefix>PASS,
+# <prefix>PASS_CMD or a hidden prompt
+get_password () {
+    local passvar=${1}PASS cmdvar=${1}PASS_CMD pass=""
+    if [ -n "${!passvar:-}" ]; then
+        pass=${!passvar}
+    elif [ -n "${!cmdvar:-}" ]; then
+        pass=$(bash -c "${!cmdvar}") || die "$cmdvar failed"
+        [ -n "$pass" ] || die "$cmdvar printed nothing"
+    else
+        prompt_password "$2" "${3:-}"
+        return
+    fi
+    printf '%s' "$pass"
+}
+
+prompt_password () {   # prompt_password <prompt> [confirm]
+    local pass="" again=""
+    { : < /dev/tty; } 2>/dev/null || die "no password: set ARCHIVE_PASS or ARCHIVE_PASS_CMD"
+    IFS= read -rs -p "$1: " pass < /dev/tty && echo >&2
+    if [ -n "${2:-}" ] && [ -n "$pass" ]; then
+        IFS= read -rs -p "$1 (again): " again < /dev/tty && echo >&2
+        [ "$pass" = "$again" ] || die "passwords don't match"
+    fi
+    printf '%s' "$pass"
+}
+
+has_password_env () {   # has_password_env <env prefix>
+    local passvar=${1}PASS cmdvar=${1}PASS_CMD
+    [ -n "${!passvar:-}" ] || [ -n "${!cmdvar:-}" ]
+}
+
+# The op:// reference (not the secret) from a command like "op read op://..."
+op_ref_from_cmd () {
+    local cmd=$1 re='(^|[[:space:]])op[[:space:]]+read[[:space:]]' ref
+    [[ $cmd =~ $re ]] || return 0
+    case $cmd in *op://*) ;; *) return 0 ;; esac
+    ref=op://${cmd#*op://}
+    ref=${ref%%[\"\']*}
+    ref=${ref%"${ref##*[![:space:]]}"}
+    printf '%s' "$ref"
+}
+
+
+#
+# Crypto: everything that encrypts or decrypts goes through crypt(), so the
+# format can change in one place.
+#
+
+# crypt enc|dec <digest> <kdf> <iterations> <password>, stdin to stdout.
+# kdf "none" is the legacy key derivation (one round of <digest>). The
+# password reaches openssl through a pipe on fd 3, never as an argument.
+crypt () {
+    local mode=$1 digest=$2 kdf=$3 iter=$4 pass=$5
+    local args=(enc "-$CIPHER" -md "$digest" -pass fd:3)
+    if [ "$kdf" = pbkdf2 ]; then
+        args+=(-pbkdf2 -iter "$iter")
+    fi
+    if [ "$mode" = dec ]; then
+        # openssl's own errors ("bad decrypt") are replaced by ours
+        "$OPENSSL" "${args[@]}" -d 3< <(printf '%s\n' "$pass") 2>/dev/null
+    else
+        "$OPENSSL" "${args[@]}" -salt 3< <(printf '%s\n' "$pass")
+    fi
+}
+
+# Decrypts the file list with the archive's parameters from .meta, or for a
+# legacy archive tries md5 and then sha256. Sets FMT_* and FILE_LIST, or dies
+# before any data is touched.
+open_archive () {
+    local name=$1 pass=$2 digest
+    [ -f "$name.txt.enc" ] || die "$name.txt.enc not found (is $name an archive?)"
+    read_meta "$name"
+    FMT_FORMAT=$META_FORMAT FMT_KDF=$META_KDF FMT_ITER=$META_ITER
+    if [ "$META_FORMAT" = legacy ]; then
+        for digest in md5 sha256; do
+            if FILE_LIST=$(crypt dec "$digest" none 0 "$pass" < "$name.txt.enc" | gzip -dc 2>/dev/null); then
+                FMT_DIGEST=$digest
+                return 0
+            fi
+        done
+    else
+        FMT_DIGEST=$META_DIGEST
+        if FILE_LIST=$(crypt dec "$FMT_DIGEST" "$FMT_KDF" "$FMT_ITER" "$pass" < "$name.txt.enc" | gzip -dc 2>/dev/null); then
+            return 0
+        fi
+    fi
+    die "can't decrypt $name.txt.enc: wrong password or wrong format"
+}
+
+decrypt_data () {   # decrypt_data <name> <password>, after open_archive
+    load_parts "$1"
+    cat "${PARTS[@]}" | crypt dec "$FMT_DIGEST" "$FMT_KDF" "$FMT_ITER" "$2"
+}
+
+# write_data <name> <password> <producer> [args...]: encrypts the tar stream
+# from <producer> into <name>.tar.enc.NNN and builds the encrypted file list
+# <name>.txt.enc from that same stream (through a fifo, so only in memory).
+write_data () {
+    local name=$1 pass=$2 fifo=$TMP/list.fifo
+    shift 2
+    mkfifo "$fifo"
+    { py list < "$fifo" | gzip -9 | crypt enc "$DIGEST" "$KDF" "$ITERATIONS" "$pass" > "$name.txt.enc"; } &
+    BG_PID=$!
+    if ! "$@" | tee "$fifo" | crypt enc "$DIGEST" "$KDF" "$ITERATIONS" "$pass" \
+            | "$SPLIT" -d -a 3 -b "$SPLIT_SIZE" - "$name.tar.enc."; then
+        die "writing $name failed"
+    fi
+    if ! wait "$BG_PID"; then
+        BG_PID=""
+        die "writing the file list of $name failed"
+    fi
+    BG_PID=""
+    rm -f "$fifo"
+}
+
+# make_par2 <name> [folder]: writes the par2 files into [folder] (default:
+# next to the archive). File names are stored relative to the archive's
+# folder (-B), so par2 files made elsewhere work once moved next to it.
+make_par2 () {
+    local dir base out
+    dir=$(cd "$(dirname "$1")" && pwd)
+    base=$(basename "$1")
+    out=${2:-$dir}
+    step "Creating par2 data" "${PAR2_REDUNDANCY}%, $PAR2_BLOCKS blocks"
+    ( cd "$out" && par2 create -q -r"$PAR2_REDUNDANCY" -b"$PAR2_BLOCKS" -l -B"$dir" -- "$base.par2" \
+        "$dir/$base.meta" "$dir/$base.txt.enc" "$dir/$base".tar.enc.[0-9]* ) >/dev/null \
+        || die "par2 create failed"
+}
+
+par2_verify () {   # par2_verify <name>; prints par2's output tail on failure
+    local dir base output
+    dir=$(dirname "$1")
+    base=$(basename "$1")
+    if output=$(cd "$dir" && par2 verify -- "$base.par2" 2>&1); then
+        return 0
+    fi
+    printf '%s\n' "$output" | tr '\r' '\n' | grep -v '^Scanning:\|^Loading:' | tail -n 15 >&2
+    return 1
+}
+
+
+#
+# Tar streams. Per-file work happens in an embedded Python helper (stream
+# mode, so data never touches the disk):
+#   list            tar on stdin -> ls-style listing on stdout
+#   manifest        tar on stdin -> one summary line (paths, sizes, modes,
+#                   mtimes and sha256 of every entry, hashed together)
+#   rewrite P SUM   tar on stdin -> tar on stdout with prefix P stripped and
+#                   ._*/.DS_Store dropped; writes the manifest summary of
+#                   what it wrote plus the dropped count to file SUM
+#   prefix          find-style path list on stdin -> "<prefix>\t<root>"
+#
+
+IFS= read -r -d '' PY_HELPER <<'PY' || true
+import hashlib, stat, sys, tarfile, time
+
+def fail(msg):
+    sys.stderr.write('archive: %s\n' % msg)
+    sys.exit(1)
+
+def norm(name):
+    while name.startswith('./'):
+        name = name[2:]
+    name = name.strip('/')
+    return '' if name == '.' else name
+
+def dropped(name):
+    base = name.rsplit('/', 1)[-1]
+    return base == '.DS_Store' or base.startswith('._')
+
+def kind(ti):
+    if ti.isreg(): return 'f'
+    if ti.isdir(): return 'd'
+    if ti.issym(): return 'l'
+    if ti.islnk(): return 'h'
+    return 'o'
+
+def out(line):
+    sys.stdout.buffer.write((line + '\n').encode('utf-8', 'surrogateescape'))
+
+class Hashing(object):
+    def __init__(self, f):
+        self.f, self.sha = f, hashlib.sha256()
+    def read(self, size=-1):
+        data = self.f.read(size)
+        self.sha.update(data)
+        return data
+
+def file_digest(f):
+    sha = hashlib.sha256()
+    for chunk in iter(lambda: f.read(1 << 20), b''):
+        sha.update(chunk)
+    return sha.hexdigest()
+
+class Manifest(object):
+    def __init__(self):
+        self.lines, self.files, self.bytes = [], 0, 0
+    def add(self, ti, name, extra):
+        k = kind(ti)
+        size = ti.size if k == 'f' else 0
+        if k == 'f':
+            self.files += 1
+            self.bytes += size
+        self.lines.append('\0'.join([k, name, str(size), '%o' % (ti.mode & 0o7777),
+                                     str(int(ti.mtime)), extra]))
+    def summary(self):
+        data = '\n'.join(sorted(self.lines)).encode('utf-8', 'surrogateescape')
+        return '%d entries, %d files, %d bytes, manifest %s' % (
+            len(self.lines), self.files, self.bytes, hashlib.sha256(data).hexdigest())
+
+def tar_in():
+    return tarfile.open(fileobj=sys.stdin.buffer, mode='r|*', bufsize=1 << 20)
+
+def listing():
+    for ti in tar_in():
+        name = norm(ti.name)
+        if not name:
+            continue
+        k = kind(ti)
+        mode = (ti.mode & 0o7777) | {'d': stat.S_IFDIR, 'l': stat.S_IFLNK}.get(k, stat.S_IFREG)
+        line = '%s %14d %s %s' % (stat.filemode(mode), ti.size if k == 'f' else 0,
+                                  time.strftime('%Y-%m-%d %H:%M', time.localtime(ti.mtime)),
+                                  name + ('/' if k == 'd' else ''))
+        if k == 'l':
+            line += ' -> ' + ti.linkname
+        elif k == 'h':
+            line += ' link to ' + norm(ti.linkname)
+        out(line)
+
+def manifest():
+    src, m = tar_in(), Manifest()
+    for ti in src:
+        name = norm(ti.name)
+        if not name:
+            continue
+        extra = ''
+        if ti.islnk():
+            extra = norm(ti.linkname)
+        elif ti.issym():
+            extra = ti.linkname
+        elif ti.isreg():
+            extra = file_digest(src.extractfile(ti))
+        m.add(ti, name, extra)
+    print(m.summary())
+
+def strip_prefix(name, prefix):
+    if not prefix:
+        return name
+    if name.startswith(prefix):
+        return name[len(prefix):]
+    fail('%s is outside the prefix %s; use --strip or --no-strip' % (name, prefix))
+
+def rewrite(prefix, summary_path):
+    src = tar_in()
+    dst = tarfile.open(fileobj=sys.stdout.buffer, mode='w|', format=tarfile.PAX_FORMAT,
+                       bufsize=1 << 20)
+    dst.copybufsize = 1 << 20
+    m, ndropped = Manifest(), 0
+    for ti in src:
+        name = norm(ti.name)
+        if not name or (prefix and prefix.startswith(name + '/')):
+            continue    # the folders above the prefix
+        name = strip_prefix(name, prefix)
+        if dropped(name):
+            ndropped += 1
+            continue
+        extra = ''
+        if ti.islnk():
+            ti.linkname = extra = strip_prefix(norm(ti.linkname), prefix)
+        elif ti.issym():
+            extra = ti.linkname
+        ti.name = name
+        ti.pax_headers = {}     # drops xattrs/ACLs; path and size are regenerated
+        if ti.isreg():
+            f = Hashing(src.extractfile(ti))
+            dst.addfile(ti, f)
+            extra = f.sha.hexdigest()
+        else:
+            dst.addfile(ti)
+        m.add(ti, name, extra)
+    dst.close()
+    with open(summary_path, 'w') as f:
+        f.write('%s\n%d\n' % (m.summary(), ndropped))
+
+def prefix():
+    common = None
+    for raw in sys.stdin.buffer:
+        name = norm(raw.rstrip(b'\n').decode('utf-8', 'surrogateescape'))
+        if not name:
+            continue
+        parts = name.split('/')
+        if common is None:
+            common = parts
+        else:
+            i = 0
+            while i < len(common) and i < len(parts) and common[i] == parts[i]:
+                i += 1
+            common = common[:i]
+    if common and len(common) > 1:
+        out('/'.join(common[:-1]) + '/\t' + common[-1])
+
+try:
+    cmd = sys.argv[1]
+    if cmd == 'list': listing()
+    elif cmd == 'manifest': manifest()
+    elif cmd == 'rewrite': rewrite(sys.argv[2], sys.argv[3])
+    elif cmd == 'prefix': prefix()
+    else: fail('unknown helper command %s' % cmd)
+except (tarfile.TarError, EOFError, OSError) as e:
+    fail('reading the tar stream failed: %s' % e)
+except KeyboardInterrupt:
+    sys.exit(130)
+PY
+
+py () {
+    python3 -c "$PY_HELPER" "$@"
+}
+
+tar_create () {   # tar_create <parent> <folder name>
+    if "$TAR" --version 2>/dev/null | grep -q bsdtar; then
+        COPYFILE_DISABLE=1 "$TAR" --no-mac-metadata --no-xattrs --no-acls --no-fflags \
+            --exclude .DS_Store --exclude '._*' -C "$1" -cf - -- "$2"
+    else
+        "$TAR" --no-xattrs --no-acls --exclude .DS_Store --exclude '._*' -C "$1" -cf - -- "$2"
+    fi
+}
+
+# migrate_source <old name> <old password> <prefix> <summary file>
+migrate_source () {
+    decrypt_data "$1" "$2" | py rewrite "$3" "$4"
+}
+
+
+#
+# Commands
+#
+
+parse_common_opt () {   # sets OPT_SHIFT when $1 is handled here
+    OPT_SHIFT=0
+    case $1 in
+        --op-ref) [ $# -ge 2 ] || die "--op-ref needs a value"; OPT_OP_REF=$2; OPT_SHIFT=2 ;;
+    esac
+}
+
+cmd_pack () {
+    local args=() src name abs parent base namedir pass
+    OPT_OP_REF=""
+    while [ $# -gt 0 ]; do
+        parse_common_opt "$@"
+        if [ $OPT_SHIFT -gt 0 ]; then shift $OPT_SHIFT; continue; fi
+        case $1 in
+            --split-size) [ $# -ge 2 ] || die "--split-size needs a value"; SPLIT_SIZE=$2; shift ;;
+            -h|--help) usage pack; exit 0 ;;
+            -*) die "unknown option $1 (see $PROG pack --help)" ;;
+            *) args+=("$1") ;;
+        esac
+        shift
+    done
+    [ ${#args[@]} -eq 2 ] || { usage pack >&2; exit 2; }
+    src=${args[0]}
+    name=$(archive_name "${args[1]}")
+
+    [ -d "$src" ] || die "$src is not a folder"
+    abs=$(cd "$src" && pwd)
+    [ "$abs" != / ] || die "won't archive /"
+    parent=$(dirname "$abs")
+    base=$(basename "$abs")
+    check_new_name "$name"
+    namedir=$(cd "$(dirname "$name")" && pwd)
+    case $namedir/ in
+        "$abs"/*) die "the archive can't be written inside the folder being archived" ;;
+    esac
+
+    setup split par2 python3 tar
+    pass=$(get_password ARCHIVE_ "Password for the new archive" confirm)
+    [ -n "$pass" ] || die "empty password"
+    OP_REF=${OPT_OP_REF:-$(op_ref_from_cmd "${ARCHIVE_PASS_CMD:-}")}
+
+    OUT_NAME=$name
+    step "Archiving and encrypting" "$abs into $name"
+    write_data "$name" "$pass" tar_create "$parent" "$base"
+    write_meta "$name"
+    make_par2 "$name"
+    OUT_NAME=""
+    load_parts "$name"
+    step_summary
+    say ""
+    say "Done: $name (${#PARTS[@]} part(s), $(describe $FORMAT_VERSION $DIGEST $KDF $ITERATIONS))."
+    warn_no_op_ref "$name"
+}
+
+cmd_list () {
+    local name pass
+    case ${1:-} in -h|--help) usage list; exit 0 ;; esac
+    [ $# -eq 1 ] || { usage list >&2; exit 2; }
+    name=$(archive_name "$1")
+    setup
+    pass=$(get_password ARCHIVE_ "Password")
+    open_archive "$name" "$pass"
+    if [ -t 1 ]; then
+        # shellcheck disable=SC2086 # PAGER may hold options
+        printf '%s\n' "$FILE_LIST" | ${PAGER:-less}
+    else
+        printf '%s\n' "$FILE_LIST"
+    fi
+}
+
+cmd_unpack () {
+    local name target pass
+    case ${1:-} in -h|--help) usage unpack; exit 0 ;; esac
+    [ $# -ge 1 ] && [ $# -le 2 ] || { usage unpack >&2; exit 2; }
+    name=$(archive_name "$1")
+    target=${2:-./$(basename "$name")}
+    if [ -e "$target" ]; then
+        [ -d "$target" ] || die "$target exists and is not a folder"
+        [ -z "$(ls -A "$target")" ] || die "$target is not empty"
+    fi
+
+    setup tar
+    pass=$(get_password ARCHIVE_ "Password")
+    step "Checking the password"
+    open_archive "$name" "$pass"
+    load_parts "$name"
+    mkdir -p "$target"
+    step "Decrypting and unpacking" "${#PARTS[@]} part(s) into $target"
+    if ! decrypt_data "$name" "$pass" | "$TAR" -xf - -C "$target"; then
+        die "unpacking failed: the data couldn't be decrypted or is damaged (try '$PROG check $name'); what was unpacked so far is in $target"
+    fi
+    step_summary
+    say ""
+    say "Done."
+}
+
+cmd_check () {
+    local args=() full="" name pass summary
+    while [ $# -gt 0 ]; do
+        case $1 in
+            --full) full=1 ;;
+            -h|--help) usage check; exit 0 ;;
+            -*) die "unknown option $1 (see $PROG check --help)" ;;
+            *) args+=("$1") ;;
+        esac
+        shift
+    done
+    [ ${#args[@]} -eq 1 ] || { usage check >&2; exit 2; }
+    name=$(archive_name "${args[0]}")
+
+    setup par2 ${full:+python3}
+    pass=$(get_password ARCHIVE_ "Password")
+    step "Checking the password"
+    open_archive "$name" "$pass"
+    load_parts "$name"
+    say "Password OK. Format: $(describe "$FMT_FORMAT" "$FMT_DIGEST" "$FMT_KDF" "$FMT_ITER")."
+    say "File list: $(printf '%s\n' "$FILE_LIST" | grep -c .) entries; data: ${#PARTS[@]} part(s)."
+
+    if [ -f "$name.par2" ]; then
+        step "Running par2 verify"
+        par2_verify "$name" || die "par2 found damaged or missing files; repair with: cd '$(dirname "$name")' && par2 repair '$(basename "$name").par2'"
+        say "par2: all files are intact."
+    elif [ "$FMT_FORMAT" = legacy ]; then
+        say "par2: no recovery data found."
+    else
+        die "par2: $name.par2 is missing"
+    fi
+
+    if [ -n "$full" ]; then
+        step "Decrypting and reading all data"
+        summary=$(decrypt_data "$name" "$pass" | py manifest) \
+            || die "reading the data failed: wrong password for the data, or damaged data"
+        say "Data OK: $summary."
+    fi
+    step_summary
+}
+
+cmd_migrate () {
+    local args=() strip="" strip_mode=auto yes="" old new oldpass newpass suggestion root
+    local answer sum old_summary new_summary ndropped old_opref inplace="" dir base legacy_dir
+    local old_files=() new_files=() others f
+    OPT_OP_REF=""
+    while [ $# -gt 0 ]; do
+        parse_common_opt "$@"
+        if [ $OPT_SHIFT -gt 0 ]; then shift $OPT_SHIFT; continue; fi
+        case $1 in
+            --strip) [ $# -ge 2 ] || die "--strip needs a value"; strip=$2; strip_mode=given; shift ;;
+            --no-strip) strip_mode=none ;;
+            -y|--yes) yes=1 ;;
+            -h|--help) usage migrate; exit 0 ;;
+            -*) die "unknown option $1 (see $PROG migrate --help)" ;;
+            *) args+=("$1") ;;
+        esac
+        shift
+    done
+    case ${#args[@]} in
+        1)
+            # In place: build under the final name in <name>.migrating/, so
+            # the names in par2 and .meta never change
+            inplace=1
+            old=$(archive_name "${args[0]}")
+            dir=$(dirname "$old")
+            base=$(basename "$old")
+            legacy_dir=$old.legacy
+            new=$old.migrating/$base
+            [ -w "$dir" ] || die "folder $dir isn't writable"
+            [ ! -e "$old.migrating" ] || die "$old.migrating already exists (left over from an interrupted migrate?); remove it first"
+            [ ! -e "$legacy_dir" ] || die "$legacy_dir already exists"
+            ;;
+        2)
+            old=$(archive_name "${args[0]}")
+            new=$(archive_name "${args[1]}")
+            [ "$old" != "$new" ] || die "old and new archive must differ (or give only one name to migrate in place)"
+            check_new_name "$new"
+            ;;
+        *)
+            usage migrate >&2
+            exit 2
+            ;;
+    esac
+    [ -f "$old.txt.enc" ] || die "$old.txt.enc not found (is $old an archive?)"
+
+    setup split par2 python3
+    if has_password_env ARCHIVE_OLD_; then
+        oldpass=$(get_password ARCHIVE_OLD_ "Password of the old archive")
+    else
+        oldpass=$(get_password ARCHIVE_ "Password of the old archive")
+    fi
+    step "Checking the password" "old archive"
+    open_archive "$old" "$oldpass"
+    old_opref=$META_OPREF
+    load_parts "$old"
+    say "Old archive: $(describe "$FMT_FORMAT" "$FMT_DIGEST" "$FMT_KDF" "$FMT_ITER"), ${#PARTS[@]} part(s)."
+    step_end
+
+    if has_password_env ARCHIVE_; then
+        newpass=$(get_password ARCHIVE_ "Password for the new archive")
+    else
+        newpass=$(prompt_password "Password for the new archive (Enter keeps the old one)" confirm)
+        [ -n "$newpass" ] || newpass=$oldpass
+    fi
+
+    # 1Password reference: --op-ref, else from ARCHIVE_PASS_CMD; with an
+    # unchanged password also from ARCHIVE_OLD_PASS_CMD or the old .meta
+    if [ -n "$OPT_OP_REF" ]; then
+        OP_REF=$OPT_OP_REF
+    else
+        OP_REF=$(op_ref_from_cmd "${ARCHIVE_PASS_CMD:-}")
+        if [ -z "$OP_REF" ] && [ "$newpass" = "$oldpass" ]; then
+            OP_REF=$(op_ref_from_cmd "${ARCHIVE_OLD_PASS_CMD:-}")
+            OP_REF=${OP_REF:-$old_opref}
+        fi
+    fi
+
+    case $strip_mode in
+        given)
+            while [ "${strip#./}" != "$strip" ]; do strip=${strip#./}; done
+            strip=${strip#/}
+            strip=${strip%/}/
+            [ "$strip" != / ] || strip=""
+            ;;
+        auto)
+            # Only legacy archives have long paths; their file list is plain paths
+            if [ "$FMT_FORMAT" = legacy ]; then
+                suggestion=$(printf '%s\n' "$FILE_LIST" | py prefix)
+                if [ -n "$suggestion" ]; then
+                    strip=${suggestion%%"$TAB"*}
+                    root=${suggestion#*"$TAB"}
+                    say "Paths will be shortened: $strip$root/... becomes $root/..."
+                    if [ -z "$yes" ] && [ -t 0 ]; then
+                        read -r -p "Continue? [Y/n] " answer < /dev/tty
+                        case $answer in
+                            [nN]*) die "stopped; choose with --strip PREFIX or --no-strip" ;;
+                        esac
+                    fi
+                fi
+            fi
+            ;;
+    esac
+
+    if [ -n "$inplace" ]; then
+        mkdir "$old.migrating"
+        WORK_DIR=$old.migrating
+    fi
+    OUT_NAME=$new
+    sum=$TMP/old.summary
+    step "Re-encrypting" "decrypting, encrypting and building the file list"
+    write_data "$new" "$newpass" migrate_source "$old" "$oldpass" "$strip" "$sum"
+    old_summary=$(sed -n 1p "$sum")
+    ndropped=$(sed -n 2p "$sum")
+    write_meta "$new" "migrated_from=$(basename "$old")" "stripped_prefix=$strip" "dropped_entries=$ndropped"
+    make_par2 "$new"
+
+    step "Verifying" "decrypting the new archive and comparing every file"
+    open_archive "$new" "$newpass"
+    new_summary=$(decrypt_data "$new" "$newpass" | py manifest) \
+        || die "verification failed: the new archive can't be read back; the old one is untouched"
+    [ "$old_summary" = "$new_summary" ] \
+        || die "verification failed: the new archive differs from the old one; the old one is untouched"
+    OUT_NAME=""
+
+    while IFS= read -r f; do old_files+=("$f"); done < <(archive_files "$old")
+    while IFS= read -r f; do new_files+=("$f"); done < <(archive_files "$new")
+    others=$(other_files "$old")
+    if [ -n "$inplace" ]; then
+        # Plain renames within one folder: instant, and no name changes
+        step "Moving into place" "old archive to $legacy_dir/, new one to $dir/"
+        mkdir "$legacy_dir"
+        move_files "$legacy_dir" "${old_files[@]}" \
+            || die "moving the old archive into $legacy_dir/ failed; the verified new archive is in $old.migrating/"
+        move_files "$dir" "${new_files[@]}" \
+            || die "moving the new archive out of $old.migrating/ failed; the old archive is in $legacy_dir/"
+        rmdir "$old.migrating"
+        WORK_DIR=""
+    fi
+    step_summary
+
+    say ""
+    say "Verified: $new_summary."
+    if [ "$ndropped" -gt 0 ]; then
+        say "Dropped $ndropped ._* / .DS_Store entries."
+    fi
+    say ""
+    if [ -n "$inplace" ]; then
+        say "$old is now in the current format. The old archive was moved to $legacy_dir/;"
+        say "delete that folder when you no longer need it."
+        say ""
+        say "On the Storage Box, delete the old archive's files:"
+        for f in "${old_files[@]}"; do say "  $(basename "$f")"; done
+        say "and upload the new ones (some names are the same, so delete first):"
+        for f in "${new_files[@]}"; do say "  $(basename "$f")"; done
+        say "Don't upload $(basename "$legacy_dir")/."
+    else
+        say "The old archive can now be deleted (locally and on the Storage Box):"
+        for f in "${old_files[@]}"; do say "  $f"; done
+    fi
+    if [ -n "$others" ]; then
+        say ""
+        say "These files next to it aren't part of the archive and were left alone:"
+        printf '%s\n' "$others" | sed 's/^/  /' >&2
+    fi
+    warn_no_op_ref "$old"
+}
+
+move_files () {   # move_files <folder> <file>...
+    local dest=$1 f
+    shift
+    for f in "$@"; do
+        mv -- "$f" "$dest/" || return 1
+    done
+}
+
+cmd_meta () {
+    local args=() name kv ref="" dir base scratch f new_par2=() old_par2=()
+    while [ $# -gt 0 ]; do
+        case $1 in
+            -h|--help) usage meta; exit 0 ;;
+            -*) die "unknown option $1 (see $PROG meta --help)" ;;
+            *) args+=("$1") ;;
+        esac
+        shift
+    done
+    [ ${#args[@]} -ge 1 ] || { usage meta >&2; exit 2; }
+    name=$(archive_name "${args[0]}")
+    [ -f "$name.meta" ] || die "$name has no .meta (a legacy archive?); migrate it first"
+    read_meta "$name"
+    if [ ${#args[@]} -eq 1 ]; then
+        cat "$name.meta"
+        return
+    fi
+    for kv in "${args[@]:1}"; do
+        case $kv in
+            op_ref=*) ref=${kv#op_ref=} ;;
+            *=*) die "only op_ref can be changed; the other values describe how the archive was made" ;;
+            *) die "expected op_ref=REF, got '$kv'" ;;
+        esac
+    done
+    OP_REF=$ref
+
+    setup par2
+    dir=$(cd "$(dirname "$name")" && pwd)
+    base=$(basename "$name")
+    # Never bake existing damage into new par2 data
+    if [ -f "$name.par2" ]; then
+        step "Checking par2 data" "before replacing it"
+        par2_verify "$name" || die "par2 verify fails for $name; repair it first (see '$PROG check $name')"
+    fi
+
+    scratch=$dir/.$base.meta-update
+    [ ! -e "$scratch" ] || die "$scratch already exists (left over from an interrupted run?); remove it first"
+    mkdir "$scratch"
+    SCRATCH_DIR=$scratch
+    cp -p -- "$name.meta" "$scratch/meta.backup"
+    META_BACKUP=$scratch/meta.backup
+    META_TARGET=$name.meta
+    awk -v ref="$ref" -v r="$PAR2_REDUNDANCY" -v b="$PAR2_BLOCKS" -v v="$(par2_version)" \
+        -v now="$(date -u +%Y-%m-%dT%H:%M:%SZ)" '
+        BEGIN { FS = "=" }
+        $1 == "op_ref"          { print "op_ref=" ref;          seen[$1] = 1; next }
+        $1 == "par2_redundancy" { print "par2_redundancy=" r;   seen[$1] = 1; next }
+        $1 == "par2_blocks"     { print "par2_blocks=" b;       seen[$1] = 1; next }
+        $1 == "par2_version"    { print "par2_version=" v;      seen[$1] = 1; next }
+        $1 == "meta_updated"    { next }
+        { print }
+        END {
+            if (!seen["op_ref"]) print "op_ref=" ref
+            if (!seen["par2_redundancy"]) print "par2_redundancy=" r
+            if (!seen["par2_blocks"]) print "par2_blocks=" b
+            if (!seen["par2_version"]) print "par2_version=" v
+            print "meta_updated=" now
+        }' "$name.meta" > "$scratch/meta.new"
+    mv -- "$scratch/meta.new" "$name.meta"
+
+    # New par2 files go to the scratch folder first; the old ones are only
+    # replaced once that has worked
+    make_par2 "$name" "$scratch"
+    step "Replacing the par2 files"
+    while IFS= read -r f; do old_par2+=("$f"); done < <(printf '%s\n' "$name.par2" "$name".vol*.par2)
+    new_par2=("$scratch"/*.par2)
+    META_BACKUP=""
+    move_files "$dir" "${new_par2[@]}" || die "moving the new par2 files from $scratch failed"
+    # Old recovery volumes the new set doesn't overwrite (other block counts)
+    for f in "${old_par2[@]}"; do
+        printf '%s\n' "${new_par2[@]##*/}" | grep -Fxq -- "$(basename "$f")" || rm -f -- "$f"
+    done
+    step_summary
+    say ""
+    say "Updated $name.meta (op_ref=${ref:-<empty>}) and its par2 data."
+    say "Offsite: upload $base.meta and all $base.par2/$base.vol*.par2 files again, and remove old .vol files there."
+    warn_no_op_ref "$name"
+}
+
+cmd_info () {
+    local dir names name f width=4 nparts meta_from migrated="" format created size total=0 par2 note
+    local count=0 legacy=0 done_count=0
+    case ${1:-} in -h|--help) usage info; exit 0 ;; esac
+    [ $# -le 1 ] || { usage info >&2; exit 2; }
+    dir=${1:-.}
+    [ -d "$dir" ] || die "$dir is not a folder"
+
+    names=$(for f in "$dir"/*.txt.enc "$dir"/*.meta; do archive_name "$f"; done | sort -u)
+    if [ -z "$names" ]; then
+        say "No archives in $dir."
+        return
+    fi
+
+    # Which archives have been migrated into another one (from .meta; an
+    # in-place migrate names itself and keeps the old one in <name>.legacy/)
+    while IFS= read -r name; do
+        read_meta "$name"
+        if [ -n "$META_FROM" ] && [ "$META_FROM" != "$(basename "$name")" ]; then
+            migrated="$migrated$META_FROM$TAB$(basename "$name")$NL"
+        fi
+        f=$(basename "$name")
+        [ ${#f} -le "$width" ] || width=${#f}
+    done <<< "$names"
+
+    printf "%-${width}s  %-12s  %-10s  %5s  %9s  %-4s  %s\n" NAME FORMAT DATE PARTS SIZE PAR2 NOTE
+    while IFS= read -r name; do
+        read_meta "$name"
+        load_parts_quiet "$name"
+        size=0
+        while IFS= read -r f; do
+            size=$(( size + $(file_size "$f") ))
+        done < <(archive_files "$name")
+        total=$(( total + size ))
+        par2=no
+        [ ! -f "$name.par2" ] || par2=yes
+        note=""
+        meta_from=$(printf '%s' "$migrated" | awk -F'\t' -v n="$(basename "$name")" '$1 == n { print $2; exit }')
+        if [ "$META_FORMAT" = legacy ]; then
+            format=legacy
+            created=$(file_date "${PARTS[0]:-$name.txt.enc}")
+            legacy=$(( legacy + 1 ))
+            note="migrate"
+        else
+            format="v$META_FORMAT $(short_iter "$META_ITER")"
+            created=${META_CREATED%%T*}
+        fi
+        if [ -n "$meta_from" ]; then
+            note="migrated to $meta_from: can be deleted"
+            done_count=$(( done_count + 1 ))
+        elif [ -d "$name.legacy" ]; then
+            note="old version in $(basename "$name").legacy/: can be deleted"
+        fi
+        count=$(( count + 1 ))
+        printf "%-${width}s  %-12s  %-10s  %5s  %9s  %-4s  %s\n" "$(basename "$name")" "$format" \
+            "$created" "$nparts" "$(human $size)" "$par2" "$note"
+    done <<< "$names"
+
+    echo
+    echo "$count archive(s), $(human $total) in total; $legacy legacy, $done_count already migrated."
+}
+
+load_parts_quiet () {
+    PARTS=("$1".tar.enc.[0-9]*)
+    nparts=${#PARTS[@]}
+}
+
+
+main () {
+    local cmd=${1:-}
+    case $cmd in
+        pack|list|unpack|check|migrate|meta|info)
+            shift
+            "cmd_$cmd" "$@"
+            ;;
+        help)
+            usage "${2:-}"
+            ;;
+        -h|--help|"")
+            usage
+            ;;
+        *)
+            die "unknown command '$cmd' (see $PROG --help)"
+            ;;
+    esac
+}
+
+main "$@"
