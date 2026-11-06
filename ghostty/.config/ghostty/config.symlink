@@ -102,3 +102,5 @@ bell-features = system
 # This is also Ghostty's default (macos-option-as-alt = false), so nothing
 # to set here - listed for the record.
 # macos-option-as-alt = false
+
+keybind = super+v=paste_from_clipboard
