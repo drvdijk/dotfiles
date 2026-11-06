@@ -116,13 +116,27 @@ EOF
       # bring-to-front-when-already-open behaviour. It sources this file by
       # its current path: rerun --make-app if the dotfiles move.
       osacompile -o "$app" -e "do shell script \"/bin/zsh -c \" & quoted form of \"source ${(qq)_claude_app_script} && claude-app $name\"" || return 1
-      # Claude's icon, and no Dock icon for the (short-lived) applet itself
-      icon=$(defaults read /Applications/Claude.app/Contents/Info CFBundleIconFile 2>/dev/null)
-      [[ -n $icon ]] && cp "/Applications/Claude.app/Contents/Resources/${icon%.icns}.icns" "$app/Contents/Resources/applet.icns"
-      plutil -replace LSUIElement -bool true "$app/Contents/Info.plist"
+      # Claude's icon. Current osacompile applets carry their script icon in an
+      # asset catalog (Assets.car + CFBundleIconName), which takes precedence
+      # over applet.icns, so drop that and use whichever form Claude ships.
+      local src=/Applications/Claude.app/Contents plist="$app/Contents/Info.plist" res="$app/Contents/Resources"
+      rm -f "$res/Assets.car"
+      plutil -remove CFBundleIconName "$plist" 2>/dev/null
+      icon=$(defaults read "$src/Info" CFBundleIconName 2>/dev/null)
+      if [[ -n $icon && -f $src/Resources/Assets.car ]]; then
+        cp "$src/Resources/Assets.car" "$res/" && plutil -replace CFBundleIconName -string "$icon" "$plist"
+      fi
+      icon=$(defaults read "$src/Info" CFBundleIconFile 2>/dev/null)
+      [[ -n $icon ]] && cp "$src/Resources/${icon%.icns}.icns" "$res/applet.icns"
+      # No Dock icon for the (short-lived) applet itself
+      plutil -replace LSUIElement -bool true "$plist"
       # Editing the bundle broke osacompile's ad-hoc signature
       codesign --force --sign - "$app" 2>/dev/null
       touch "$app"
+      # Register with Launch Services and have Spotlight index it now, rather
+      # than waiting for the next background scan to notice the new bundle
+      /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$app" 2>/dev/null
+      mdimport -i "$app" 2>/dev/null
       echo "created $app"
       ;;
 
